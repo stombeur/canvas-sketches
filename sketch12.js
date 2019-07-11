@@ -147,8 +147,8 @@ const clip = (line, polyClip) => {
   return polygonBoolean(polyClip, closedLine, 'and');
 };
 
-const drawHatchedPoly = (context, posX, posY, angle, space) => {
-  let rect = createPolygon(6, 2, [posX, posY]);
+const drawHatchedPoly = (context, posX, posY, angle, space, sideLength = 2) => {
+  let rect = createPolygon(6, sideLength, [posX, posY]);
   let hatched = hatch2(rect, angle, space);
   for (let i = 0; i < hatched.length; i++) {
     let x = null;
@@ -193,20 +193,8 @@ const sketch = (context) => {
     let posX = marginLeft + elementWidth / 4;
     let posY = marginTop  + elementHeight / 4;
 
-    for (let r = 0; r < rows; r++) {
-      if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
-    	for (let i = 0; i < columns; i++) {
-        
-        //drawSquare(context, posX - elementWidth /2, posY - elementHeight/2 + o[r][i][1], elementWidth, o[r][i][0]);
-        
-        //drawPolygon(context, createPolygon(6, 2, [posX,posY]));
-        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
-
-    		posX = posX + (elementWidth) + margin;
-    	}
-    	posX = marginLeft + elementWidth / 4;
-    	posY = posY + elementHeight + margin;
-    }
+    drawHatchedPoly(context, 13,17, 12.3, 0.45, 14);
+    drawHatchedPoly(context, 16,25, 54.8, 0.85, 14);
 
     return [
       // Export PNG as first layer
