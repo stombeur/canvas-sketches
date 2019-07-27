@@ -61,6 +61,7 @@ function arcsToSvgPaths(arcs, opt = {}) {
   return commands;
 }
 
+
 // convert paths to an svg file
 // mostly formatting into svg-xml
 function pathsToSvgFile(paths, opt = {}) {
@@ -113,6 +114,77 @@ function pathsToSvgFile(paths, opt = {}) {
   ].join('\n');
 }
 
+function formatSvgPaths(svgPaths, opt = {}) {
+  var fillStyle = opt.fillStyle || 'none';
+  var strokeStyle = opt.strokeStyle || 'black';
+  var lineWidth = opt.lineWidth;
+  var units = opt.units || 'px';
+
+  let paths = [];
+  svgPaths.map(p => {
+    let commands = [];
+    commands.push(...polyLinesToSvgPaths(p.lines, opt));
+    commands.push(...arcsToSvgPaths(p.arcs, opt));
+    let path =  commands.join(' ');
+
+    paths.push('      <path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" />');
+  });
+
+  return paths;
+}
+
+// convert paths to an svg file
+// mostly formatting into svg-xml
+function formatSvgFile(svgPaths, opt = {}) {
+  opt = opt || {};
+
+  var width = opt.width;
+  var height = opt.height;
+
+  var computeBounds =
+    typeof width === 'undefined' || typeof height === 'undefined';
+  if (computeBounds) {
+    throw new Error('Must specify "width" and "height" options');
+  }
+
+  var units = opt.units || 'px';
+
+  var convertOptions = {
+    roundPixel: false,
+    precision: defined(opt.precision, 5),
+    pixelsPerInch: DEFAULT_PIXELS_PER_INCH
+  };
+  
+  var viewWidth = convert(width, units, 'px', convertOptions).toString();
+  var viewHeight = convert(height, units, 'px', convertOptions).toString();
+  var fillStyle = opt.fillStyle || 'none';
+  var strokeStyle = opt.strokeStyle || 'black';
+  var lineWidth = opt.lineWidth;
+
+  // Choose a default line width based on a relatively fine-tip pen
+  if (typeof lineWidth === 'undefined') {
+    // Convert to user units
+    lineWidth = convert(
+      DEFAULT_PEN_THICKNESS,
+      DEFAULT_PEN_THICKNESS_UNIT,
+      units,
+      convertOptions
+    ).toString();
+  }
+
+  return [
+    '<?xml version="1.0" standalone="no"?>',
+    '  <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" ',
+    '      "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">',
+    '  <svg width="' + width + units + '" height="' + height + units + '"',
+    '      xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + viewWidth + ' ' + viewHeight + '">',
+    '    <g>',
+    ...svgPaths,
+    '    </g>',
+    '</svg>'
+  ].join('\n');
+}
+
 // container class for the data needed to create an svg arc path
 class Arc {
   constructor() {
@@ -145,6 +217,13 @@ class Arc {
   }
 }
 
+class SvgPath {
+  constructor() {
+    this.lines = [];
+    this.arcs = [];
+  }
+}
+
 // this class makes it easier to handle svg output
 // use in this order:
 // - new SvgFile()
@@ -152,28 +231,34 @@ class Arc {
 // - toSvg(options)
 class SvgFile {
   constructor(options = {}) {
-    this.lines = [];
-    this.arcs = [];
+    this.paths = [];
+    this.currentPath = new SvgPath();
+
     this.options = options;
   }
 
   addLine(line) {
-    this.lines.push(line);
+    this.currentPath.lines.push(line);
   }
 
   addCircle(cx, cy, radius) {
-    this.arcs.push(...createCircle(cx, cy, radius));
+    this.currentPath.arcs.push(...createCircle(cx, cy, radius));
   }
 
   addArc(cx, cy, radius, sAngle, eAngle) {
-    this.arcs.push(createArc(cx, cy, radius, sAngle, eAngle));
+    this.currentPath.arcs.push(createArc(cx, cy, radius, sAngle, eAngle));
+  }
+
+  newPath() {
+    this.paths.push(this.currentPath);
+    this.currentPath = new SvgPath();
   }
 
   toSvg(options = null){
+    this.newPath();
     if (!options) { options = this.options; }
-    let lineCommands = polyLinesToSvgPaths(this.lines, options);
-    let arcCommands = arcsToSvgPaths(this.arcs, options);
-    return pathsToSvgFile([...lineCommands, ...arcCommands], options);
+
+    return formatSvgFile(formatSvgPaths(this.paths, options), options);
   }
 }
 
