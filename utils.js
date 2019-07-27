@@ -1,6 +1,5 @@
-function getRandomInt(max) {
-	let x = Math.floor(Math.random() * Math.floor(max));
-	//console.log(x);
+function getRandomInt(max, min = 0) {
+	let x = min + Math.floor(Math.random() * Math.floor(max));
 	return x;
 }
 

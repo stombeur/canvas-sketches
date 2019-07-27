@@ -1,3 +1,5 @@
+// first example with plot - as-is
+
 const canvasSketch = require('canvas-sketch');
 const { renderPolylines } = require('canvas-sketch-util/penplot');
 const { clipPolylinesToBox } = require('canvas-sketch-util/geometry');

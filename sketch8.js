@@ -1,3 +1,6 @@
+// first hatching test
+// hatched arrows
+
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
 const utils = require('./utils');

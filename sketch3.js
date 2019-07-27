@@ -1,3 +1,7 @@
+// asterisk in circle 
+// p5.js
+// no plotting
+
 const canvasSketch = require('canvas-sketch');
 
 // Grab P5.js from npm

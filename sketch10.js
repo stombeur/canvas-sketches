@@ -1,10 +1,12 @@
+// hatched hexagons
+
 const canvasSketch = require('canvas-sketch');
-const { polylinesToSVG } = require('canvas-sketch-util/penplot');
+const penplot = require('./penplot');
 const utils = require('./utils');
 const polygonBoolean = require('2d-polygon-boolean');
 
+const svgFile = new penplot.SvgFile();
 
-const lines = [];
 
 const settings = {
   dimensions: 'A3',
@@ -68,7 +70,7 @@ function drawPolygon(context, poly) {
 
   context.stroke();
 
-  lines.push(poly);
+  svgFile.addLine(poly);
 }
 
 function drawLine(context, poly) {
@@ -85,7 +87,7 @@ function drawLine(context, poly) {
 
   context.stroke();
 
-  lines.push(poly);
+  svgFile.addLine(poly);
 }
 
 const boundingBox = (polyLine, padding = 0) => {
@@ -213,7 +215,7 @@ const sketch = (context) => {
       context.canvas,
       // Export SVG for pen plotter as second layer
       {
-        data: polylinesToSVG(lines, {
+        data: svgFile.toSvg({
           width,
           height,
           units

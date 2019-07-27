@@ -1,3 +1,5 @@
+// basic first example - as-is
+
 const canvasSketch = require('canvas-sketch');
 
 // Sketch parameters

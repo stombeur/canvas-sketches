@@ -1,3 +1,7 @@
+// asterisk in circle
+// p5, but only for sin and radians
+// plotting, yay!
+
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
 const utils = require('./utils');
