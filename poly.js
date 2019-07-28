@@ -106,17 +106,18 @@ const hatchPolygon = (poly, angle, spacing = 0.1) => {
 
     let x = rectangle[0][0];
     let y = rectangle[0][1];
-    //let height = rectangle[2][1] - y;
+    let height = rectangle[2][1] - y;
     let width = rectangle[2][0] - x;
 
     let rotatedRectangle = rotatePolygon(
       rectangle,
-      [x + width / 2, y + width / 2],
+      [x + width / 2, y + height / 2],
       angle
     );
+    
 
-    let box = calculateBoundingBox(rotatedRectangle, 0);
-  
+    let box = calculateBoundingBox(rotatedRectangle, Math.max(height, width));
+    
     let x2 = box[0][0];
     let y2 = box[0][1];
     let height2 = box[2][1] - y2;

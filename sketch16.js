@@ -1,6 +1,4 @@
-// circles with segment missing
-// paths are split
-// extra layer of hatching
+// overlapping squares with hatching
 
 const canvasSketch = require('canvas-sketch');
 const penplot = require('./penplot');
@@ -19,11 +17,11 @@ const settings = {
 
 const sketch = (context) => {
 
-  let margin = 0.2;
-  let elementWidth = 2;
-  let elementHeight = 2;
-  let columns = 8;
-  let rows = 14;
+  let margin = -0.2;
+  let elementWidth = 3;
+  let elementHeight = 3;
+  let columns = 7;
+  let rows = 12;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -34,32 +32,16 @@ const sketch = (context) => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
-      let rot = utils.getRandomInt(4,0) * 90;//utils.random(0, 360);
-      let size = utils.random(45, 270);
-      let quarter = utils.getRandomInt(4,1);
-      o[r].push([rot, size, quarter]);
+      let rot = utils.random(-90, 90);
+      let space = utils.random(0.21,0.27);
+      let skew1 = utils.random(-0.21,0.17);
+      let skew2 = utils.random(-0.21,0.17);
+      o[r].push([rot,space, skew1, skew2]);
     }
   }
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
-
-    const drawCircle = (cx, cy, radius) => {
-  
-      context.beginPath();
-      context.arc(cx, cy, radius, 0, Math.PI * 2);
-      context.stroke();
-    
-      svgFile.addCircle(cx, cy, radius);
-    }
-    
-    const drawArc = (cx, cy, radius, sAngle, eAngle) => {
-      context.beginPath();
-      context.arc(cx, cy, radius, (Math.PI / 180) * sAngle, (Math.PI / 180) * eAngle);
-      context.stroke();
-    
-      svgFile.addArc(cx, cy, radius, sAngle, eAngle);
-    }
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -69,30 +51,30 @@ const sketch = (context) => {
     let posX = marginLeft;
     let posY = marginTop;
 
-    let radius = elementWidth / 2;
-    let divide = 15
-    let step = radius / divide;
-
     for (let r = 0; r < rows; r++) {
     	for (let i = 0; i < columns; i++) {
-            for (let s = 0; s < (divide); s++) {
-            drawArc(posX + radius, posY + radius, s * step, o[r][i][0], o[r][i][0] + 270);
-            }
-    		posX = posX + (elementWidth) + margin;
-        }
-
+        let sposX = posX + o[r][i][2];
+        let sposY = posY + o[r][i][3];
+        let s =poly.createSquarePolygon(sposX, sposY, elementWidth, elementHeight);
+        let lines = poly.hatchPolygon(s, o[r][i][0], o[r][i][1]);
+        lines.map(l => {
+          poly.drawLineOnCanvas(context, l);
+          svgFile.addLine(l);
+        });
+        posX = posX + (elementWidth) + margin;
         svgFile.newPath();
-        
+      }
+
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
 
-    let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
-    let hatchLines = poly.hatchPolygon(bounds, 30, 0.1);
-    hatchLines.map(l => {
-        poly.drawLineOnCanvas(context, l);
-        svgFile.addLine(l);
-    });
+    // let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
+    // let hatchLines = poly.hatchPolygon(bounds, 30, 0.5);
+    // hatchLines.map(l => {
+    //     poly.drawLineOnCanvas(context, l);
+    //     svgFile.addLine(l);
+    // });
 
     return [
       // Export PNG as first layer
