@@ -16,7 +16,7 @@ const settings = {
   units: 'cm',
 };
 
-const drawRandomDashedLine = (x, y, angle, length, segments, clip) => {
+const createRandomDashedLine = (x, y, angle, length, segments, clip) => {
   // let q = [[x, y], poly.rotatePoint([x+length, y], [x,y], angle)];
   // // console.log(q);
   // // console.log(clip);
@@ -44,21 +44,20 @@ const drawRandomDashedLine = (x, y, angle, length, segments, clip) => {
 
   //console.log(polyline);
 
+  let result = [];
   for (let index = 0; index < polyline.length -1; index++) {
     let seg = [polyline[index], polyline[index+1]];
     if (index % 2 === 0) {
-      poly.drawLineOnCanvas(mainContext, seg);
-      svgFile.addLine(seg);
+      result.push(seg);
     }
   }
+  return result;
 }
 
 const drawSquare = (origX, origY, side, height = side) => {
   let squarePoly = poly.createSquarePolygon(origX, origY, side, height);
-  //console.log(squarePoly);
   poly.drawPolygonOnCanvas(mainContext, squarePoly);
   svgFile.addLine(squarePoly, true);
-  //console.log(squarePoly);  
 }
 
 const drawTopLeft = (origX, origY, side, options) => {
@@ -123,6 +122,7 @@ const drawCorner = (origX, origY, side, invertX, invertY, options) =>  {
       }
     } 
   }
+  svgFile.newPath();
 }
 
 const sketch = (context) => {
@@ -161,15 +161,30 @@ const sketch = (context) => {
 
     let posX = marginLeft;
     let posY = marginTop;
+    let clip = [[posX, posY],[posX+drawingWidth, posY],[posX+drawingWidth, posY+drawingHeight],[posX, posY+drawingHeight]];
 
-    let a = drawingHeight / 10;
-    for (let index = 0; index < 30; index++) {
+    let a = drawingHeight / 20;
+    for (let index = 0; index < 60; index++) {
         let x = 0;
         let y = -drawingHeight + (index * a);
-        //console.log(x, y);
-        drawRandomDashedLine(x, y, 50, 40, 20, poly.createSquarePolygon(posX, posY, drawingWidth, drawingHeight));
+
+        let dash = createRandomDashedLine(x, y, 50, 40, 20, poly.createSquarePolygon(posX, posY, drawingWidth, drawingHeight));
+
+        dash.forEach(element => {
+          try {
+            x = poly.clip(element, clip);
+          } catch {}
+          if (x) {
+            x.map(l => {
+              poly.drawLineOnCanvas(mainContext, [l[0], l[1]]);
+              svgFile.addLine([l[0], l[1]]);
+              });
+           
+          }
+          
+        });
     }
-    
+    svgFile.newPath();
 
     for (let row = 0; row < rows; row++) {
     	for (let col = 0; col < columns; col++) {
