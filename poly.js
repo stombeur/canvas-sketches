@@ -21,7 +21,7 @@ const createSquarePolygon = (originX, originY, width, height) => {
     result.push([originX + width, originY]);
     result.push([originX + width, originY + height]);
     result.push([originX, originY + height]);
-  
+
     return result;
 }
 
@@ -149,9 +149,9 @@ const hatchPolygon = (poly, angle, spacing = 0.1) => {
     return result;
 };
   
-const clip = (line, polyClip) => {
-    let closedLine = [line[0], line[1], line[1], line[0]];
-    return polygonBoolean(polyClip, closedLine, 'and');
+const clip = (lineToClip, lineThatClips) => {
+    let closedLine = [lineToClip[0], lineToClip[1], lineToClip[1], lineToClip[0]];
+    return polygonBoolean(lineThatClips, closedLine, 'and');
 };
   
 const drawHatchedPolygonOnCanvas = (context, posX, posY, angle, space, sideLength = 2, options = {}) => {
@@ -184,4 +184,3 @@ module.exports.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
 module.exports.clip = clip;
 module.exports.hatchPolygon = hatchPolygon;
 module.exports.createSquarePolygon = createSquarePolygon;
-

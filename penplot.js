@@ -123,8 +123,12 @@ function formatSvgPaths(svgPaths, opt = {}) {
   let paths = [];
   svgPaths.map(p => {
     let commands = [];
-    commands.push(...polyLinesToSvgPaths(p.lines, opt));
-    commands.push(...arcsToSvgPaths(p.arcs, opt));
+    let plines = polyLinesToSvgPaths(p.lines, opt);
+    for (let e of plines) commands.push(e);
+    let parcs = arcsToSvgPaths(p.arcs, opt);
+    for (let e of parcs) commands.push(e);
+    //commands.push(...polyLinesToSvgPaths(p.lines, opt));
+    //commands.push(...arcsToSvgPaths(p.arcs, opt));
     let path =  commands.join(' ');
 
     paths.push('      <path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" />');
@@ -237,8 +241,13 @@ class SvgFile {
     this.options = options;
   }
 
-  addLine(line) {
-    this.currentPath.lines.push(line);
+  addLine(line, close = false) {
+    let copy = [];
+    for (let e of line) copy.push(e);
+    if (close){
+      copy.push(line[0]);
+    }
+    this.currentPath.lines.push(copy);
   }
 
   addCircle(cx, cy, radius) {
@@ -255,6 +264,7 @@ class SvgFile {
   }
 
   toSvg(options = null){
+    //console.log(this);
     this.newPath();
     if (!options) { options = this.options; }
 
