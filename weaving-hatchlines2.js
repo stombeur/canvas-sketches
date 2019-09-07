@@ -37,58 +37,44 @@ const drawRibbonSegment = (start, end, diffX, diffY, nrOfLines) => {
   return lines;
 }
 
-const drawRibbon = (start, end, width, nrOfLines = 3) => {
-  let diff = width / (nrOfLines - 1);
-  
-  let vector = poly.point(end.x - start.x, end.y - start.y);
-  let a = vector.x;
-  let b = vector.y;
+const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
+  let x = start.x;
+  let y = start.y;
+  let spacing = ribbonWidth / (nrOfLines - 1);
+  let length = ribbonLength
+  let ribbonLines = [];
 
-  let angle = Math.asin(a / (Math.sqrt((a*a)+(b*b))));
-  let angleDegrees = angle * 180 / Math.PI;
+  // if (y < bounds.top) {
+  //   let h = bounds.top - y;
+  //   x = h + bounds.left;
+  //   y = bounds.top;
+  //   length = ribbonLength - h;
+  // }
 
-  let diffY = diff * Math.sin(angle);
-  let diffX = (diff * Math.cos(angle));
-
-  if (vector.x > 0 && vector.y > 0) { diffY = 0-diffY; }
-  if (vector.y < 0 && vector.x < 0) { diffX = 0-diffX; }
-
-  let ribbon = {lines: null, left: null, right: null};
-
-  ribbon.lines = drawRibbonSegment(start, end, diffX, diffY, nrOfLines);
-  ribbon.left = ribbon.lines[0];
-  ribbon.right = ribbon.lines[nrOfLines - 1]
+  for(let i = 0;i<nrOfLines;i++) {
+    y = y + i * spacing;
+    
+    let start = poly.point(x, y);
+    let end = poly.point(x + length, y);
+    end = poly.rotatePointXY(end, start, angle);
+    let line = poly.toLine(start, end);
+    ribbonLines.push(line);
+    poly.drawLineOnCanvas(mainContext, line);
+  }
+  let ribbon = {lines: ribbonLines, left: ribbonLines[0], right: ribbonLines[nrOfLines - 1]};
 
   ribbons.forEach(r => {
-    //console.log('testing intersection');
-    //console.log(r.left);
-    let int = poly.findSegmentIntersection(start, end, poly.point(...r.left[0]), poly.point(...r.left[1]));
-    if (int) {
-      // console.log('intersection found at ' + int);
 
-      mainContext.beginPath();
-      mainContext.arc(int.x, int.y, 0.3, 0, Math.PI * 2);
-      mainContext.stroke();
-    
-    }
+
   });
 
   ribbons.push(ribbon);
-
 }
+
 
 const sketch = (context) => {
 
-  let margin = -0.2;
-  let elementWidth = 3;
-  let elementHeight = 3;
-  let columns = 7;
-  let rows = 12;
   
-  let drawingWidth = (columns * (elementWidth + margin)) - margin;
-  let drawingHeight = (rows * (elementHeight + margin)) - margin;
-  let marginLeft = (context.width - drawingWidth) / 2;
-  let marginTop = (context.height - drawingHeight) / 2;
   
   // let o = [];
   // for (let r = 0; r < rows; r++) {
@@ -111,14 +97,45 @@ const sketch = (context) => {
     context.lineWidth = 0.01;
     mainContext = context;
 
-    let posX = marginLeft;
-    let posY = marginTop;
+    let horMargin = 4;
+    let vertMargin = 4;
+    let drawingHeight = height - (vertMargin *2);
+    let drawingWidth = width - (horMargin * 2);
+    let posXLeft = horMargin;
+    let posXRight = drawingWidth + horMargin;
+    let posY = vertMargin - drawingWidth;
+   
 
-    let linesPerRibbon = 3
 
-    drawRibbon(poly.point(posX, posY+5), poly.point(posX + drawingWidth, posY + drawingHeight-1), 1, 5);
-    drawRibbon(poly.point(posX, posY + drawingHeight/2), poly.point(posX + drawingWidth, posY), 1, 5);
-    
+    let nrOfLines = 3;
+    let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
+    let ribbonWidth = 1;
+    let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth,2));
+
+   
+    let slots = [...Array(nrOfRibbons).keys()];
+   // slots = utils.shuffle(slots);
+
+    console.log({horMargin,vertMargin,height,width,drawingHeight,drawingWidth,posXLeft,posXRight,posY, nrOfRibbons, ribbonWidth, ribbonLength});
+
+
+    for(let slot = 0; slot<nrOfRibbons; slot++) {
+      let ltr = true;
+      if (slot%2 > 0) {ltr = false;}
+      let position = slots[slot];
+
+      let y = posY + (ribbonWidth * position);
+      let x = ltr ? posXLeft : posXRight;
+      let angle = ltr ? 45 : 135;
+
+      console.log({position,x,y, angle})
+   
+      let bounds = {left: posXLeft, top: vertMargin, right: posXRight, bottom: vertMargin + drawingHeight};
+
+      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidth, angle, nrOfLines)
+    }
+
+   
 
     return [
       // Export PNG as first layer

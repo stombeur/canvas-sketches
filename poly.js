@@ -80,19 +80,34 @@ const calculateBoundingBox = (polyLine, padding = 0) => {
     ];
 };
 
-const rotatePoint = (point, center, angle) => {
+const rotatePointXY = (p, c, angle) => {
     if (angle === 0) return point;
 
     let radians = (Math.PI / 180) * angle,
-        x = point[0],
-        y = point[1],
-        cx = center[0],
-        cy = center[1],
+        x = p.x,
+        y = p.y,
+        cx = c.x,
+        cy = c.y,
         cos = Math.cos(radians),
         sin = Math.sin(radians),
         nx = cos * (x - cx) - sin * (y - cy) + cx,
         ny = cos * (y - cy) + sin * (x - cx) + cy;
-    return [nx, ny];
+    return point(nx, ny);
+};
+
+const rotatePoint = (point, center, angle) => {
+  if (angle === 0) return point;
+
+  let radians = (Math.PI / 180) * angle,
+      x = point[0],
+      y = point[1],
+      cx = center[0],
+      cy = center[1],
+      cos = Math.cos(radians),
+      sin = Math.sin(radians),
+      nx = cos * (x - cx) - sin * (y - cy) + cx,
+      ny = cos * (y - cy) + sin * (x - cx) + cy;
+  return [nx, ny];
 };
   
 const rotatePolygon = (polyLine, center, angle) => {
@@ -244,6 +259,7 @@ module.exports.createPolygon = createPolygon;
 module.exports.drawPolygonOnCanvas = drawPolygonOnCanvas;
 module.exports.calculateBoundingBox = calculateBoundingBox;
 module.exports.rotatePoint = rotatePoint;
+module.exports.rotatePointXY = rotatePointXY;
 module.exports.rotatePolygon = rotatePolygon;
 module.exports.drawLineOnCanvas = drawLineOnCanvas;
 
