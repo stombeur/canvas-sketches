@@ -173,6 +173,73 @@ const drawHatchedPolygonOnCanvas = (context, posX, posY, angle, space, sideLengt
     // }
 };
 
+const point = (x, y) => {
+  return {x, y};
+}
+
+const toLine = (point1, point2) => {
+  return [[point1.x, point1.y],[point2.x, point2.y]];
+}
+
+const movePoint = (p, vector) => {
+  return point(p.x + vector.x, p.y + vector.y);
+} 
+
+const findIntersection = (P1, P2, P3, P4) => {
+  if (!P1.x) { P1 = point(P1[0], P1[1]); }
+  if (!P2.x) { P2 = point(P2[0], P2[1]); }
+  if (!P3.x) { P3 = point(P3[0], P3[1]); }
+  if (!P4.x) { P4 = point(P4[0], P4[1]); }
+
+  var x =
+    ((P1.x * P2.y - P2.x * P1.y) * (P3.x - P4.x) -
+      (P1.x - P2.x) * (P3.x * P4.y - P3.y * P4.x)) /
+    ((P1.x - P2.x) * (P3.y - P4.y) - (P1.y - P2.y) * (P3.x - P4.x));
+  var y =
+    ((P1.x * P2.y - P2.x * P1.y) * (P3.y - P4.y) -
+      (P1.y - P2.y) * (P3.x * P4.y - P3.y * P4.x)) /
+    ((P1.x - P2.x) * (P3.y - P4.y) - (P1.y - P2.y) * (P3.x - P4.x));
+  return { x, y };
+}
+
+function isPointBetween(p, a, b) {
+  if (!a.x) { a = point(a[0], a[1]); }
+  if (!b.x) { b = point(b[0], b[1]); }
+  if (!p.x) { p = point(p[0], p[1]); }
+
+  return ((a.x <= p.x && p.x <= b.x) || (a.x >= p.x && p.x >= b.x)) && ((a.y <= p.y && p.y <= b.y) || (a.y >= p.y && p.y >= b.y));
+}
+
+function findSegmentIntersection(P1, P2, P3, P4) {
+  var i1 = findIntersection(P1, P2, P3, P4);
+  const isIntersected = isPointBetween(i1, P1, P2) && isPointBetween(i1, P3, P4);
+  return isIntersected ? i1 : false;
+}
+
+function isSegmentIntersected(P1, P2, P3, P4) {
+  var i1 = findIntersection(P1, P2, P3, P4);
+  return isPointBetween(i1, P1, P2) && isPointBetween(i1, P3, P4);
+}
+
+const findIntersectionPolygon = (line1, line2, line3, line4) => {
+  let a = findSegmentIntersection(line1[0], line1[1], line3[0], line3[1]);
+  let b = findSegmentIntersection(line1[0], line1[1], line4[0], line4[1]);
+  let c = findSegmentIntersection(line2[0], line2[1], line3[0], line3[1]);
+  let d = findSegmentIntersection(line2[0], line2[1], line4[0], line4[1]);
+
+  if (a && b && c && d)  { return [a,b,c,d]; }
+  return false;
+}
+
+module.exports.findIntersection = findIntersection;
+module.exports.isPointBetween = isPointBetween;
+module.exports.findSegmentIntersection = findSegmentIntersection;
+module.exports.isSegmentIntersected = isSegmentIntersected;
+module.exports.point = point;
+module.exports.toLine = toLine;
+module.exports.movePoint = movePoint;
+module.exports.findIntersectionPolygon = findIntersectionPolygon;
+
 module.exports.createPolygon = createPolygon;
 module.exports.drawPolygonOnCanvas = drawPolygonOnCanvas;
 module.exports.calculateBoundingBox = calculateBoundingBox;
