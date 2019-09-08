@@ -44,20 +44,21 @@ const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
   let length = ribbonLength
   let ribbonLines = [];
 
-  // if (y < bounds.top) {
-  //   let h = bounds.top - y;
-  //   x = h + bounds.left;
-  //   y = bounds.top;
-  //   length = ribbonLength - h;
-  // }
+  if (y >= bounds.bottom) return;
+
+  let topLine = poly.toLine(poly.point(-10, bounds.top), poly.point(100, bounds.top));
+  let bottomLine = poly.toLine(poly.point(-10, bounds.bottom), poly.point(100, bounds.bottom));
 
   for(let i = 0;i<nrOfLines;i++) {
     y = y + i * spacing;
+    if (y >= bounds.bottom) return;
     
     let start = poly.point(x, y);
     let end = poly.point(x + length, y);
     end = poly.rotatePointXY(end, start, angle);
     let line = poly.toLine(start, end);
+    line = clipLine(topLine, line, true);
+    line = clipLine(bottomLine, line, false);
     ribbonLines.push(line);
     poly.drawLineOnCanvas(mainContext, line);
   }
@@ -69,6 +70,19 @@ const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
   });
 
   ribbons.push(ribbon);
+}
+
+const clipLine = (clip, lineToClip, clipStart = true) => {
+  let int = poly.findSegmentIntersection(clip[0], clip[1], lineToClip[0], lineToClip[1]);
+  if (!int) { return lineToClip; }
+
+  if (clipStart) {
+    return poly.toLine(poly.point(int.x, int.y), poly.point(lineToClip[1][0], lineToClip[1][1]));
+  }
+  else {
+    return poly.toLine(poly.point(lineToClip[0][0], lineToClip[0][1]), poly.point(int.x, int.y));
+
+  }
 }
 
 
@@ -110,29 +124,37 @@ const sketch = (context) => {
     let nrOfLines = 3;
     let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
     let ribbonWidth = 1;
+    let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth,2));
     let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth,2));
 
    
-    let slots = [...Array(nrOfRibbons).keys()];
+    let slotsLeft = [...Array(nrOfRibbons).keys()];
+    let slotsRight = [...Array(nrOfRibbons).keys()];
+
    // slots = utils.shuffle(slots);
 
-    console.log({horMargin,vertMargin,height,width,drawingHeight,drawingWidth,posXLeft,posXRight,posY, nrOfRibbons, ribbonWidth, ribbonLength});
+    //console.log({horMargin,vertMargin,height,width,drawingHeight,drawingWidth,posXLeft,posXRight,posY, nrOfRibbons, ribbonWidthAngle, ribbonLength});
 
+    let bounds = {left: posXLeft, top: vertMargin, right: posXRight, bottom: vertMargin + drawingHeight};
 
     for(let slot = 0; slot<nrOfRibbons; slot++) {
       let ltr = true;
-      if (slot%2 > 0) {ltr = false;}
-      let position = slots[slot];
+      //if (slot%2 > 0) {ltr = false;}
+      let positionLeft = slotsLeft[slot];
 
-      let y = posY + (ribbonWidth * position);
-      let x = ltr ? posXLeft : posXRight;
-      let angle = ltr ? 45 : 135;
+      let y = posY + (ribbonWidthAngle * positionLeft);
+      let x = posXLeft;//ltr ? posXLeft : posXRight;
+      let angle = 45;//ltr ? 45 : 135;
 
-      console.log({position,x,y, angle})
-   
-      let bounds = {left: posXLeft, top: vertMargin, right: posXRight, bottom: vertMargin + drawingHeight};
+      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines);
 
-      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidth, angle, nrOfLines)
+      let positionRight = slotsRight[slot];
+       y = posY + (ribbonWidthAngle * positionRight);
+       x = posXRight;
+       angle = 135;
+
+      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines);
+
     }
 
    
