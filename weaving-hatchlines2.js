@@ -50,26 +50,36 @@ const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
   let bottomLine = poly.toLine(poly.point(-10, bounds.bottom), poly.point(100, bounds.bottom));
 
   for(let i = 0;i<nrOfLines;i++) {
-    y = y + i * spacing;
+    y = start.y + i * spacing;
     if (y >= bounds.bottom) return;
     
-    let start = poly.point(x, y);
-    let end = poly.point(x + length, y);
-    end = poly.rotatePointXY(end, start, angle);
-    let line = poly.toLine(start, end);
+    let a = poly.point(x, y);
+    let b = poly.point(x + length, y);
+    b = poly.rotatePointXY(b, a, angle);
+    let line = poly.toLine(a, b);
     line = clipLine(topLine, line, true);
     line = clipLine(bottomLine, line, false);
     ribbonLines.push(line);
-    poly.drawLineOnCanvas(mainContext, line);
+    
   }
   let ribbon = {lines: ribbonLines, left: ribbonLines[0], right: ribbonLines[nrOfLines - 1]};
 
-  ribbons.forEach(r => {
+  let linesToDraw = [];
 
+  ribbons.forEach(r => {
+    ribbonLines.forEach(rl => {
+      let lineSegment = clipLine(r.left, rl, false);
+      
+    });
 
   });
 
   ribbons.push(ribbon);
+
+  linesToDraw.forEach(l => {
+    poly.drawLineOnCanvas(mainContext, l);
+  });
+  
 }
 
 const clipLine = (clip, lineToClip, clipStart = true) => {
@@ -121,15 +131,15 @@ const sketch = (context) => {
    
 
 
-    let nrOfLines = 3;
+    let nrOfLines = 4;
     let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
     let ribbonWidth = 1;
     let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth,2));
     let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth,2));
 
    
-    let slotsLeft = [...Array(nrOfRibbons).keys()];
-    let slotsRight = [...Array(nrOfRibbons).keys()];
+    let slotsLeft = [23];//[...Array(nrOfRibbons).keys()];
+    let slotsRight = [17];//[...Array(nrOfRibbons).keys()];
 
    // slots = utils.shuffle(slots);
 

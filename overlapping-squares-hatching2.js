@@ -32,7 +32,7 @@ const sketch = (context) => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
-      let rot = [utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75)];
+      let rot = [utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75),utils.random(-75, 75)];
       let space = utils.random(0.23,0.23);
       let skew1 = utils.random(-0.32,0.32);
       let skew2 = utils.random(-0.32,0.32);
