@@ -37,7 +37,7 @@ const drawRibbonSegment = (start, end, diffX, diffY, nrOfLines) => {
   return lines;
 }
 
-const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
+const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines, slot) => {
   let x = start.x;
   let y = start.y;
   let spacing = ribbonWidth / (nrOfLines - 1);
@@ -66,20 +66,39 @@ const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines) => {
 
   let linesToDraw = [];
 
-  ribbons.forEach(r => {
-    ribbonLines.forEach(rl => {
-      let lineSegment = clipLine(r.left, rl, false);
+  ribbonLines.forEach(rl => {
+    let line = rl;
+    ribbons.forEach(rx => {
+      let r = rx.ribbon;
+      let firstPart = clipLine(r.left, line, false);
+      firstPart = clipLine(r.right, firstPart, true);
+      let secondPart = clipLine(r.right, line, true);
+      secondPart = clipLine(r.left, secondPart, false);
+      line = [...secondPart];
       
-    });
+      if (!lineEquals(line, firstPart)) { linesToDraw.push(firstPart); }
+      //if (!lineEquals(line, secondPart)) { linesToDraw.push(secondPart); }
 
+    });
+    //if (ribbons.length === 0) { linesToDraw.push(line); }
+    linesToDraw.push(line);
   });
 
-  ribbons.push(ribbon);
+
+  ribbons.push({slot, ribbon});
+  ribbons.sort((a, b) => {
+    return a.slot - b.slot;
+  });
 
   linesToDraw.forEach(l => {
-    poly.drawLineOnCanvas(mainContext, l);
+    let angle =  Math.atan2(l[1][1] - l[0][1], l[1][0] - l[0][0]) * 180 / Math.PI;
+    if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { poly.drawLineOnCanvas(mainContext, l); }
   });
   
+}
+
+const lineEquals = (a, b) => {
+  return (a[0][0] === b[0][0] && a[0][1] === b[0][1] && a[1][0] === b[1][0] && a[1][1] === b[1][1]);
 }
 
 const clipLine = (clip, lineToClip, clipStart = true) => {
@@ -131,15 +150,15 @@ const sketch = (context) => {
    
 
 
-    let nrOfLines = 4;
+    let nrOfLines = 6;
     let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
     let ribbonWidth = 1;
     let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth,2));
     let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth,2));
 
    
-    let slotsLeft = [23];//[...Array(nrOfRibbons).keys()];
-    let slotsRight = [17];//[...Array(nrOfRibbons).keys()];
+    let slotsLeft = utils.shuffle([...Array(nrOfRibbons).keys()]);//[23, 26, 32, 44, 17, 28, 41];//[...Array(nrOfRibbons).keys()];
+    let slotsRight = utils.shuffle([...Array(nrOfRibbons).keys()]);//[17, 23, 15, 34, 12, 32, 10, 27];//[...Array(nrOfRibbons).keys()];
 
    // slots = utils.shuffle(slots);
 
@@ -156,14 +175,14 @@ const sketch = (context) => {
       let x = posXLeft;//ltr ? posXLeft : posXRight;
       let angle = 45;//ltr ? 45 : 135;
 
-      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines);
+      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft);
 
       let positionRight = slotsRight[slot];
        y = posY + (ribbonWidthAngle * positionRight);
        x = posXRight;
        angle = 135;
 
-      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines);
+      drawRibbon(poly.point(x,y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight);
 
     }
 

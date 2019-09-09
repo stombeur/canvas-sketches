@@ -32,13 +32,13 @@ const generatePoints = (nr, side, maxR, overlap = true) => {
 
       result.forEach(element => {
         //(R0 - R1)^2 <= (x0 - x1)^2 + (y0 - y1)^2 <= (R0 + R1)^2
-        let left = Math.pow((element.radius - radius), 2);
-        let middle = Math.pow(element.x - x,2) + Math.pow(element.y - y,2);
-        let right = Math.pow((element.radius + radius), 2);
-        if (left <= middle && middle <= right) { overlapping = true; }
+        // let left = Math.pow((element.radius - radius), 2);
+        // let middle = Math.pow(element.x - x,2) + Math.pow(element.y - y,2);
+        // let right = Math.pow((element.radius + radius), 2);
+        // if (left <= middle && middle <= right) { overlapping = true; }
 
         //Math.hypot(x0-x1, y0-y1) <= (r0 + r1);
-        let hypo = Math.hypot(element.x-x, element.y-y) <= (element.radius + radius);
+        let hypo = Math.hypot(element.x-x, element.y-y) < (element.radius + radius);
         if (hypo) { overlapping = true; }
       });
 
