@@ -87,12 +87,12 @@ const sketch = (context) => {
     	posY = posY + elementHeight + margin;
     }
 
-    let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
-    let hatchLines = poly.hatchPolygon(bounds, 30, 0.1);
-    hatchLines.map(l => {
-        poly.drawLineOnCanvas(context, l);
-        svgFile.addLine(l);
-    });
+    // let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
+    // let hatchLines = poly.hatchPolygon(bounds, 30, 0.1);
+    // hatchLines.map(l => {
+    //     poly.drawLineOnCanvas(context, l);
+    //     svgFile.addLine(l);
+    // });
 
     return [
       // Export PNG as first layer
