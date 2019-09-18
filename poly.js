@@ -144,7 +144,7 @@ const hatchCircle = (center, radius, angle, spacing) => {
     if (clippedLine && clippedLine.length > 0 && clippedLine[0] && clippedLine[1]) hatchlines.push(clippedLine);
   }
 
-  console.log(hatchlines);
+  //console.log(hatchlines);
   return hatchlines;
 }
 
@@ -340,6 +340,12 @@ const findCircleLineIntersections = (r, h, k, m, n) => {
   return [];
 }
 
+const pointIsInsideBB = (p, bb) => {
+  // bb = {left, top, right, bottom} 
+  if (!p.x) { p = point(p[0], p[1]); }
+  return ( p.x >= bb.left && p.x <= bb.right && p.y <= bb.top && p.y >= bb.bottom );
+}
+
 module.exports.findIntersection = findIntersection;
 module.exports.isPointBetween = isPointBetween;
 module.exports.findSegmentIntersection = findSegmentIntersection;
@@ -366,3 +372,5 @@ module.exports.lineEquationFromPoints = lineEquationFromPoints;
 module.exports.findCircleLineIntersections = findCircleLineIntersections;
 module.exports.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
 module.exports.hatchCircle = hatchCircle;
+
+module.exports.pointIsInsideBB = pointIsInsideBB;
