@@ -1,4 +1,5 @@
 const polygonBoolean = require('2d-polygon-boolean');
+const lineclip = require('./lineclip');
 
 const createPolygon = (nrOfSides, sideLength, centerPoint) => {
     let centerAngle = Math.PI * 2 / nrOfSides;
@@ -45,6 +46,12 @@ const drawPolygonOnCanvas = (context, poly, options = {}) => {
 }
 
 const drawLineOnCanvas = (context, poly, options = {}) => {
+    let x1 = poly[0][0] || poly[0].x,
+        x2 = poly[1][0] || poly[1].x,
+        y1 = poly[0][1] || poly[0].y,
+        y2 = poly[1][1] || poly[1].y;
+
+
     context.beginPath();
   
     context.strokeStyle = options.strokeStyle || 'black';
@@ -52,9 +59,9 @@ const drawLineOnCanvas = (context, poly, options = {}) => {
     context.lineCap = options.lineCap || 'square';
     context.lineJoin = options.lineJoin || 'miter';
   
-    context.moveTo(poly[0][0], poly[0][1]);
+    context.moveTo(x1, y1);
   
-    context.lineTo(poly[1][0], poly[1][1]);
+    context.lineTo(x2, y2);
   
     context.stroke();
 }
@@ -99,10 +106,10 @@ const rotatePoint = (point, center, angle) => {
   if (angle === 0) return point;
 
   let radians = (Math.PI / 180) * angle,
-      x = point[0],
-      y = point[1],
-      cx = center[0],
-      cy = center[1],
+      x = point.x || point[0],
+      y = point.y || point[1],
+      cx = center.x || center[0],
+      cy = center.y || center[1],
       cos = Math.cos(radians),
       sin = Math.sin(radians),
       nx = cos * (x - cx) - sin * (y - cy) + cx,
@@ -115,6 +122,53 @@ const rotatePolygon = (polyLine, center, angle) => {
         return rotatePoint(p, center, angle);
     });
 };
+
+const hatchDonut = (center, outerRadius, innerRadius, hatchAngle, hatchSpacing) => {
+  let lines = [];
+  
+  hatchCircle(center, outerRadius, hatchAngle, hatchSpacing).forEach(l => {
+    let int2 = findCircleLineIntersectionsP(innerRadius, center, l);
+    if (int2 && int2.length > 0 && int2[0] && int2[1]) {
+      let l1 = toLine(l[0], int2[0]),
+          l2 = toLine(int2[1], l[1]);
+
+      lines.push(l1);
+      lines.push(l2);
+    }
+    else {
+      lines.push(l);
+    }
+
+  });
+
+  return lines;
+}
+
+const hatchCircle = (center, radius, angle, spacing) => {
+  let widthAndMargin = radius*2*1.1;
+  let numLines = Math.floor(widthAndMargin/spacing);
+
+
+
+  let x = center.x - widthAndMargin/2,
+      y = center.y - widthAndMargin/2;
+
+      //console.log({numLines, radius, angle, spacing, widthAndMargin, x, y, center});
+
+  let hatchlines = [];
+  
+  for (let i = 0; i <= numLines; i++) {
+    let line = [[x, y + i * spacing], [x + widthAndMargin, y + i * spacing]];
+    let rotatedLine = rotatePolygon(line, center, angle);
+    let intersections = findCircleLineIntersectionsP(radius, center, rotatedLine);
+    let clippedLine = [intersections[0], intersections[1]];
+    //console.log({line, rotatedLine, intersections, clippedLine});
+    if (clippedLine && clippedLine.length > 0 && clippedLine[0] && clippedLine[1]) hatchlines.push(clippedLine);
+  }
+
+  //console.log(hatchlines);
+  return hatchlines;
+}
 
 const hatchPolygon = (poly, angle, spacing = 0.1) => {
     let rectangle = calculateBoundingBox(poly);
@@ -193,7 +247,12 @@ const point = (x, y) => {
 }
 
 const toLine = (point1, point2) => {
-  return [[point1.x, point1.y],[point2.x, point2.y]];
+  let x1 = point1.x || point1[0],
+      x2 = point2.x || point2[0],
+      y1 = point1.y || point1[1],
+      y2 = point2.y || point2[1];
+
+  return [[x1, y1],[x2, y2]];
 }
 
 const movePoint = (p, vector) => {
@@ -246,6 +305,91 @@ const findIntersectionPolygon = (line1, line2, line3, line4) => {
   return false;
 }
 
+const lineEquationFromPoints = (p1, p2) => {
+  if (!p1.x) { p1 = point(p1[0], p1[1]); }
+  if (!p2.x) { p2 = point(p2[0], p2[1]); }
+
+  // y = mx + n
+  let m = (p1.y - p2.y) / (p1.x - p2.x); // gradient or slope
+  let n = p1.y - m * p1.x; //y-intercept
+  
+  return {m,n};
+}
+
+const findCircleLineIntersectionsP = (r, c, line) => {
+  let h = c.x,
+      k = c.y,
+      eq = lineEquationFromPoints(line[0], line[1]),
+      m = eq.m,
+      n = eq.n;
+
+  return findCircleLineIntersections(r,h,k,m,n)
+            .map(xInt => {return point(xInt[0], (m*xInt + n))});
+}
+
+const findCircleLineIntersections = (r, h, k, m, n) => {
+  // circle: (x - h)^2 + (y - k)^2 = r^2
+  // line: y = m * x + n
+  // r: circle radius
+  // h: x value of circle centre
+  // k: y value of circle centre
+  // m: slope
+  // n: y-intercept
+
+  // get a, b, c values
+  let a = 1 + (m*m);
+  let b = -h * 2 + (m * (n - k)) * 2;
+  let c = (h*h) + ((n - k)*(n-k)) - (r*r);
+
+  // get discriminant
+  let d = (b*b) - 4 * a * c;
+  if (d >= 0) {
+      // insert into quadratic formula
+      let x1 = (-b + Math.sqrt((b*b) - 4 * a * c)) / (2 * a);
+      let x2 = (-b - Math.sqrt((b*b) - 4 * a * c)) / (2 * a);
+      let intersections = [
+          [x1],
+          [x2],
+      ];
+      
+      if (d == 0) {
+          // only 1 intersection
+          return [intersections[0]];
+      }
+      return intersections;
+  }
+  // no intersection
+  return [];
+}
+
+const pointIsInsideBB = (p, bb) => {
+  // bb = {minx, miny, maxx, maxy}; 
+
+  if (!p.x) { p = point(p[0], p[1]); } // check if point is {x,y}
+  return ( p.x >= bb.minx && p.x <= bb.maxx && p.y <= bb.maxy && p.y >= bb.miny );
+}
+
+const clipLineToBB = (line, bb) => {
+  // bb = {xmin, ymin, xmax, ymax}; 
+
+  // check if line is completely out of the box
+  if (line[0][0] <= bb.xmin && line[1][0] <= bb.xmin) { return false; } // line is left of box
+  if (line[0][0] >= bb.xmax && line[1][0] >= bb.xmax) { return false; } // line is right of box
+  if (line[0][1] >= bb.ymax && line[1][1] >= bb.ymax) { return false; } // line is higher than box
+  if (line[0][1] <= bb.ymin && line[1][1] <= bb.ymin) { return false; } // line is lower than box
+
+  if (pointIsInsideBB(line[0], bb) && pointIsInsideBB(line[1], bb)) { return line;}
+
+  let p1 = [line[0][0] || line[0].x, line[0][1] || line[0].y];
+  let p2 = [line[1][0] || line[1].x, line[1][1] || line[1].y];
+  let clipped = lineclip.polyline([p1, p2], [bb.xmin, bb.ymin, bb.xmax, bb.ymax]);
+  if (clipped.length>0) {
+    return clipped[0];
+  }
+
+  return false;
+}
+
 module.exports.findIntersection = findIntersection;
 module.exports.isPointBetween = isPointBetween;
 module.exports.findSegmentIntersection = findSegmentIntersection;
@@ -267,3 +411,12 @@ module.exports.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
 module.exports.clip = clip;
 module.exports.hatchPolygon = hatchPolygon;
 module.exports.createSquarePolygon = createSquarePolygon;
+
+module.exports.lineEquationFromPoints = lineEquationFromPoints;
+module.exports.findCircleLineIntersections = findCircleLineIntersections;
+module.exports.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
+module.exports.hatchCircle = hatchCircle;
+module.exports.hatchDonut = hatchDonut;
+
+module.exports.pointIsInsideBB = pointIsInsideBB;
+module.exports.clipLineToBB = clipLineToBB;

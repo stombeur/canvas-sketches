@@ -131,7 +131,7 @@ function formatSvgPaths(svgPaths, opt = {}) {
     //commands.push(...arcsToSvgPaths(p.arcs, opt));
     let path =  commands.join(' ');
 
-    paths.push('      <path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" />');
+    paths.push('      <g><path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" /></g>');
   });
 
   return paths;
@@ -182,9 +182,7 @@ function formatSvgFile(svgPaths, opt = {}) {
     '      "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">',
     '  <svg width="' + width + units + '" height="' + height + units + '"',
     '      xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + viewWidth + ' ' + viewHeight + '">',
-    '    <g>',
     ...svgPaths,
-    '    </g>',
     '</svg>'
   ].join('\n');
 }
