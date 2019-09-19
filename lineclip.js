@@ -11,6 +11,7 @@ lineclip.polygon = polygonclip;
 // handle polylines rather than just segments
 
 function lineclip(points, bbox, result) {
+    // bbox = [xmin, ymin, xmax, ymax]
 
     var len = points.length,
         codeA = bitCode(points[0], bbox),

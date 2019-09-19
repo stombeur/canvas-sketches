@@ -4,7 +4,6 @@ const canvasSketch = require('canvas-sketch');
 const penplot = require('./penplot');
 const utils = require('./utils');
 const poly = require('./poly');
-const clip = require('./mapbox');
 
 let svgFile = new penplot.SvgFile();
 
@@ -65,77 +64,33 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.01;
 
-    let lines = [];
+    
+    let bb = {xmin:margin, ymin:margin, xmax:width-margin, ymax:height-margin};
 
     let circles = [];
     circles.push({center: poly.point(width/3, height/3), r: width/2, hatchAngle: 20, hatchSpace: 0.2, innerOuter: 4/5});
     //circles.push({center: poly.point(width/4, height/4), r: width/4, hatchAngle: 25, hatchSpace: 0.1, innerOuter: 0.5});
     circles.push({center: poly.point(width/3*2, height/3*2), r: width/2, hatchAngle: 70, hatchSpace: 0.2, innerOuter: 3.5/5});
     circles.push({center: poly.point(width/2, height/2), r: width/2+2, hatchAngle: 12, hatchSpace: 0.2, innerOuter: 3.5/5});
-    circles.push({center: poly.point(width/2*1.5, height/4*3), r: width/2+2, hatchAngle: 12, hatchSpace: 0.2, innerOuter: 3.5/5});
+    circles.push({center: poly.point(width/2*1.5, height/4*3), r: width/2+2, hatchAngle: 44, hatchSpace: 0.2, innerOuter: 3.5/5});
 
-    circles.push({center: poly.point(width/3, height/2+4), r: width/4, hatchAngle: 10, hatchSpace: 0.2, innerOuter: 0.8});
+    circles.push({center: poly.point(width/10, height/2+4), r: width/3.5, hatchAngle: 10, hatchSpace: 0.17, innerOuter: 0.73});
 
     circles.forEach(c => {
-      poly.hatchCircle(c.center, c.r, c.hatchAngle, c.hatchSpace).forEach(l => {
-        let int2 = poly.findCircleLineIntersectionsP(c.r*c.innerOuter, c.center, l);
-        if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-          let l1 = poly.toLine(l[0], int2[0]),
-              l2 = poly.toLine(int2[1], l[1]);
 
-          lines.push(l1);
-          lines.push(l2);
-        }
-        else {
-          lines.push(l);
-        }
-  
+      let x = poly.hatchDonut(c.center, c.r, c.r * c.innerOuter, c.hatchAngle, c.hatchSpace);
+      x.forEach(l => { 
+        let clippedLine = poly.clipLineToBB(l, bb);
+        if (clippedLine) { 
+          poly.drawLineOnCanvas(context, clippedLine);
+          let p1 = [clippedLine[0][0] || clippedLine[0].x, clippedLine[0][1] || clippedLine[0].y];
+          let p2 = [clippedLine[1][0] || clippedLine[1].x, clippedLine[1][1] || clippedLine[1].y];
+          svgFile.addLine([p1, p2]);
+         }
       });
-      //svgFile.newPath();
+
+      svgFile.newPath();
     });
-    
-    let bb = {left:margin, bottom:margin, right:width-margin, top: height-margin};
-    let top = [[bb.left, bb.top], [bb.right, bb.top]];
-    let left = [[bb.left, bb.top], [bb.left, bb.bottom]];
-    let bottom = [[bb.left, bb.bottom], [bb.right, bb.bottom]];
-    let right = [[bb.right, bb.top], [bb.right, bb.bottom]];
-
-    //console.log({bb,top,left,right,bottom,nrOfLines:lines.length});
-    
-    let linesToDraw = [];
-    let linesOutside = 0;
-    linesInside = 0;
-    lines.forEach(l => {
-      if (l[0][0] <= bb.left && l[1][0] <= bb.left) { linesOutside++; return; }
-      if (l[0][0] >= bb.right && l[1][0] >= bb.right) { linesOutside++; return; }
-      if (l[0][1] >= bb.top && l[1][1] >= bb.top) { linesOutside++; return; }
-      if (l[0][1] <= bb.bottom && l[1][1] <= bb.bottom) { linesOutside++; return; }
-
-      if (poly.pointIsInsideBB(l[0], bb) && poly.pointIsInsideBB(l[1], bb)) { linesInside++; linesToDraw.push(l); return; }
-
-      if (!poly.pointIsInsideBB(l[0], bb)) {
-        // clip and take l[1];
-
-      }
-      let p1 = [l[0][0] || l[0].x, l[0][1] || l[0].y];
-      let p2 = [l[1][0] || l[1].x, l[1][1] || l[1].y];
-      let clipped = clip.polyline([p1, p2], [bb.bottom, bb.left, bb.right, bb.top]);
-      if (clipped.length>0) {
-        linesToDraw.push(clipped[0]);
-      }
-    });
-
-    //console.log({linesOutside, linesInside});
-
-    linesToDraw.forEach(l => {
-      poly.drawLineOnCanvas(context, l);
-
-      let p1 = [l[0][0] || l[0].x, l[0][1] || l[0].y];
-      let p2 = [l[1][0] || l[1].x, l[1][1] || l[1].y];
-      svgFile.addLine([p1, p2]);
-    });
-
-    console.log(svgFile);
 
     return [
       // Export PNG as first layer
