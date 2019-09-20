@@ -20,10 +20,10 @@ const settings = {
 const sketch = (context) => {
 
   let margin = 0.2;
-  let elementWidth = 2;
-  let elementHeight = 2;
-  let columns = 8;
-  let rows = 14;
+  let elementWidth = 3;
+  let elementHeight = 3;
+  let columns = 6;
+  let rows = 10;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
