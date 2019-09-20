@@ -123,11 +123,13 @@ const rotatePolygon = (polyLine, center, angle) => {
     });
 };
 
-const hatchDonut = (center, outerRadius, innerRadius, hatchAngle, hatchSpacing) => {
+const hatchDonut = (center, outerRadius, innerRadius, hatchAngle, hatchSpacing, innerCenter = null) => {
+  if (!innerCenter) { innerCenter = center; }
+
   let lines = [];
   
   hatchCircle(center, outerRadius, hatchAngle, hatchSpacing).forEach(l => {
-    let int2 = findCircleLineIntersectionsP(innerRadius, center, l);
+    let int2 = findCircleLineIntersectionsP(innerRadius, innerCenter, l);
     if (int2 && int2.length > 0 && int2[0] && int2[1]) {
       let l1 = toLine(l[0], int2[0]),
           l2 = toLine(int2[1], l[1]);
@@ -148,13 +150,8 @@ const hatchCircle = (center, radius, angle, spacing) => {
   let widthAndMargin = radius*2*1.1;
   let numLines = Math.floor(widthAndMargin/spacing);
 
-
-
   let x = center.x - widthAndMargin/2,
       y = center.y - widthAndMargin/2;
-
-      //console.log({numLines, radius, angle, spacing, widthAndMargin, x, y, center});
-
   let hatchlines = [];
   
   for (let i = 0; i <= numLines; i++) {
@@ -162,11 +159,9 @@ const hatchCircle = (center, radius, angle, spacing) => {
     let rotatedLine = rotatePolygon(line, center, angle);
     let intersections = findCircleLineIntersectionsP(radius, center, rotatedLine);
     let clippedLine = [intersections[0], intersections[1]];
-    //console.log({line, rotatedLine, intersections, clippedLine});
     if (clippedLine && clippedLine.length > 0 && clippedLine[0] && clippedLine[1]) hatchlines.push(clippedLine);
   }
 
-  //console.log(hatchlines);
   return hatchlines;
 }
 

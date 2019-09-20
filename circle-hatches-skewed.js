@@ -68,17 +68,17 @@ const sketch = (context) => {
     let bb = {xmin:margin, ymin:margin, xmax:width-margin, ymax:height-margin};
 
     let circles = [];
-    circles.push({center: poly.point(width/3, height/3), r: width/2, hatchAngle: 20, hatchSpace: 0.2, innerOuter: 4/5});
-    //circles.push({center: poly.point(width/4, height/4), r: width/4, hatchAngle: 25, hatchSpace: 0.1, innerOuter: 0.5});
-    circles.push({center: poly.point(width/3*2, height/3*2), r: width/2, hatchAngle: 70, hatchSpace: 0.2, innerOuter: 3.5/5});
+    circles.push({center: poly.point(width/3, height/3), r: width/2, hatchAngle: 20, hatchSpace: 0.2, innerOuter: 4/5, innerCenter: poly.point((width/3)+1.5, (height/3)+1.5)});
+    //circles.push({center: poly.point(width/4, height/4), r: width/4, hatchAngle: 25, hatchSpace: 0.1, innerOuter: 0.5, innerCenter: poly.point((width/4)+0.8, (height/4)+1.2)});
+    circles.push({center: poly.point(width/3*2, height/3*2), r: width/2, hatchAngle: 70, hatchSpace: 0.2, innerOuter: 3.5/5, innerCenter: poly.point((width/3*2)-1, (height/3*2)+0.8)});
     circles.push({center: poly.point(width/2, height/2), r: width/2+2, hatchAngle: 12, hatchSpace: 0.2, innerOuter: 3.5/5});
     circles.push({center: poly.point(width/2*1.5, height/4*3), r: width/2+2, hatchAngle: 44, hatchSpace: 0.2, innerOuter: 3.5/5});
 
-    circles.push({center: poly.point(width/10, height/2+4), r: width/3.5, hatchAngle: 57, hatchSpace: 0.17, innerOuter: 0.73});
+    circles.push({center: poly.point(width/10, height/2+4), r: width/3.5, hatchAngle: 85, hatchSpace: 0.17, innerOuter: 0.73, innerCenter: poly.point((width/10)+1.5, (height/2+4)-0.2)});
 
     circles.forEach(c => {
 
-      let x = poly.hatchDonut(c.center, c.r, c.r * c.innerOuter, c.hatchAngle, c.hatchSpace);
+      let x = poly.hatchDonut(c.center, c.r, c.r * c.innerOuter, c.hatchAngle, c.hatchSpace, c.innerCenter);
       x.forEach(l => { 
         let clippedLine = poly.clipLineToBB(l, bb);
         if (clippedLine) { 
