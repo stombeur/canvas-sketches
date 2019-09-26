@@ -248,6 +248,7 @@ class SvgFile {
     this.currentPath.lines.push(copy);
   }
 
+
   addCircle(cx, cy, radius) {
     this.currentPath.arcs.push(...createCircle(cx, cy, radius));
   }
