@@ -8,6 +8,8 @@ const poly = require('./poly');
 let svgFile = new penplot.SvgFile();
 
 let squareGroup1 = [];
+let linegroup1 = [];
+let arcGroup1 = [];
 let arcGroup2 = [];
 
 const settings = {
@@ -66,10 +68,20 @@ const sketch = (context) => {
       poly.drawPolygonOnCanvas(context, s);
       squareGroup1.push(s);
 
+      let zeroCorner = [x + padding, y + padding],
+          oneCorner = [x + side - padding, y + padding],
+          twoCorner = [x + side - padding, y + side - padding],
+          threeCorner = [x + padding, y + side -padding];
+      
+    
+
       let cx = x + padding, // case 0
           cy = y + padding,
-          startAngle = 0;
-      
+          startAngle = 0,
+          p0 = zeroCorner,
+          p1 = oneCorner,
+          p2 = threeCorner;
+
       // 0 1
       // 3 2
       switch (corner) {
@@ -77,30 +89,47 @@ const sketch = (context) => {
           cx = x + side - padding;
           cy = y + padding;
           startAngle = 90;
+          p0 = oneCorner;
+          p1 = zeroCorner;
+          p2 = twoCorner;
           break;
         case 2:
           cx = x + side - padding;
           cy = y + side - padding;
           startAngle = 180;
+          p0 = twoCorner;
+          p1 = oneCorner;
+          p2 = threeCorner;
           break;
         case 3:
           cx = x + padding;
           cy = y + side - padding;
           startAngle = 270;
+          p0 = threeCorner;
+          p1 = twoCorner;
+          p2 = zeroCorner;
           break;
         default:
           break;
       }
 
+      let l1 = [p0,p1];
+      poly.drawLineOnCanvas(context, l1);
+      linegroup1.push(l1);
+      let l2 = [p0,p2];
+      poly.drawLineOnCanvas(context, l2);
+      linegroup1.push(l2);
+
       let endAngle = startAngle + 90;
 
       let radius = side - (padding*2);
-      let divide = 15
+      let divide = 30;
       let step = radius / divide;
 
       for (let s = 0; s <= divide; s++) {
         drawArc(cx, cy, s * step, startAngle, endAngle);
-        arcGroup2.push({cx, cy, radius: s* step, startAngle, endAngle});
+        if (s < divide) {arcGroup2.push({cx, cy, radius: s* step, startAngle, endAngle});}
+        else { arcGroup1.push({cx, cy, radius: s* step, startAngle, endAngle});}
       }
       
   }
@@ -118,15 +147,18 @@ const sketch = (context) => {
           drawTile(posX, posY, elementWidth, o[r][i], margin);
     		  posX = posX + (elementWidth) + margin;
         }
-
-        svgFile.newPath();
         
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
     squareGroup1.forEach(s => {
-      console.log(s);
       svgFile.addLine(s, true);
+    });
+    linegroup1.forEach(l => {
+      svgFile.addLine(l, true);
+    });
+    arcGroup1.forEach(a => {
+      svgFile.addArc(a.cx, a.cy, a.radius, a.startAngle, a.endAngle);
     });
     svgFile.newPath();
     arcGroup2.forEach(a => {
