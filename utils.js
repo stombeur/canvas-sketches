@@ -3,6 +3,12 @@ function getRandomInt(max, min = 0) {
 	return x;
 }
 
+function getRandom(max, min=0) {
+	//let x = min + (Math.random() * (max - min + 1) + min);
+	let x = min + (Math.random() * max);
+	return x;
+}
+
 const random = (min, max) => Math.random() * (max - min) + min;
 
 function getRandomBitMask(flags) {
@@ -57,6 +63,7 @@ const shuffle = (array) => {
   }
 
 module.exports.getRandomInt = getRandomInt;
+module.exports.getRandom = getRandom;
 module.exports.getRandomBitMask = getRandomBitMask;
 module.exports.flags = flags;
 module.exports.random = random;
