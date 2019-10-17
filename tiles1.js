@@ -5,6 +5,59 @@ const penplot = require('./penplot');
 const utils = require('./utils');
 const poly = require('./poly');
 
+let columns = 5;
+let rows = 5;
+
+let o = [];
+  let idealNumber = 0;
+  let rounds = 0;
+
+  o = [];
+
+    for (let r = 0; r < rows; r++) {
+      o[r] = [];
+      for (let i = 0; i < columns; i++) {
+        let corner = utils.getRandomInt(3,0);
+        o[r].push({corner, ideal:0});
+      }
+    }
+
+  while (idealNumber < 29) {
+    idealNumber = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let i = 0; i < columns; i++) {
+        let ideal = 0;
+        switch (o[r][i].corner) {
+          case 0:
+            if (r > 0 && (o[r-1][i].corner === 2 || o[r-1][i].corner === 3 )) { idealNumber++; ideal++; }
+            if (i > 0 && (o[r][i-1].corner === 1 || o[r][i-1].corner === 2 )) { idealNumber++; ideal++; }
+            break;
+          case 1:
+            if (r > 0 && (o[r-1][i].corner === 2 || o[r-1][i].corner === 3 )) { idealNumber++; ideal++; }
+            if (i < columns-1  && (o[r][i+1].corner === 0 || o[r][i+1].corner === 3 )) { idealNumber++; ideal++; }
+            break;
+          case 2:
+            if (i < columns-1  && (o[r][i+1].corner === 0 || o[r][i+1].corner === 3 )) { idealNumber++; ideal++; }
+            if (r < rows-1 && (o[r+1][i].corner === 1 || o[r+1][i].corner === 0 )) { idealNumber++; ideal++; }
+            break;
+          case 3:
+            if (r > 0 && (o[r-1][i].corner === 1 || o[r-1][i].corner === 2 )) { idealNumber++; ideal++; }
+            if (r < rows-1 && (o[r+1][i].corner === 0 || o[r+1][i].corner === 1 )) { idealNumber++; ideal++; }
+            break;
+          default:
+            break;
+        }
+        o[r][i].ideal = ideal;
+        if ( o[r][i].ideal === 0) {o[r][i].corner = utils.getRandomInt(3,0);}
+      }
+    }
+
+    console.log({idealNumber, o});
+    //idealNumber = 1;
+    rounds++;
+  }
+
+
 let svgFile = new penplot.SvgFile();
 
 let squareGroup1 = [];
@@ -22,25 +75,19 @@ const settings = {
 
 const sketch = (context) => {
 
-  let margin = 0.15;
+  let margin = 0.07;
   let elementWidth = 3;
   let elementHeight = 3;
-  let columns = 6;
-  let rows = 10;
+
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
   
-  let o = [];
-  for (let r = 0; r < rows; r++) {
-    o[r] = [];
-    for (let i = 0; i < columns; i++) {
-      let corner = utils.getRandomInt(3,0);
-      o[r].push(corner);
-    }
-  }
+  
+  
+
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
@@ -62,7 +109,7 @@ const sketch = (context) => {
       //svgFile.addArc(cx, cy, radius, sAngle, eAngle);
     }
 
-    const drawTile = (x,y, side, corner, padding = 0.2) => {
+    const drawTile = (x,y, side, corner, padding = 0.1) => {
       //console.log({x, y, side, corner});
       let s = poly.createSquarePolygon(x,y, side, side);
       poly.drawPolygonOnCanvas(context, s);
@@ -144,13 +191,14 @@ const sketch = (context) => {
 
     for (let r = 0; r < rows; r++) {
     	for (let i = 0; i < columns; i++) {
-          drawTile(posX, posY, elementWidth, o[r][i], margin);
+          drawTile(posX, posY, elementWidth, o[r][i].corner, margin);
     		  posX = posX + (elementWidth) + margin;
         }
         
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
+
     squareGroup1.forEach(s => {
       svgFile.addLine(s, true);
     });

@@ -20,11 +20,11 @@ const settings = {
 
 const sketch = (context) => {
 
-  let margin = 0.005;
+  let margin = 0;
   let elementWidth = 2;
   let elementHeight = 2;
-  let columns = 9;
-  let rows = 13;
+  let columns = 10;
+  let rows = 14;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -120,7 +120,7 @@ const sketch = (context) => {
       let endAngle = startAngle + 90;
 
       let radius = side - (padding*2);
-      let divide = 30;
+      let divide = 5;
       let step = radius / divide;
 
       for (let s = 0; s <= divide; s++) {
