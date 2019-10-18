@@ -33,7 +33,7 @@ const sketch = (context) => {
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
-    for (let c = 0; c < columns; i++) {
+    for (let c = 0; c < columns; r++) {
       let rnd = utils.getRandomInt(3,0);
       o[r].push(rnd);
     }

@@ -312,8 +312,8 @@ const lineEquationFromPoints = (p1, p2) => {
 }
 
 const findCircleLineIntersectionsP = (r, c, line) => {
-  let h = c.x,
-      k = c.y,
+  let h = c.x || c[0],
+      k = c.y || c[1],
       eq = lineEquationFromPoints(line[0], line[1]),
       m = eq.m,
       n = eq.n;
@@ -385,6 +385,19 @@ const clipLineToBB = (line, bb) => {
   return false;
 }
 
+const clipLineToCircle = (line, center, radius, padding = 0) => {
+  let mn = lineEquationFromPoints(line[0], line[1]);
+  // y = mx + n
+  let xmin = Math.min(line[0][0], line[1][0]) - padding;
+  let xmax = Math.max(line[0][0], line[1][0]) + padding;
+  let ymin = mn.m * xmin + mn.n;
+  let ymax = mn.m * xmax + mn.n;
+  let paddedLine = [[xmin,ymin],[xmax,ymax]];
+
+  let intersections = findCircleLineIntersectionsP(radius, center, paddedLine);
+  return [intersections[0], intersections[1]];
+}
+
 module.exports.findIntersection = findIntersection;
 module.exports.isPointBetween = isPointBetween;
 module.exports.findSegmentIntersection = findSegmentIntersection;
@@ -415,3 +428,4 @@ module.exports.hatchDonut = hatchDonut;
 
 module.exports.pointIsInsideBB = pointIsInsideBB;
 module.exports.clipLineToBB = clipLineToBB;
+module.exports.clipLineToCircle = clipLineToCircle;
