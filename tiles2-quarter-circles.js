@@ -11,7 +11,7 @@ let lines = [];
 let arcs = [];
 
 const settings = {
-  dimensions: 'A4',
+  dimensions: 'A3',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -22,8 +22,8 @@ const sketch = context => {
   let margin = 0;
   let elementWidth = 2;
   let elementHeight = 2;
-  let columns = 9;
-  let rows = 13;
+  let columns = 13;
+  let rows = 20;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
@@ -213,8 +213,8 @@ const sketch = context => {
       let divide = 5;
       let step = radius / divide;
 
-      for (let s = 0; s <= divide; s++) {
-        drawArc(cx, cy, s * step, startAngle, endAngle);
+      for (let s = 1; s <= divide; s++) {
+        drawArc(cx, cy, s * step, startAngle, endAngle);                                            
         if (s < divide) {
           arcs.push({ cx, cy, radius: s * step, startAngle, endAngle });
         } else {
