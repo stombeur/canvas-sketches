@@ -9,10 +9,10 @@ let svgFile = new penplot.SvgFile();
 
 // grid settings
 let margin = 0;
-let elementWidth = 2;
-let elementHeight = 2;
-let columns = 9;
-let rows = 13;
+let elementWidth = 3;
+let elementHeight = 3;
+let columns = 5;
+let rows = 8;
 
 const settings = {
   dimensions: 'A4',
@@ -34,13 +34,14 @@ const sketch = (context) => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
-      let startangle = utils.getRandomInt(360,0);
-      o[r].push(startangle);
+      let rotate = utils.getRandomInt(360,0);
+      o[r].push(rotate);
     }
   }
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -54,7 +55,30 @@ const sketch = (context) => {
         context.stroke();
       
         svgFile.addCircle(cx, cy, radius);
+    }
+    
+    const drawCircleWithFan = (cx, cy, r, nrOfLines, rotate, overlap = 0) => {
+
+      let radius = r + overlap;
+      //drawCircle(cx, cy, radius);
+      //svgFile.addCircle(cx, cy, radius);
+
+      let step = 180 / nrOfLines;
+      let fulcrum = [cx - radius, cy];
+
+      let startLine = [...[fulcrum], [cx - radius, cy - 2*radius]];
+      for (let i = 1; i < nrOfLines; i++) {
+        let angle = step * i;
+        let line = poly.rotatePolygon([...startLine], fulcrum, angle);
+        let clippedLine = poly.clipLineToCircle(line, [cx,cy], radius);
+ 
+        if (clippedLine[0]) {
+          let rotatedLine = poly.rotatePolygon(clippedLine, [cx,cy], rotate);
+          svgFile.addLine(rotatedLine, false);
+          poly.drawLineOnCanvas(context, rotatedLine);
+        }
       }
+    }
 
     // grid repeat starts here
     let posX = marginLeft;
@@ -67,15 +91,10 @@ const sketch = (context) => {
     	for (let c = 0; c < columns; c++) {
           //draw element here
           let center = {x:posX+elementWidth/2, y:posY+elementHeight/2};
-          let radius = o[r][c];
-          let line = [[posX, posY+elementHeight/2], [posX+elementWidth, posY+elementHeight/2]]];
-          while (radius > 0) {
-            drawCircle(center.x, center.y, radius);
-            radius = radius - step;
-          }
-          
+          drawCircleWithFan(center.x, center.y, elementWidth/2, 60, o[r][c], 1.5);
+
           //advance grid
-    	  posX = posX + (elementWidth) + margin;
+    	    posX = posX + (elementWidth) + margin;
         }
       
       //advance 
