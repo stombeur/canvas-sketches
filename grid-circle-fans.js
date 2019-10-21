@@ -11,8 +11,8 @@ let svgFile = new penplot.SvgFile();
 let margin = 0;
 let elementWidth = 3;
 let elementHeight = 3;
-let columns = 5;
-let rows = 8;
+let columns = 4;
+let rows = 6;
 
 const settings = {
   dimensions: 'A4',
@@ -35,7 +35,8 @@ const sketch = (context) => {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
       let rotate = utils.getRandomInt(360,0);
-      o[r].push(rotate);
+      let skip = utils.getRandomInt(100)>100;
+      o[r].push({rotate, skip});
     }
   }
   
@@ -91,7 +92,7 @@ const sketch = (context) => {
     	for (let c = 0; c < columns; c++) {
           //draw element here
           let center = {x:posX+elementWidth/2, y:posY+elementHeight/2};
-          drawCircleWithFan(center.x, center.y, elementWidth/2, 60, o[r][c], 1.5);
+          if (!o[r][c].skip){drawCircleWithFan(center.x, center.y, elementWidth/2, 40, o[r][c].rotate, 0.35); }
 
           //advance grid
     	    posX = posX + (elementWidth) + margin;
