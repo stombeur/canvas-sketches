@@ -30,6 +30,8 @@ const sketch = context => {
 
     let posY = margin;
     for (let r = 0; r < rows; r++) {
+      let hatchAngle = utils.getRandom(89, 0);
+      let hatchSpacing = utils.getRandom(0.2, 0.05);
       let posX = margin;
       let posYTop = posY;
       let posYBottom = posY + ribbonHeight;
@@ -59,23 +61,38 @@ const sketch = context => {
         5      4 
         */
         posX = margin + index * (chevronWidth + margin);
-        let lines = [];
-        lines.push([[posX, posYTop], [posX + chevronWidth, posYTop]]);
-        lines.push([
-          [posX + chevronWidth, posYTop],
-          [posX + chevronWidth + inkeping, posYTop + randomSplit]
-        ]);
-        lines.push([
-          [posX + chevronWidth + inkeping, posYTop + randomSplit],
-          [posX + chevronWidth, posYBottom]
-        ]);
-        lines.push([[posX + chevronWidth, posYBottom], [posX, posYBottom]]);
-        lines.push([
-          [posX, posYBottom],
-          [posX + inkeping, posYTop + randomSplit]
-        ]);
-        lines.push([[posX + inkeping, posYTop + randomSplit], [posX, posYTop]]);
-        lines.map(l => poly.drawLineOnCanvas(context, l));
+        let polyline = [];
+        polyline.push([posX, posYTop]);
+        polyline.push([posX + chevronWidth, posYTop]);
+        polyline.push([posX + chevronWidth + inkeping, posYTop + randomSplit]);
+        polyline.push([posX + chevronWidth, posYBottom]);
+        polyline.push([posX, posYBottom]);
+        polyline.push([posX + inkeping, posYTop + randomSplit]);
+        poly.drawPolygonOnCanvas(context, polyline);
+
+        let hatched = poly.hatchPolygon(polyline, hatchAngle, hatchSpacing);
+        hatched.map(l => {
+            poly.drawLineOnCanvas(context, l, {});
+        });
+
+
+        // let lines = [];
+        // lines.push([[posX, posYTop], [posX + chevronWidth, posYTop]]);
+        // lines.push([
+        //   [posX + chevronWidth, posYTop],
+        //   [posX + chevronWidth + inkeping, posYTop + randomSplit]
+        // ]);
+        // lines.push([
+        //   [posX + chevronWidth + inkeping, posYTop + randomSplit],
+        //   [posX + chevronWidth, posYBottom]
+        // ]);
+        // lines.push([[posX + chevronWidth, posYBottom], [posX, posYBottom]]);
+        // lines.push([
+        //   [posX, posYBottom],
+        //   [posX + inkeping, posYTop + randomSplit]
+        // ]);
+        // lines.push([[posX + inkeping, posYTop + randomSplit], [posX, posYTop]]);
+        // lines.map(l => poly.drawLineOnCanvas(context, l));
       }
       posY = posY + ribbonHeight + margin;
     }

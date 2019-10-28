@@ -1,6 +1,10 @@
 const polygonBoolean = require('2d-polygon-boolean');
 const lineclip = require('./lineclip');
 
+let context;
+
+const init = (canvas) => context = canvas;
+
 const createPolygon = (nrOfSides, sideLength, centerPoint) => {
     let centerAngle = Math.PI * 2 / nrOfSides;
     let b = Math.sin(centerAngle/2) * sideLength / 2 / Math.cos(centerAngle/2);
@@ -45,7 +49,7 @@ const drawPolygonOnCanvas = (context, poly, options = {}) => {
     context.stroke();
 }
 
-const drawLineOnCanvas = (context, poly, options = {}) => {
+const drawLineOnCanvas = ( poly, options = {}) => {
     let x1 = poly[0][0] || poly[0].x,
         x2 = poly[1][0] || poly[1].x,
         y1 = poly[0][1] || poly[0].y,
@@ -398,6 +402,13 @@ const clipLineToCircle = (line, center, radius, padding = 0) => {
   return [intersections[0], intersections[1]];
 }
 
+const drawCircle = context => (cx, cy, radius) => {
+  
+  context.beginPath();
+  context.arc(cx, cy, radius, 0, Math.PI * 2);
+  context.stroke();
+}
+
 module.exports.findIntersection = findIntersection;
 module.exports.isPointBetween = isPointBetween;
 module.exports.findSegmentIntersection = findSegmentIntersection;
@@ -429,3 +440,6 @@ module.exports.hatchDonut = hatchDonut;
 module.exports.pointIsInsideBB = pointIsInsideBB;
 module.exports.clipLineToBB = clipLineToBB;
 module.exports.clipLineToCircle = clipLineToCircle;
+module.exports.drawCircle = drawCircle;
+
+module.exports.init = init;

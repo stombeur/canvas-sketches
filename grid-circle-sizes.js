@@ -47,14 +47,7 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.02;
 
-    const drawCircle = (cx, cy, radius) => {
-  
-        context.beginPath();
-        context.arc(cx, cy, radius, 0, Math.PI * 2);
-        context.stroke();
-      
-        svgFile.addCircle(cx, cy, radius);
-      }
+    const drawCircle = poly.drawCircle(context);
 
     // grid repeat starts here
     let posX = marginLeft;
@@ -70,6 +63,7 @@ const sketch = (context) => {
           let radius = o[r][c];
           while (radius > 0) {
             drawCircle(center.x, center.y, radius);
+            svgFile.addCircle(center.x, center.y, radius);
             radius = radius - step;
           }
           

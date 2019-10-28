@@ -41,6 +41,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -54,6 +55,7 @@ const sketch = (context) => {
     for (let r = 0; r < rows; r++) {
     	for (let i = 0; i < columns; i++) {
           //draw element here
+          poly.drawLineOnCanvas([[1,1],[5,5]]);
 
           //advance grid
     		  posX = posX + (elementWidth) + margin;
