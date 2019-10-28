@@ -11,8 +11,8 @@ let svgFile = new penplot.SvgFile();
 let margin = 0;
 let elementWidth = 2;
 let elementHeight = 2;
-let columns = 9;
-let rows = 13;
+let columns = 6;
+let rows = 9;
 
 const settings = {
   dimensions: 'A4',
@@ -53,7 +53,7 @@ const sketch = (context) => {
     let posX = marginLeft;
     let posY = marginTop;
 
-    let divide = 25;
+    let divide = 12;
     let step = elementHeight / divide;
 
     for (let r = 0; r < rows; r++) {
