@@ -21,6 +21,16 @@ function getRandomBitMask(flags) {
 	return result;
 }
 
+function getBitMask(max) {
+	let result = 0;
+
+	for (let f = 0; f < max; f++) {
+		result = result | Math.pow(2,f);
+	}
+
+	return result;
+}
+
 var flags = {
 	one: Math.pow(2,0),
 	two: Math.pow(2,1),
@@ -68,3 +78,4 @@ module.exports.getRandomBitMask = getRandomBitMask;
 module.exports.flags = flags;
 module.exports.random = random;
 module.exports.shuffle = shuffle;
+module.exports.getBitMask = getBitMask;

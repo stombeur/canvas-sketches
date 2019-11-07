@@ -65,11 +65,24 @@ const sketch = (context) => {
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
   
+  let gravityPoint = [(rows-1)/2 + 2, (columns-1)/2 + 2];
+  const distance = (p1, p2) => {
+      return Math.hypot(p2[0]-p1[0],p2[1]-p1[1]);
+  }
+//   let maxDist = Math.max(distance([0,0], gravityPoint),
+//                         distance([0,columns-1], gravityPoint),
+//                         distance([rows-1,0], gravityPoint),
+//                         distance([rows-1,columns-1], gravityPoint));
+let maxDist = distance([0,0], [rows,0]);
+
+  let steps = maxDist / 6;
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
-    for (let i = 0; i < columns; i++) {
-      o[r].push(utils.getRandomBitMask(8));
+    for (let c = 0; c < columns; c++) {
+      let w = distance([r,c],gravityPoint);
+      let nrOfArms = Math.ceil(w/steps);
+      o[r].push(utils.getBitMask(nrOfArms));
     }
   }
 
