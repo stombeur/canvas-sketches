@@ -409,6 +409,20 @@ const drawCircle = context => (cx, cy, radius) => {
   context.stroke();
 }
 
+const distanceBetween = (p1, p2) => {
+
+  if (!p1.x) { p1 = point(p1[0], p1[1]); }
+  if (!p2.x) { p2 = point(p2[0], p2[1]); }
+
+  let dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
+  //console.log(dist);
+  return dist;
+}
+
+const pointIsInCircle = (point, center, radius) => {
+  return distanceBetween(point, center) < radius;
+}
+
 module.exports.findIntersection = findIntersection;
 module.exports.isPointBetween = isPointBetween;
 module.exports.findSegmentIntersection = findSegmentIntersection;
@@ -440,6 +454,8 @@ module.exports.hatchDonut = hatchDonut;
 module.exports.pointIsInsideBB = pointIsInsideBB;
 module.exports.clipLineToBB = clipLineToBB;
 module.exports.clipLineToCircle = clipLineToCircle;
+module.exports.pointIsInCircle = pointIsInCircle;
 module.exports.drawCircle = drawCircle;
+module.exports.distanceBetween = distanceBetween;
 
 module.exports.init = init;
