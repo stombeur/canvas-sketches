@@ -54,16 +54,22 @@ function line(context, x1, y1, x2, y2) {
 const sketch = (context) => {
 
 
-  let margin = 0.5;
+  let margin = 0.4;
   let houseWidth = 1;
   let houseHeight = 2;
-  let columns = 8;
-  let rows = 9;
+  let columns = 14;
+  let rows = 12;
   
   let drawingWidth = (columns * (houseWidth + margin)) - margin;
   let drawingHeight = (rows * (houseHeight + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
+
+  function getRndBias(min, max, bias, influence) {
+    var rnd = Math.random() * (max - min) + min,   // random in range
+        mix = Math.random() * influence;           // random mixer
+    return rnd * (1 - mix) + bias * mix;           // mix full range and bias
+}
   
   let o = [];
   for (let r = 0; r < rows; r++) {
