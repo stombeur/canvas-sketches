@@ -67,15 +67,15 @@ const sketch = (context) => {
   let drawingHeight = (rows * (asteriskWidth + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
-
+  noise.seed(Math.random());
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
-    noise.seed(Math.random());
+
 
       let nrOfArms = 8;
-      let n = Math.abs(noise.perlin2(c/5, r/5));
+      let n = Math.abs(noise.perlin2(c/1.2, r/1.2));
       n = Math.ceil(n * 8);
       console.log(n);
       o[r].push(utils.getBitMask(n));
