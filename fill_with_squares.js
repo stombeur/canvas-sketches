@@ -52,6 +52,7 @@ const sketch = (context) => {
         s[corner][i] = s[corner][i] + offset;
 
         poly.drawPolygonOnCanvas(context, s);
+        svgFile.addLine(s, true);
       }
 
     // grid repeat starts here
