@@ -59,13 +59,13 @@ const sketch = (context) => {
     let posX = marginLeft;
     let posY = marginTop;
 
-    let circle = { center: poly.point(width/2, height/2), radius: width/2 - 2 * margin };
-    let innercircle = { center: poly.point(width/2, height/2), radius: (width/2 - 2 * margin) / 4 }
+    let circle = { center: poly.point(width/2, height/2), radius: width/2 - 2 };
+    let innercircle = { center: poly.point(width/2, height/2), radius: (width/2 - 2 ) / 3 }
     //poly.drawCircle(context)(circle.center.x, circle.center.y, circle.radius);
 
     //console.log(circle);
 
-    for (let index = 0; index < 10000; index++) {
+    for (let index = 0; index < 20000; index++) {
         let x = utils.getRandom(circle.radius*2) - circle.radius;
         let y = utils.getRandom(circle.radius* 2) - circle.radius;
         
