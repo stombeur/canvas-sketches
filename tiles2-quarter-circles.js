@@ -104,6 +104,7 @@ const sketch = context => {
 
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     const drawCircle = (cx, cy, radius) => {
       context.beginPath();
@@ -198,12 +199,12 @@ const sketch = context => {
 
       if (drawline1) {
         let l1 = [p0, p1];
-        poly.drawLineOnCanvas(context, l1);
+        poly.drawLineOnCanvas(l1);
         lines.push(l1);
       }
       if (drawline2) {
         let l2 = [p0, p2];
-        poly.drawLineOnCanvas(context, l2);
+        poly.drawLineOnCanvas(l2);
         lines.push(l2);
       }
 

@@ -50,10 +50,10 @@ const drawPolygonOnCanvas = (context, poly, options = {}) => {
 }
 
 const drawLineOnCanvas = ( poly, options = {}) => {
-    let x1 = poly[0][0] || poly[0].x,
-        x2 = poly[1][0] || poly[1].x,
-        y1 = poly[0][1] || poly[0].y,
-        y2 = poly[1][1] || poly[1].y;
+    let x1 = poly[0].x  || poly[0][0],
+        x2 = poly[1].x || poly[1][0],
+        y1 = poly[0].y || poly[0][1],
+        y2 = poly[1].y || poly[1][1];
 
 
     context.beginPath();
