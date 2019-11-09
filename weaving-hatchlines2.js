@@ -29,7 +29,7 @@ const drawRibbonSegment = (start, end, diffX, diffY, nrOfLines) => {
     let diffVector = poly.point(diffX * index, diffY * index);
     let line = poly.toLine(poly.movePoint(start, diffVector), poly.movePoint(end, diffVector));
 
-    poly.drawLineOnCanvas(mainContext, line);
+    poly.drawLineOnCanvas(line);
 
     lines.push(line);
   }
@@ -92,7 +92,7 @@ const drawRibbon = (start,bounds,ribbonLength,ribbonWidth,angle,nrOfLines, slot)
 
   linesToDraw.forEach(l => {
     let angle =  Math.atan2(l[1][1] - l[0][1], l[1][0] - l[0][0]) * 180 / Math.PI;
-    if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { poly.drawLineOnCanvas(mainContext, l); }
+    if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { poly.drawLineOnCanvas(l); }
   });
   
 }
@@ -133,6 +133,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);

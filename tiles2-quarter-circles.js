@@ -11,7 +11,7 @@ let lines = [];
 let arcs = [];
 
 const settings = {
-  dimensions: 'A3',
+  dimensions: [24,31.5],
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -22,8 +22,8 @@ const sketch = context => {
   let margin = 0;
   let elementWidth = 2;
   let elementHeight = 2;
-  let columns = 13;
-  let rows = 20;
+  let columns = 6;
+  let rows = 8;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
@@ -242,7 +242,7 @@ const sketch = context => {
       posY = posY + elementHeight + margin;
     }
     lines.forEach(l => {
-      svgFile.addLine(l, true);
+      svgFile.addLine(l);
     });
     arcs.forEach(a => {
       svgFile.addArc(a.cx, a.cy, a.radius, a.startAngle, a.endAngle);
