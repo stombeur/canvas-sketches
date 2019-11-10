@@ -34,7 +34,8 @@ const sketch = context => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
-      let corner = utils.getRandomInt(3, 0);
+      let corner = utils.getRandomInt(4, 0);
+      //console.log(corner);
       o[r].push({
         corner,
         draw01: true,
@@ -84,13 +85,10 @@ const sketch = context => {
           }
           break;
         case 3:
-          if (
-            r < rows - 1 &&
-            (o[r + 1][c].corner === 0 || o[r + 1][c].corner === 1)
-          ) {
+          if (r < rows - 1 && (o[r + 1][c].corner === 0 || o[r + 1][c].corner === 1)) {
             o[r][c].draw23 = false;
           }
-          if (r > 0 && (o[r][c - 1].corner === 1 || o[r][c - 1].corner === 2)) {
+          if (c > 0 && (o[r][c - 1].corner === 1 || o[r][c - 1].corner === 2)) {
             o[r][c].draw30 = false;
           }
           break;
