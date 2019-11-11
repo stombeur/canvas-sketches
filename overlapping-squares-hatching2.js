@@ -20,8 +20,8 @@ const sketch = (context) => {
   let margin = -0.2;
   let elementWidth = 3;
   let elementHeight = 3;
-  let columns = 6;
-  let rows = 10;
+  let columns = 4;
+  let rows = 4;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -42,6 +42,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -60,7 +61,7 @@ const sketch = (context) => {
           let s =poly.createSquarePolygon(sposX, sposY, elementWidth, elementHeight);
           let lines = poly.hatchPolygon(s, o[r][i][0][a], o[r][i][1]);
           lines.map(l => {
-            poly.drawLineOnCanvas(context, l);
+            poly.drawLineOnCanvas(l);
             svgFile.addLine(l);
           });
           posX = posX + (elementWidth) + margin;

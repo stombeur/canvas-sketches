@@ -247,6 +247,10 @@ const sketch = context => {
     });
     svgFile.newPath();
 
+    // let box = [[marginLeft,marginTop],[marginLeft, height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,marginTop]];
+    // poly.drawPolygonOnCanvas(context, box);
+    // svgFile.addLine(box, true);
+
     return [
       // Export PNG as first layer
       context.canvas,

@@ -42,6 +42,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
 
     context.fillStyle = 'white';
@@ -61,9 +62,6 @@ const sketch = (context) => {
     const drawCircleWithFan = (cx, cy, r, nrOfLines, rotate, overlap = 0) => {
 
       let radius = r + overlap;
-      //drawCircle(cx, cy, radius);
-      //svgFile.addCircle(cx, cy, radius);
-
       let step = 180 / nrOfLines;
       let fulcrum = [cx - radius, cy];
 
@@ -76,7 +74,7 @@ const sketch = (context) => {
         if (clippedLine[0]) {
           let rotatedLine = poly.rotatePolygon(clippedLine, [cx,cy], rotate);
           svgFile.addLine(rotatedLine, false);
-          poly.drawLineOnCanvas(context, rotatedLine);
+          poly.drawLineOnCanvas(rotatedLine);
         }
       }
     }
@@ -92,7 +90,7 @@ const sketch = (context) => {
     	for (let c = 0; c < columns; c++) {
           //draw element here
           let center = {x:posX+elementWidth/2, y:posY+elementHeight/2};
-          if (!o[r][c].skip){drawCircleWithFan(center.x, center.y, elementWidth/2, 40, o[r][c].rotate, 0.35); }
+          if (!o[r][c].skip){drawCircleWithFan(center.x, center.y, elementWidth/2, 40, o[r][c].rotate, 0.5); }
 
           //advance grid
     	    posX = posX + (elementWidth) + margin;
