@@ -1,9 +1,9 @@
-// germs test 1
+// squares on grid filled with circles of varying sizes
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 let mainContext = null;
@@ -31,19 +31,11 @@ const generatePoints = (nr, side, maxR, overlap = true) => {
       let overlapping = false;
 
       result.forEach(element => {
-        //(R0 - R1)^2 <= (x0 - x1)^2 + (y0 - y1)^2 <= (R0 + R1)^2
-        // let left = Math.pow((element.radius - radius), 2);
-        // let middle = Math.pow(element.x - x,2) + Math.pow(element.y - y,2);
-        // let right = Math.pow((element.radius + radius), 2);
-        // if (left <= middle && middle <= right) { overlapping = true; }
-
-        //Math.hypot(x0-x1, y0-y1) <= (r0 + r1);
         let hypo = Math.hypot(element.x-x, element.y-y) < (element.radius + radius);
         if (hypo) { overlapping = true; }
       });
 
       if (overlap || !overlapping) { result.push({x,y,radius}); retry = false; }
-      //console.log({index,overlapping, retry, element:{x,y, radius}});
     }
 
     
@@ -53,11 +45,6 @@ const generatePoints = (nr, side, maxR, overlap = true) => {
 }
 
 const drawGermSquare = (x, y, side, points) => {
-  // let s = poly.createSquarePolygon(x,y, side, side);
-  // poly.drawPolygonOnCanvas(mainContext, s);
-
-
-
   points.forEach(p => {
     mainContext.beginPath();
     mainContext.arc(p.x + x, p.y + y, p.radius, 0, Math.PI * 2);
@@ -97,23 +84,6 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.01;
     mainContext = context;
-
-    const drawCircle = (cx, cy, radius) => {
-  
-      context.beginPath();
-      context.arc(cx, cy, radius, 0, Math.PI * 2);
-      context.stroke();
-    
-      svgFile.addCircle(cx, cy, radius);
-    }
-    
-    const drawArc = (cx, cy, radius, sAngle, eAngle) => {
-      context.beginPath();
-      context.arc(cx, cy, radius, (Math.PI / 180) * sAngle, (Math.PI / 180) * eAngle);
-      context.stroke();
-    
-      svgFile.addArc(cx, cy, radius, sAngle, eAngle);
-    }
 
     let posX = marginLeft;
     let posY = marginTop;

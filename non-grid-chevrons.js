@@ -1,4 +1,4 @@
-// starter file with grid
+// random-sized chevrons in line
 
 const canvasSketch = require('canvas-sketch');
 const penplot = require('./penplot');

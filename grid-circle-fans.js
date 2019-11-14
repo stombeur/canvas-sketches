@@ -1,9 +1,9 @@
-// grid with circles of different sizes
+// grid with circular fans that overlap
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
