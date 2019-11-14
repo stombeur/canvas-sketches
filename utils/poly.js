@@ -49,11 +49,17 @@ const drawPolygonOnCanvas = (context, poly, options = {}) => {
     context.stroke();
 }
 
-const drawLineOnCanvas = ( poly, options = {}) => {
-    let x1 = poly[0].x  || poly[0][0],
-        x2 = poly[1].x || poly[1][0],
-        y1 = poly[0].y || poly[0][1],
-        y2 = poly[1].y || poly[1][1];
+
+/**
+ * draw a line on the canvas
+ * @param {array} line [[x1,y1],[x2,y2]] or [point, point] 
+ * @param {any} options { strokestyle, lineWidth, lineCap, lineJoin }
+ */
+const drawLineOnCanvas = ( line, options = {}) => {
+    let x1 = line[0].x  || line[0][0],
+        x2 = line[1].x || line[1][0],
+        y1 = line[0].y || line[0][1],
+        y2 = line[1].y || line[1][1];
 
 
     context.beginPath();
@@ -409,16 +415,27 @@ const drawCircle = context => (cx, cy, radius) => {
   context.stroke();
 }
 
+/**
+ * returns the distance between two points
+ * 
+ * @param {any} p1  [x, y] or {x,y}
+ * @param {any} p2  [x, y] or {x,y}
+ */
 const distanceBetween = (p1, p2) => {
 
   if (!p1.x) { p1 = point(p1[0], p1[1]); }
   if (!p2.x) { p2 = point(p2[0], p2[1]); }
 
   let dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
-  //console.log(dist);
   return dist;
 }
 
+/**
+ * returns if a point is inside the circle, exclusive
+ * @param {{x,y}} point 
+ * @param {any} center [x, y] or {x,y}
+ * @param {number} radius 
+ */
 const pointIsInCircle = (point, center, radius) => {
   return distanceBetween(point, center) < radius;
 }

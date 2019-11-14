@@ -1,9 +1,9 @@
 // test for circle-line intersection
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -27,20 +27,10 @@ const sketch = (context) => {
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
-  
-  // let o = [];
-  // for (let r = 0; r < rows; r++) {
-  //   o[r] = [];
-  //   for (let i = 0; i < columns; i++) {
-  //     let rot = utils.getRandomInt(4,0) * 90;//utils.random(0, 360);
-  //     let size = utils.random(45, 270);
-  //     let quarter = utils.getRandomInt(4,1);
-  //     o[r].push([rot, size, quarter]);
-  //   }
-  // }
-  
+
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     const drawCircle = (cx, cy, radius) => {
   
@@ -75,7 +65,7 @@ const sketch = (context) => {
     drawCircle(circleCenter.x, circleCenter.y, r);
 
     let intersections = poly.findCircleLineIntersectionsP(r, circleCenter, line);
-    console.log(intersections);
+    //console.log(intersections);
 
     // let angle = Math.atan(drawingWidth/drawingHeight);
     // let d1 = x[0];
@@ -94,7 +84,7 @@ const sketch = (context) => {
     //drawCircle(x[0][0], x[0][1], 0.5);
     //drawCircle(x[1][0], x[1][1], 0.5);
     //poly.drawLineOnCanvas(context, [[x[0][0], x[0][1]], [x[1][0], x[1][1]]]);
-    poly.drawLineOnCanvas(context, poly.toLine(intersections[0], intersections[1]))
+    poly.drawLineOnCanvas( poly.toLine(intersections[0], intersections[1]))
 
     let circleCenter2 = poly.point(posX + drawingWidth/2, posY + drawingHeight/4*3);
     //drawCircle(circleCenter2.x, circleCenter2.y, r);
@@ -104,11 +94,11 @@ const sketch = (context) => {
     poly.hatchCircle(circleCenter2, r, 20, 0.2).forEach(l => {
       let int2 = poly.findCircleLineIntersectionsP(r/5*4, circleCenter2, l);
       if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-        poly.drawLineOnCanvas(context, poly.toLine(l[0], int2[0]));
-        poly.drawLineOnCanvas(context, poly.toLine(int2[1], l[1]));
+        poly.drawLineOnCanvas( poly.toLine(l[0], int2[0]));
+        poly.drawLineOnCanvas( poly.toLine(int2[1], l[1]));
       }
       else {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
       }
 
     });
@@ -116,11 +106,11 @@ const sketch = (context) => {
     poly.hatchCircle(circleCenter2, r/5*4, 31, 0.2).forEach(l => {
       let int2 = poly.findCircleLineIntersectionsP(r/5*3, circleCenter2, l);
       if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-        poly.drawLineOnCanvas(context, poly.toLine(l[0], int2[0]));
-        poly.drawLineOnCanvas(context, poly.toLine(int2[1], l[1]));
+        poly.drawLineOnCanvas( poly.toLine(l[0], int2[0]));
+        poly.drawLineOnCanvas( poly.toLine(int2[1], l[1]));
       }
       else {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
       }
 
     });
@@ -128,11 +118,11 @@ const sketch = (context) => {
     poly.hatchCircle(circleCenter2, r/5*3, 12, 0.2).forEach(l => {
       let int2 = poly.findCircleLineIntersectionsP(r/5*2, circleCenter2, l);
       if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-        poly.drawLineOnCanvas(context, poly.toLine(l[0], int2[0]));
-        poly.drawLineOnCanvas(context, poly.toLine(int2[1], l[1]));
+        poly.drawLineOnCanvas( poly.toLine(l[0], int2[0]));
+        poly.drawLineOnCanvas( poly.toLine(int2[1], l[1]));
       }
       else {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
       }
 
     });
@@ -140,11 +130,11 @@ const sketch = (context) => {
     poly.hatchCircle(circleCenter2, r/5*2, 87, 0.2).forEach(l => {
       let int2 = poly.findCircleLineIntersectionsP(r/5, circleCenter2, l);
       if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-        poly.drawLineOnCanvas(context, poly.toLine(l[0], int2[0]));
-        poly.drawLineOnCanvas(context, poly.toLine(int2[1], l[1]));
+        poly.drawLineOnCanvas( poly.toLine(l[0], int2[0]));
+        poly.drawLineOnCanvas( poly.toLine(int2[1], l[1]));
       }
       else {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
       }
 
     });
@@ -152,17 +142,17 @@ const sketch = (context) => {
     poly.hatchCircle(circleCenter2, r/5, 120, 0.2).forEach(l => {
       let int2 = poly.findCircleLineIntersectionsP(r/10, circleCenter2, l);
       if (int2 && int2.length > 0 && int2[0] && int2[1]) {
-        poly.drawLineOnCanvas(context, poly.toLine(l[0], int2[0]));
-        poly.drawLineOnCanvas(context, poly.toLine(int2[1], l[1]));
+        poly.drawLineOnCanvas( poly.toLine(l[0], int2[0]));
+        poly.drawLineOnCanvas( poly.toLine(int2[1], l[1]));
       }
       else {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
       }
 
     });
 
     poly.hatchCircle(circleCenter2, r/10, 145, 0.2).forEach(l => {
-        poly.drawLineOnCanvas(context, l);
+        poly.drawLineOnCanvas( l);
     });
 
     return [

@@ -1,9 +1,8 @@
-// test for circle-line intersection
+// hatched donuts
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -41,6 +40,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     const drawCircle = (cx, cy, radius) => {
   
@@ -82,7 +82,7 @@ const sketch = (context) => {
       x.forEach(l => { 
         let clippedLine = poly.clipLineToBB(l, bb);
         if (clippedLine) { 
-          poly.drawLineOnCanvas(context, clippedLine);
+          poly.drawLineOnCanvas(clippedLine);
           let p1 = [clippedLine[0][0] || clippedLine[0].x, clippedLine[0][1] || clippedLine[0].y];
           let p2 = [clippedLine[1][0] || clippedLine[1].x, clippedLine[1][1] || clippedLine[1].y];
           svgFile.addLine([p1, p2]);

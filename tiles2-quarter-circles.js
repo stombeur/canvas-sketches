@@ -98,7 +98,7 @@ const sketch = context => {
     }
   }
 
-  console.dir(o);
+  //console.dir(o);
 
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
@@ -109,7 +109,6 @@ const sketch = context => {
       context.arc(cx, cy, radius, 0, Math.PI * 2);
       context.stroke();
 
-      //svgFile.addCircle(cx, cy, radius);
     };
 
     const drawArc = (cx, cy, radius, sAngle, eAngle) => {

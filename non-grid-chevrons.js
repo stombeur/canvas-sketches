@@ -1,9 +1,9 @@
-// starter file with grid
+// random-sized chevrons in line
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -18,6 +18,7 @@ const settings = {
 const sketch = context => {
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -72,7 +73,7 @@ const sketch = context => {
 
         let hatched = poly.hatchPolygon(polyline, hatchAngle, hatchSpacing);
         hatched.map(l => {
-            poly.drawLineOnCanvas(context, l, {});
+            poly.drawLineOnCanvas(l);
         });
 
 

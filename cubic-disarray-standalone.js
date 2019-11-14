@@ -1,5 +1,5 @@
 /**
- * A Canvas2D example of pixel-perfect RGBA manipualation.
+ * example of cubic disarray implemented with canvas-sketch
  * @author Stephane Tombeur (https://github.com/stombeur)
  */
 
