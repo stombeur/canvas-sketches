@@ -1,10 +1,10 @@
 const canvasSketch = require('canvas-sketch');
-const { polylinesToSVG } = require('canvas-sketch-util/penplot');
-const utils = require('./utils');
 const polygonBoolean = require('2d-polygon-boolean');
 
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
 
-const lines = [];
+let svgFile = new penplot.SvgFile();
 
 const settings = {
   dimensions: 'A3',
@@ -68,7 +68,7 @@ function drawPolygon(context, poly) {
 
   context.stroke();
 
-  lines.push(poly);
+  svgFile.addLine(poly);
 }
 
 function drawLine(context, poly) {
@@ -85,7 +85,7 @@ function drawLine(context, poly) {
 
   context.stroke();
 
-  lines.push(poly);
+  svgFile.addLine(poly);  
 }
 
 const boundingBox = (polyLine, padding = 0) => {
@@ -164,7 +164,6 @@ const drawHatchedPoly = (context, posX, posY, angle, space, sideLength = 2) => {
 };
 
 const sketch = (context) => {
-
   let margin = 0.2;
   let elementWidth = 2;
   let elementHeight = 1.8;
@@ -187,6 +186,9 @@ const sketch = (context) => {
   }
 
   return ({ context, width, height, units }) => {
+    // reset svgFile at each render
+    svgFile = new penplot.SvgFile();
+
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
@@ -194,6 +196,7 @@ const sketch = (context) => {
     let posY = marginTop  + elementHeight / 4;
 
     drawHatchedPoly(context, 13,17, 12.3, 0.45, 14);
+    svgFile.newPath();
     drawHatchedPoly(context, 16,25, 54.8, 0.85, 14);
 
     return [
@@ -201,7 +204,7 @@ const sketch = (context) => {
       context.canvas,
       // Export SVG for pen plotter as second layer
       {
-        data: polylinesToSVG(lines, {
+        data: svgFile.toSvg({
           width,
           height,
           units

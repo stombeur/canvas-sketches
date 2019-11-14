@@ -1,9 +1,9 @@
 // tiles with quarter-circle
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -43,7 +43,7 @@ const sketch = context => {
         draw12: true,
         draw23: true,
         draw30: true,
-        isRound:false
+        isRound
       });
     }
   }

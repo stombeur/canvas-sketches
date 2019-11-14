@@ -1,9 +1,9 @@
 // tiles with quarter-circle
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let columns = 5;
 let rows = 5;
@@ -22,7 +22,7 @@ let o = [];
       }
     }
 
-  while (idealNumber < 29) {
+  while (idealNumber < 5) {
     idealNumber = 0;
     for (let r = 0; r < rows; r++) {
       for (let i = 0; i < columns; i++) {
@@ -91,6 +91,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     const drawCircle = (cx, cy, radius) => {
   
@@ -161,10 +162,10 @@ const sketch = (context) => {
       }
 
       let l1 = [p0,p1];
-      poly.drawLineOnCanvas(context, l1);
+      poly.drawLineOnCanvas(l1);
       linegroup1.push(l1);
       let l2 = [p0,p2];
-      poly.drawLineOnCanvas(context, l2);
+      poly.drawLineOnCanvas(l2);
       linegroup1.push(l2);
 
       let endAngle = startAngle + 90;

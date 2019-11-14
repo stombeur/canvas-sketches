@@ -1,10 +1,12 @@
+// hatched hexagons
+
 const canvasSketch = require('canvas-sketch');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
 const polygonBoolean = require('2d-polygon-boolean');
 
-const penplot = require('./penplot');
-const utils = require('./utils');
+const svgFile = new penplot.SvgFile();
 
-let svgFile = new penplot.SvgFile();
 
 const settings = {
   dimensions: 'A3',
@@ -85,7 +87,7 @@ function drawLine(context, poly) {
 
   context.stroke();
 
-  svgFile.addLine(poly);  
+  svgFile.addLine(poly);
 }
 
 const boundingBox = (polyLine, padding = 0) => {
@@ -147,8 +149,8 @@ const clip = (line, polyClip) => {
   return polygonBoolean(polyClip, closedLine, 'and');
 };
 
-const drawHatchedPoly = (context, posX, posY, angle, space, sideLength = 2) => {
-  let rect = createPolygon(6, sideLength, [posX, posY]);
+const drawHatchedPoly = (context, posX, posY, angle, space) => {
+  let rect = createPolygon(6, 2, [posX, posY]);
   let hatched = hatch2(rect, angle, space);
   for (let i = 0; i < hatched.length; i++) {
     let x = null;
@@ -164,6 +166,7 @@ const drawHatchedPoly = (context, posX, posY, angle, space, sideLength = 2) => {
 };
 
 const sketch = (context) => {
+
   let margin = 0.2;
   let elementWidth = 2;
   let elementHeight = 1.8;
@@ -186,18 +189,26 @@ const sketch = (context) => {
   }
 
   return ({ context, width, height, units }) => {
-    // reset svgFile at each render
-    svgFile = new penplot.SvgFile();
-
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
     let posX = marginLeft + elementWidth / 4;
     let posY = marginTop  + elementHeight / 4;
 
-    drawHatchedPoly(context, 13,17, 12.3, 0.45, 14);
-    svgFile.newPath();
-    drawHatchedPoly(context, 16,25, 54.8, 0.85, 14);
+    for (let r = 0; r < rows; r++) {
+      if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
+    	for (let i = 0; i < columns; i++) {
+        
+        //drawSquare(context, posX - elementWidth /2, posY - elementHeight/2 + o[r][i][1], elementWidth, o[r][i][0]);
+        
+        //drawPolygon(context, createPolygon(6, 2, [posX,posY]));
+        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
+
+    		posX = posX + (elementWidth) + margin;
+    	}
+    	posX = marginLeft + elementWidth / 4;
+    	posY = posY + elementHeight + margin;
+    }
 
     return [
       // Export PNG as first layer

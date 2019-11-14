@@ -2,7 +2,7 @@
 
 const canvasSketch = require('canvas-sketch');
 const penplot = require('./utils/penplot');
-const utils = require('./utils/utils');
+const utils = require('./utils/random');
 const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();

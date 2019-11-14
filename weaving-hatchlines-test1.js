@@ -1,9 +1,9 @@
 // overlapping squares with hatching
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 let mainContext = null;
@@ -29,7 +29,7 @@ const drawRibbonSegment = (start, end, diffX, diffY, nrOfLines) => {
     let diffVector = poly.point(diffX * index, diffY * index);
     let line = poly.toLine(poly.movePoint(start, diffVector), poly.movePoint(end, diffVector));
 
-    poly.drawLineOnCanvas(mainContext, line);
+    poly.drawLineOnCanvas(line);
 
     lines.push(line);
   }
@@ -116,6 +116,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);

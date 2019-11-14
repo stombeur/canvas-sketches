@@ -1,9 +1,9 @@
 // overlapping squares with hatching
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 let mainContext = null;
@@ -18,25 +18,7 @@ const settings = {
     units: 'cm',
 };
 
-const splitRibbon = (toSplit, splitter) => {
 
-
-}
-
-// const drawRibbonSegment = (start, end, diffX, diffY, nrOfLines) => {
-//   let lines = [];
-
-//   for (let index = 0; index < nrOfLines; index++) {
-//     let diffVector = poly.point(diffX * index, diffY * index);
-//     let line = poly.toLine(poly.movePoint(start, diffVector), poly.movePoint(end, diffVector));
-
-//     //poly.drawLineOnCanvas(line);
-
-//     lines.push(line);
-//   }
-
-//   return lines;
-// }
 
 const drawRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines, slot) => {
     let x = start.x;
@@ -120,18 +102,6 @@ const sketch = (context) => {
 
 
 
-    // let o = [];
-    // for (let r = 0; r < rows; r++) {
-    //   o[r] = [];
-    //   for (let i = 0; i < columns; i++) {
-    //     let rot = utils.random(-90, 90);
-    //     let space = utils.random(0.21,0.27);
-    //     let skew1 = utils.random(-0.21,0.17);
-    //     let skew2 = utils.random(-0.21,0.17);
-    //     o[r].push([rot,space, skew1, skew2]);
-    //   }
-    // }
-
     return ({ context, width, height, units }) => {
         svgFile = new penplot.SvgFile();
         lines = [];
@@ -144,6 +114,7 @@ const sketch = (context) => {
         context.lineWidth = 0.01;
         mainContext = context;
 
+        
         let horMargin = 3.5;
         let vertMargin = 3.5;
         let drawingHeight = height - (vertMargin * 2);
@@ -152,18 +123,17 @@ const sketch = (context) => {
         let posXRight = drawingWidth + horMargin;
         let posY = vertMargin - drawingWidth;
         let bb = { xmin: 4, ymin: 4, xmax: width - 4, ymax: height - 4 };
-
+        let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
+    
+        let slotsLeft = utils.shuffle([...Array(nrOfRibbons).keys()]);//[23, 26, 32, 44, 17, 28, 41];//[...Array(nrOfRibbons).keys()];
+        let slotsRight = utils.shuffle([...Array(nrOfRibbons).keys()]);//[17, 23, 15, 34, 12, 32, 10, 27];//[...Array(nrOfRibbons).keys()];
 
 
         let nrOfLines = 4;
-        let nrOfRibbons = Math.floor(drawingHeight + drawingWidth) + 1;
+       
         let ribbonWidth = 1;
         let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth, 2));
         let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth, 2));
-
-
-        let slotsLeft = utils.shuffle([...Array(nrOfRibbons).keys()]);//[23, 26, 32, 44, 17, 28, 41];//[...Array(nrOfRibbons).keys()];
-        let slotsRight = utils.shuffle([...Array(nrOfRibbons).keys()]);//[17, 23, 15, 34, 12, 32, 10, 27];//[...Array(nrOfRibbons).keys()];
 
         // slots = utils.shuffle(slots);
 

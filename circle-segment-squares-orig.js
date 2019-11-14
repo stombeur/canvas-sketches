@@ -1,6 +1,6 @@
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
 
 const svgFile = new penplot.SvgFile();
 

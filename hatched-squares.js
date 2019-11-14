@@ -1,19 +1,18 @@
-// hatched hexagons
+// directional hatching in squares
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
+const { polylinesToSVG } = require('canvas-sketch-util/penplot');
+const utils = require('./utils/random');
 const polygonBoolean = require('2d-polygon-boolean');
 
-const svgFile = new penplot.SvgFile();
-
+const lines = [];
 
 const settings = {
-  dimensions: 'A3',
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
-  units: 'cm',
+  units: 'cm'
 };
 
 const rotate = (point, center, angle) => {
@@ -37,59 +36,6 @@ const rotatePoly = (polyLine, center, angle) => {
   });
 };
 
-const createPolygon = (nrOfSides, sideLength, centerPoint) => {
-  let centerAngle = Math.PI * 2 / nrOfSides;
-  let b = Math.sin(centerAngle/2) * sideLength / 2 / Math.cos(centerAngle/2);
-  let x1 = centerPoint[0] - sideLength / 2;
-  let y1 = centerPoint[1] + b;
-
-  let poly = [];
-  poly.push([x1, y1]);
-  for (let i = 1; i < nrOfSides; i++) {
-    poly.push(rotate([x1, y1], centerPoint, 360 / nrOfSides * i))
-  }
- 
-  return poly;
-}
-
-function drawPolygon(context, poly) {
-  context.beginPath();
-
-  context.strokeStyle = 'black';
-  context.lineWidth = 0.01;
-  context.lineCap = 'square';
-  context.lineJoin = 'miter';
-
-  context.moveTo(poly[0][0], poly[0][1]);
-
-  poly.map(function(point) {
-    context.lineTo(point[0], point[1]);
-  });
-
-  context.lineTo(poly[0][0], poly[0][1]);
-
-  context.stroke();
-
-  svgFile.addLine(poly);
-}
-
-function drawLine(context, poly) {
-  context.beginPath();
-
-  context.strokeStyle = 'black';
-  context.lineWidth = 0.01;
-  context.lineCap = 'square';
-  context.lineJoin = 'miter';
-
-  context.moveTo(poly[0][0], poly[0][1]);
-
-  context.lineTo(poly[1][0], poly[1][1]);
-
-  context.stroke();
-
-  svgFile.addLine(poly);
-}
-
 const boundingBox = (polyLine, padding = 0) => {
   let left = Number.MAX_VALUE,
     top = Number.MAX_VALUE,
@@ -111,8 +57,24 @@ const boundingBox = (polyLine, padding = 0) => {
   ];
 };
 
-const hatch2 = (poly, angle, spacing = 0.1) => {
-  let rectangle = boundingBox(poly);
+const hatch = (rectangle, spacing = 0.1) => {
+  let x = rectangle[0][0];
+  let y = rectangle[0][1];
+  let height = rectangle[2][1] - y;
+  let width = rectangle[2][0] - x;
+  console.log({ x, y, width, height });
+
+  let numLines = Math.floor(height / spacing);
+  let result = [];
+
+  for (let i = 0; i <= numLines; i++) {
+    let line = [[x, y + i * spacing], [x + width, y + i * spacing]];
+    result.push(line);
+  }
+  return result;
+};
+
+const hatch2 = (rectangle, angle, spacing = 0.1) => {
   //console.log(rectangle);
   let x = rectangle[0][0];
   let y = rectangle[0][1];
@@ -149,9 +111,57 @@ const clip = (line, polyClip) => {
   return polygonBoolean(polyClip, closedLine, 'and');
 };
 
-const drawHatchedPoly = (context, posX, posY, angle, space) => {
-  let rect = createPolygon(6, 2, [posX, posY]);
-  let hatched = hatch2(rect, angle, space);
+function createPolygon(originX, originY, width, height) {
+  let result = [];
+  result.push([originX, originY]);
+  result.push([originX + width, originY]);
+  result.push([originX + width, originY + height]);
+  result.push([originX, originY + height]);
+
+  return result;
+}
+
+function drawPolygon(context, poly) {
+  context.beginPath();
+
+  context.strokeStyle = 'black';
+  context.lineWidth = 0.01;
+  context.lineCap = 'square';
+  context.lineJoin = 'miter';
+
+  context.moveTo(poly[0][0], poly[0][1]);
+
+  poly.map(function(point) {
+    context.lineTo(point[0], point[1]);
+  });
+
+  context.lineTo(poly[0][0], poly[0][1]);
+
+  context.stroke();
+
+  lines.push(poly);
+}
+
+function drawLine(context, poly) {
+  context.beginPath();
+
+  context.strokeStyle = 'black';
+  context.lineWidth = 0.01;
+  context.lineCap = 'square';
+  context.lineJoin = 'miter';
+
+  context.moveTo(poly[0][0], poly[0][1]);
+
+  context.lineTo(poly[1][0], poly[1][1]);
+
+  context.stroke();
+
+  lines.push(poly);
+}
+
+const drawHatchedPoly = (context, posX, posY, angle) => {
+  let rect = createPolygon(posX, posY, 1.5, 1.5);
+  let hatched = hatch2(rect, angle);
   for (let i = 0; i < hatched.length; i++) {
     let x = null;
     try {
@@ -165,26 +175,24 @@ const drawHatchedPoly = (context, posX, posY, angle, space) => {
   }
 };
 
-const sketch = (context) => {
-
-  let margin = 0.2;
-  let elementWidth = 2;
-  let elementHeight = 1.8;
+const sketch = context => {
+  let margin = 0.05;
+  let elementWidth = 1.5;
+  let elementHeight = 1.5;
   let columns = 6;
-  let rows = 12;
-  
-  let drawingWidth = (columns * (elementWidth + margin)) - margin;
-  let drawingHeight = (rows * (elementHeight + margin)) - margin;
+  let rows = 10;
+
+  let drawingWidth = columns * (elementWidth + margin) - margin;
+  let drawingHeight = rows * (elementHeight + margin) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
-  
+
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
       let rot = utils.random(-89, 89);
-      let space = utils.random(0.1,0.30);
-      o[r].push([rot,space]);
+      o[r].push(rot);
     }
   }
 
@@ -192,36 +200,34 @@ const sketch = (context) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
-    let posX = marginLeft + elementWidth / 4;
-    let posY = marginTop  + elementHeight / 4;
+    let posX = marginLeft;
+    let posY = marginTop;
+
+    //drawHatchedPoly(context, posX, posY, 15);
 
     for (let r = 0; r < rows; r++) {
-      if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
     	for (let i = 0; i < columns; i++) {
-        
-        //drawSquare(context, posX - elementWidth /2, posY - elementHeight/2 + o[r][i][1], elementWidth, o[r][i][0]);
-        
-        //drawPolygon(context, createPolygon(6, 2, [posX,posY]));
-        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
-
+    		drawHatchedPoly(context, posX, posY, o[r][i]);
     		posX = posX + (elementWidth) + margin;
     	}
-    	posX = marginLeft + elementWidth / 4;
+    	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
+
+    
+
 
     return [
       // Export PNG as first layer
       context.canvas,
       // Export SVG for pen plotter as second layer
       {
-        data: svgFile.toSvg({
+        data: polylinesToSVG(lines, {
           width,
           height,
           units
         }),
-        extension: '.svg',
-        //file: 'c:\\tmp\\saveme.svg'
+        extension: '.svg'
       }
     ];
   };

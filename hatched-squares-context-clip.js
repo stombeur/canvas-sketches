@@ -1,6 +1,5 @@
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
-const utils = require('./utils');
 
 // Grab P5.js from npm
 const p5 = require('p5');

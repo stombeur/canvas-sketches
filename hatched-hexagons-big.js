@@ -1,18 +1,17 @@
-// directional hatching in squares
-
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
-const utils = require('./utils');
+const utils = require('./utils/random');
 const polygonBoolean = require('2d-polygon-boolean');
+
 
 const lines = [];
 
 const settings = {
-  dimensions: 'A4',
+  dimensions: 'A3',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
-  units: 'cm'
+  units: 'cm',
 };
 
 const rotate = (point, center, angle) => {
@@ -36,89 +35,19 @@ const rotatePoly = (polyLine, center, angle) => {
   });
 };
 
-const boundingBox = (polyLine, padding = 0) => {
-  let left = Number.MAX_VALUE,
-    top = Number.MAX_VALUE,
-    right = 0,
-    bottom = 0;
+const createPolygon = (nrOfSides, sideLength, centerPoint) => {
+  let centerAngle = Math.PI * 2 / nrOfSides;
+  let b = Math.sin(centerAngle/2) * sideLength / 2 / Math.cos(centerAngle/2);
+  let x1 = centerPoint[0] - sideLength / 2;
+  let y1 = centerPoint[1] + b;
 
-  polyLine.map(p => {
-    left = Math.min(p[0], left);
-    top = Math.min(p[1], top);
-    right = Math.max(p[0], right);
-    bottom = Math.max(p[1], bottom);
-  });
-
-  return [
-    [left - padding, top - padding],
-    [right + padding, top - padding],
-    [right + padding, bottom + padding],
-    [left - padding, bottom + padding]
-  ];
-};
-
-const hatch = (rectangle, spacing = 0.1) => {
-  let x = rectangle[0][0];
-  let y = rectangle[0][1];
-  let height = rectangle[2][1] - y;
-  let width = rectangle[2][0] - x;
-  console.log({ x, y, width, height });
-
-  let numLines = Math.floor(height / spacing);
-  let result = [];
-
-  for (let i = 0; i <= numLines; i++) {
-    let line = [[x, y + i * spacing], [x + width, y + i * spacing]];
-    result.push(line);
+  let poly = [];
+  poly.push([x1, y1]);
+  for (let i = 1; i < nrOfSides; i++) {
+    poly.push(rotate([x1, y1], centerPoint, 360 / nrOfSides * i))
   }
-  return result;
-};
-
-const hatch2 = (rectangle, angle, spacing = 0.1) => {
-  //console.log(rectangle);
-  let x = rectangle[0][0];
-  let y = rectangle[0][1];
-  let height = rectangle[2][1] - y;
-  let width = rectangle[2][0] - x;
-  //console.log({x,y,height, width});
-  let rotatedRectangle = rotatePoly(
-    rectangle,
-    [x + width / 2, y + width / 2],
-    angle
-  );
-  //console.log(rotatedRectangle);
-  let box = boundingBox(rotatedRectangle, 0);
-
-  let x2 = box[0][0];
-  let y2 = box[0][1];
-  let height2 = box[2][1] - y2;
-  let width2 = box[2][0] - x2;
-
-  let numLines = Math.floor(height2 / spacing);
-  let result = [];
-
-  for (let i = 0; i <= numLines; i++) {
-    let line = [[x2, y2 + i * spacing], [x2 + width2, y2 + i * spacing]];
-    let rotatedLine = rotatePoly(line, [x + width / 2, y + width / 2], angle);
-    result.push(rotatedLine);
-  }
-  return result;
-};
-
-const clip = (line, polyClip) => {
-  let closedLine = [line[0], line[1], line[1], line[0]];
-  //console.log(closedLine);
-  return polygonBoolean(polyClip, closedLine, 'and');
-};
-
-function createPolygon(originX, originY, width, height) {
-  let result = [];
-  result.push([originX, originY]);
-  result.push([originX + width, originY]);
-  result.push([originX + width, originY + height]);
-  result.push([originX, originY + height]);
-
-  return result;
+ 
+  return poly;
 }
 
 function drawPolygon(context, poly) {
@@ -159,9 +88,68 @@ function drawLine(context, poly) {
   lines.push(poly);
 }
 
-const drawHatchedPoly = (context, posX, posY, angle) => {
-  let rect = createPolygon(posX, posY, 1.5, 1.5);
-  let hatched = hatch2(rect, angle);
+const boundingBox = (polyLine, padding = 0) => {
+  let left = Number.MAX_VALUE,
+    top = Number.MAX_VALUE,
+    right = 0,
+    bottom = 0;
+
+  polyLine.map(p => {
+    left = Math.min(p[0], left);
+    top = Math.min(p[1], top);
+    right = Math.max(p[0], right);
+    bottom = Math.max(p[1], bottom);
+  });
+
+  return [
+    [left - padding, top - padding],
+    [right + padding, top - padding],
+    [right + padding, bottom + padding],
+    [left - padding, bottom + padding]
+  ];
+};
+
+const hatch2 = (poly, angle, spacing = 0.1) => {
+  let rectangle = boundingBox(poly);
+  //console.log(rectangle);
+  let x = rectangle[0][0];
+  let y = rectangle[0][1];
+  let height = rectangle[2][1] - y;
+  let width = rectangle[2][0] - x;
+  //console.log({x,y,height, width});
+  let rotatedRectangle = rotatePoly(
+    rectangle,
+    [x + width / 2, y + width / 2],
+    angle
+  );
+  //console.log(rotatedRectangle);
+  let box = boundingBox(rotatedRectangle, 0);
+
+  let x2 = box[0][0];
+  let y2 = box[0][1];
+  let height2 = box[2][1] - y2;
+  let width2 = box[2][0] - x2;
+
+  let numLines = Math.floor(height2 / spacing);
+  let result = [];
+
+  for (let i = 0; i <= numLines; i++) {
+    let line = [[x2, y2 + i * spacing], [x2 + width2, y2 + i * spacing]];
+    let rotatedLine = rotatePoly(line, [x + width / 2, y + width / 2], angle);
+    result.push(rotatedLine);
+  }
+  return result;
+};
+
+const clip = (line, polyClip) => {
+  let closedLine = [line[0], line[1], line[1], line[0]];
+  //console.log(closedLine);
+  return polygonBoolean(polyClip, closedLine, 'and');
+};
+
+const drawHatchedPoly = (context, posX, posY, angle, space, sideLength = 2) => {
+  let rect = createPolygon(6, sideLength, [posX, posY]);
+  let hatched = hatch2(rect, angle, space);
   for (let i = 0; i < hatched.length; i++) {
     let x = null;
     try {
@@ -175,24 +163,26 @@ const drawHatchedPoly = (context, posX, posY, angle) => {
   }
 };
 
-const sketch = context => {
-  let margin = 0.05;
-  let elementWidth = 1.5;
-  let elementHeight = 1.5;
-  let columns = 6;
-  let rows = 10;
+const sketch = (context) => {
 
-  let drawingWidth = columns * (elementWidth + margin) - margin;
-  let drawingHeight = rows * (elementHeight + margin) - margin;
+  let margin = 0.2;
+  let elementWidth = 2;
+  let elementHeight = 1.8;
+  let columns = 6;
+  let rows = 12;
+  
+  let drawingWidth = (columns * (elementWidth + margin)) - margin;
+  let drawingHeight = (rows * (elementHeight + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
-
+  
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
       let rot = utils.random(-89, 89);
-      o[r].push(rot);
+      let space = utils.random(0.1,0.30);
+      o[r].push([rot,space]);
     }
   }
 
@@ -200,22 +190,11 @@ const sketch = context => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
 
-    let posX = marginLeft;
-    let posY = marginTop;
+    let posX = marginLeft + elementWidth / 4;
+    let posY = marginTop  + elementHeight / 4;
 
-    //drawHatchedPoly(context, posX, posY, 15);
-
-    for (let r = 0; r < rows; r++) {
-    	for (let i = 0; i < columns; i++) {
-    		drawHatchedPoly(context, posX, posY, o[r][i]);
-    		posX = posX + (elementWidth) + margin;
-    	}
-    	posX = marginLeft;
-    	posY = posY + elementHeight + margin;
-    }
-
-    
-
+    drawHatchedPoly(context, 13,17, 12.3, 0.45, 14);
+    drawHatchedPoly(context, 16,25, 54.8, 0.85, 14);
 
     return [
       // Export PNG as first layer
@@ -227,7 +206,8 @@ const sketch = context => {
           height,
           units
         }),
-        extension: '.svg'
+        extension: '.svg',
+        //file: 'c:\\tmp\\saveme.svg'
       }
     ];
   };
