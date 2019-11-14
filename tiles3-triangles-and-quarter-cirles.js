@@ -1,9 +1,9 @@
 // tiles with quarter-circle
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./utils/penplot');
-const utils = require('./utils/utils');
-const poly = require('./utils/poly');
+const penplot = require('./penplot');
+const utils = require('./utils');
+const poly = require('./poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -11,7 +11,7 @@ let lines = [];
 let arcs = [];
 
 const settings = {
-  dimensions: [24,31.5],
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -20,10 +20,10 @@ const settings = {
 
 const sketch = context => {
   let margin = 0;
-  let elementWidth = 2;
-  let elementHeight = 2;
+  let elementWidth = 3;
+  let elementHeight = 3;
   let columns = 6;
-  let rows = 8;
+  let rows = 6;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
@@ -35,13 +35,15 @@ const sketch = context => {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
       let corner = utils.getRandomInt(4, 0);
+      let isRound = utils.getRandomInt(2, 0);
       //console.log(corner);
       o[r].push({
         corner,
         draw01: true,
         draw12: true,
         draw23: true,
-        draw30: true
+        draw30: true,
+        isRound:false
       });
     }
   }
@@ -102,6 +104,8 @@ const sketch = context => {
 
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    lines = [];
+    arcs = [];
     poly.init(context);
 
     const drawCircle = (cx, cy, radius) => {
@@ -144,6 +148,10 @@ const sketch = context => {
       let cx = x + padding, // case 0
         cy = y + padding,
         startAngle = 0,
+        triangleX1 = -1,
+        triangleY1 = 0,
+        triangleX2 = 0,
+        triangleY2 = -1,
         p0 = zeroCorner,
         p1 = oneCorner,
         p2 = threeCorner;
@@ -159,6 +167,10 @@ const sketch = context => {
           cx = x + side - padding;
           cy = y + padding;
           startAngle = 90;
+          triangleX1 = 1;
+          triangleY1 = 0;
+          triangleX2 =0;
+          triangleY2 = -1;
           p0 = oneCorner;
           p1 = zeroCorner;
           p2 = twoCorner;
@@ -171,6 +183,10 @@ const sketch = context => {
           cx = x + side - padding;
           cy = y + side - padding;
           startAngle = 180;
+          triangleX2 = 1;
+          triangleY2 = 0;
+          triangleX1 = 0;
+          triangleY1 = 1;
           p0 = twoCorner;
           p1 = oneCorner;
           p2 = threeCorner;
@@ -183,6 +199,10 @@ const sketch = context => {
           cx = x + padding;
           cy = y + side - padding;
           startAngle = 270;
+          triangleX1 = -1;
+          triangleY1 = 0;
+          triangleX2 = 0;
+          triangleY2 = 1;
           p0 = threeCorner;
           p1 = twoCorner;
           p2 = zeroCorner;
@@ -209,15 +229,28 @@ const sketch = context => {
       let endAngle = startAngle + 90;
 
       let radius = side - padding * 2;
-      let divide = 5;
+      let divide = 10;
       let step = radius / divide;
+      let triangleLine = [p1,p2];
 
       for (let s = 1; s <= divide; s++) {
-        drawArc(cx, cy, s * step, startAngle, endAngle);                                            
-        if (s < divide) {
-          arcs.push({ cx, cy, radius: s * step, startAngle, endAngle });
-        } else {
-          arcs.push({ cx, cy, radius: s * step, startAngle, endAngle });
+        if (rnd.isRound) {
+          drawArc(cx, cy, s * step, startAngle, endAngle);
+          if (s < divide) {
+            arcs.push({ cx, cy, radius: s * step, startAngle, endAngle });
+          } else {
+            arcs.push({ cx, cy, radius: s * step, startAngle, endAngle });
+          }
+        }
+        
+      }
+      for (let m = 0; m<divide; m++) {
+        if (!rnd.isRound) {
+          let diff = m * step;
+          let pStart = [[p1[0] + triangleX1 * diff],[p1[1] + triangleY1 * diff]];
+          let pEnd = [[p2[0] + triangleX2 * diff],[p2[1] + triangleY2 * diff]];
+          poly.drawLineOnCanvas([pStart,pEnd]);
+          
         }
       }
     };
@@ -246,10 +279,6 @@ const sketch = context => {
       svgFile.addArc(a.cx, a.cy, a.radius, a.startAngle, a.endAngle);
     });
     svgFile.newPath();
-
-    // let box = [[marginLeft,marginTop],[marginLeft, height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,marginTop]];
-    // poly.drawPolygonOnCanvas(context, box);
-    // svgFile.addLine(box, true);
 
     return [
       // Export PNG as first layer
