@@ -1,9 +1,9 @@
 // tiles with quarter-circle
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/utils');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 

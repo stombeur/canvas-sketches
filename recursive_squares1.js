@@ -1,9 +1,9 @@
-// 
+// draw iterations of smaller squares in 4 corners of a grid
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/utils');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 let mainContext = null;
@@ -16,43 +16,33 @@ const settings = {
   units: 'cm',
 };
 
-const createRandomDashedLine = (x, y, angle, length, segments, clip) => {
-  // let q = [[x, y], poly.rotatePoint([x+length, y], [x,y], angle)];
-  // // console.log(q);
-  // // console.log(clip);
-  // let clippedLine;
-  // try {
-  //   clippedLine = poly.clip(q, clip);
-  //   console.log(clippedLine);
-  // }
-  // catch {}
-  // if (!clippedLine) return;
+// const createRandomDashedLine = (x, y, angle, length, segments, clip) => {
 
-  let polyline = [];
-  let currentX = x;//clippedLine[0][0],
-      currentY = y;//clippedLine[0][1];
-  polyline.push([currentX, currentY]);
+//   let polyline = [];
+//   let currentX = x;//clippedLine[0][0],
+//       currentY = y;//clippedLine[0][1];
+//   polyline.push([currentX, currentY]);
 
-  for (let index = 0; index < segments; index++) {
-    let len = utils.random(0.5, (length / segments) * 2);
-    let point = [currentX + len, currentY];
-    let rotPoint = poly.rotatePoint(point, [currentX, currentY], angle);
-    polyline.push(rotPoint);
-    currentX = rotPoint[0];
-    currentY = rotPoint[1];
-  }
+//   for (let index = 0; index < segments; index++) {
+//     let len = utils.random(0.5, (length / segments) * 2);
+//     let point = [currentX + len, currentY];
+//     let rotPoint = poly.rotatePoint(point, [currentX, currentY], angle);
+//     polyline.push(rotPoint);
+//     currentX = rotPoint[0];
+//     currentY = rotPoint[1];
+//   }
 
-  //console.log(polyline);
+//   //console.log(polyline);
 
-  let result = [];
-  for (let index = 0; index < polyline.length -1; index++) {
-    let seg = [polyline[index], polyline[index+1]];
-    if (index % 2 === 0) {
-      result.push(seg);
-    }
-  }
-  return result;
-}
+//   let result = [];
+//   for (let index = 0; index < polyline.length -1; index++) {
+//     let seg = [polyline[index], polyline[index+1]];
+//     if (index % 2 === 0) {
+//       result.push(seg);
+//     }
+//   }
+//   return result;
+// }
 
 const drawSquare = (origX, origY, side, height = side) => {
   let squarePoly = poly.createSquarePolygon(origX, origY, side, height);
@@ -162,30 +152,6 @@ const sketch = (context) => {
 
     let posX = marginLeft;
     let posY = marginTop;
-    // let clip = [[posX, posY],[posX+drawingWidth, posY],[posX+drawingWidth, posY+drawingHeight],[posX, posY+drawingHeight]];
-
-    // let a = drawingHeight / 20;
-    // for (let index = 0; index < 60; index++) {
-    //     let x = 0;
-    //     let y = -drawingHeight + (index * a);
-
-    //     let dash = createRandomDashedLine(x, y, 50, 40, 20, poly.createSquarePolygon(posX, posY, drawingWidth, drawingHeight));
-
-    //     dash.forEach(element => {
-    //       try {
-    //         x = poly.clip(element, clip);
-    //       } catch {}
-    //       if (x) {
-    //         x.map(l => {
-    //           poly.drawLineOnCanvas(mainContext, [l[0], l[1]]);
-    //           svgFile.addLine([l[0], l[1]]);
-    //           });
-           
-    //       }
-          
-    //     });
-    // }
-    // svgFile.newPath();
 
     for (let row = 0; row < rows; row++) {
     	for (let col = 0; col < columns; col++) {

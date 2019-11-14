@@ -2,9 +2,11 @@
 // p5, but only for sin and radians
 // plotting, yay!
 
+// randomization based on perlin noise
+
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
-const utils = require('./utils');
+const utils = require('./utils/random');
 const n = require('./utils/perlin');
 
 const noise = n.noise;

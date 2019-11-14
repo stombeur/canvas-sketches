@@ -1,9 +1,10 @@
-// test for circle-line intersection
+// hatched/skewed circles
+// multi-page side-by-side
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 let svgFile2 = new penplot.SvgFile();
@@ -46,6 +47,7 @@ const sketch = (context) => {
     svgFile = new penplot.SvgFile();
     svgFile2 = new penplot.SvgFile();
     svgFile3 = new penplot.SvgFile();
+    poly.init(context);
 
     let width = 29.7,
         height = 42.0;
@@ -116,7 +118,7 @@ const sketch = (context) => {
       x.forEach(l => { 
         let clippedLine = poly.clipLineToBB(l, bb);
         if (clippedLine) { 
-          poly.drawLineOnCanvas(context, clippedLine);
+          poly.drawLineOnCanvas(clippedLine);
           let p1 = [clippedLine[0][0] || clippedLine[0].x, clippedLine[0][1] || clippedLine[0].y];
           let p2 = [clippedLine[1][0] || clippedLine[1].x, clippedLine[1][1] || clippedLine[1].y];
           svgFile.addLine([p1, p2]);
@@ -124,7 +126,7 @@ const sketch = (context) => {
 
          let clippedLine2 = poly.clipLineToBB(l, bb2);
         if (clippedLine2) { 
-          poly.drawLineOnCanvas(context, clippedLine2);
+          poly.drawLineOnCanvas( clippedLine2);
           let p1 = [clippedLine2[0][0] - width || clippedLine2[0].x - width, clippedLine2[0][1] || clippedLine2[0].y];
           let p2 = [clippedLine2[1][0] - width || clippedLine2[1].x - width, clippedLine2[1][1] || clippedLine2[1].y];
           svgFile2.addLine([p1, p2]);
@@ -132,7 +134,7 @@ const sketch = (context) => {
 
           clippedLine = poly.clipLineToBB(l, bb3);
         if (clippedLine) { 
-          poly.drawLineOnCanvas(context, clippedLine);
+          poly.drawLineOnCanvas( clippedLine);
           let p1 = [clippedLine[0][0] - width*2 || clippedLine[0].x - width*2, clippedLine[0][1] || clippedLine[0].y];
           let p2 = [clippedLine[1][0] - width*2 || clippedLine[1].x - width*2, clippedLine[1][1] || clippedLine[1].y];
           svgFile3.addLine([p1, p2]);
