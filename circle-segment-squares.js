@@ -3,9 +3,9 @@
 // extra layer of hatching
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -87,10 +87,12 @@ const sketch = (context) => {
     	posY = posY + elementHeight + margin;
     }
 
+    // uncomment for hatched background
+    // poly.init(context);
     // let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
     // let hatchLines = poly.hatchPolygon(bounds, 30, 0.1);
     // hatchLines.map(l => {
-    //     poly.drawLineOnCanvas(context, l);
+    //     poly.drawLineOnCanvas( l);
     //     svgFile.addLine(l);
     // });
 
