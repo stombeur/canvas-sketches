@@ -73,7 +73,7 @@ const sketch = (context) => {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
       let w = r * c;
-      let nrOfArms = Math.ceil(w/steps);
+      let nrOfArms = Math.ceil(w/steps) + 1;
       o[r].push(utils.getBitMask(nrOfArms));
     }
   }

@@ -34,9 +34,9 @@ const sketch = (context) => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
-      let rotate = utils.getRandomInt(360,0);
-      let skip = utils.getRandomInt(100)>100;
-      o[r].push({rotate, skip});
+      let rotate = utils.getRandomInt(180,0);
+      let steps = utils.getRandomInt(40, 20);
+      o[r].push({rotate, steps});
     }
   }
   
@@ -49,32 +49,34 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.02;
 
-    const drawCircle = (cx, cy, radius) => {
-  
-        context.beginPath();
-        context.arc(cx, cy, radius, 0, Math.PI * 2);
-        context.stroke();
-      
-        svgFile.addCircle(cx, cy, radius);
-    }
-    
-    const drawCircleWithFan = (cx, cy, r, nrOfLines, rotate, overlap = 0) => {
+    const drawZigZag2 = (cx, cy, radius, steps, rotate) => {
 
-      let radius = r + overlap;
-      let step = 180 / nrOfLines;
-      let fulcrum = [cx - radius, cy];
+      if (!Array.isArray(steps)) steps = [steps];
 
-      let startLine = [...[fulcrum], [cx - radius, cy - 2*radius]];
-      for (let i = 1; i < nrOfLines; i++) {
-        let angle = step * i;
-        let line = poly.rotatePolygon([...startLine], fulcrum, angle);
-        let clippedLine = poly.clipLineToCircle(line, [cx,cy], radius);
- 
-        if (clippedLine[0]) {
-          let rotatedLine = poly.rotatePolygon(clippedLine, [cx,cy], rotate);
-          svgFile.addLine(rotatedLine, false);
-          poly.drawLineOnCanvas(rotatedLine);
+      let start = [cx, cy + radius];
+      let center = [cx, cy];
+      let angleSegment = 180 / steps.length;
+      start = poly.rotatePoint(start, center, angleSegment / steps[0] / 2 + rotate);
+      let result = [];
+      let left = right = start;
+
+      for (let k = 0; k < steps.length; k++) {
+        const nr = steps[k];
+        const angle = angleSegment / nr;
+
+        for (let i = 0; i < nr; i++) {
+          right = poly.rotatePoint(right, center, -angle);
+          left = poly.rotatePoint(left, center, angle);
+          result.push(right);
+          result.push(left);
         }
+      }
+      
+      let p = result[0];
+
+      for (let i = 1; i < result.length; i++) {
+        poly.drawLineOnCanvas([p,result[i]]);
+        p = result[i];
       }
     }
 
@@ -82,15 +84,12 @@ const sketch = (context) => {
     let posX = marginLeft;
     let posY = marginTop;
 
-    let divide = 25;
-    let step = elementHeight / divide;
-
     for (let r = 0; r < rows; r++) {
     	for (let c = 0; c < columns; c++) {
           //draw element here
           let center = {x:posX+elementWidth/2, y:posY+elementHeight/2};
-          if (!o[r][c].skip){drawCircleWithFan(center.x, center.y, elementWidth/2, 40, o[r][c].rotate, 0.5); }
-
+          drawZigZag2(center.x, center.y, elementWidth/2, [1,3,5,7,5,3,1], o[r][c].rotate);
+        
           //advance grid
     	    posX = posX + (elementWidth) + margin;
         }
@@ -99,7 +98,6 @@ const sketch = (context) => {
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
-    
 
     return [
       // Export PNG as first layer

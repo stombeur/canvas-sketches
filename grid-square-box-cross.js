@@ -54,12 +54,12 @@ const sketch = (context) => {
 
 
   let margin = 0.5;
-  let asteriskWidth = 1;
+  let elementWidth = 1;
   let columns = 12;
   let rows = 18;
   
-  let drawingWidth = (columns * (asteriskWidth + margin)) - margin;
-  let drawingHeight = (rows * (asteriskWidth + margin)) - margin;
+  let drawingWidth = (columns * (elementWidth + margin)) - margin;
+  let drawingHeight = (rows * (elementWidth + margin)) - margin;
   let marginLeft = (context.width - drawingWidth) / 2;
   let marginTop = (context.height - drawingHeight) / 2;
   
@@ -80,11 +80,11 @@ const sketch = (context) => {
 
     for (let r = 0; r < rows; r++) {
     	for (let i = 0; i < columns; i++) {
-    		drawSquareLegs(context, posX, posY, asteriskWidth, o[r][i]);
-    		posX = posX + (asteriskWidth) + margin;
+    		drawSquareLegs(context, posX, posY, elementWidth, o[r][i]);
+    		posX = posX + (elementWidth) + margin;
     	}
     	posX = marginLeft;
-    	posY = posY + asteriskWidth + margin;
+    	posY = posY + elementWidth + margin;
     }
 
     return [
