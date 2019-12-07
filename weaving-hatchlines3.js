@@ -11,7 +11,7 @@ let ribbons = [];
 let lines = [];
 
 const settings = {
-    dimensions: [24, 31.5],
+    dimensions: 'A3',
     orientation: 'portrait',
     pixelsPerInch: 300,
     scaleToView: true,
