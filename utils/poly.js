@@ -3,24 +3,42 @@ const lineclip = require('./lineclip');
 
 let context;
 
+/**
+ * set this canvas as the one the rest of the functions work on
+ * @param {Canvas2D} canvas 
+ */
 const init = (canvas) => context = canvas;
 
+/**
+ * create a regular polygon [[x1,y1],[x2,y2], ...]
+ * @param {number} nrOfSides 
+ * @param {number} sideLength 
+ * @param {[x,y] | {x,y}} centerPoint 
+ */
 const createPolygon = (nrOfSides, sideLength, centerPoint) => {
+    if (!centerPoint.x) { centerPoint = point(centerPoint[0], centerPoint[1]); }
+
     let centerAngle = Math.PI * 2 / nrOfSides;
     let b = Math.sin(centerAngle/2) * sideLength / 2 / Math.cos(centerAngle/2);
-    let x1 = centerPoint[0] - sideLength / 2;
-    let y1 = centerPoint[1] + b;
+    let x1 = centerPoint.x - sideLength / 2;
+    let y1 = centerPoint.y + b;
 
-    let poly = [];
-    poly.push([x1, y1]);
+    let polygon = [];
+    polygon.push([x1, y1]);
     for (let i = 1; i < nrOfSides; i++) {
-        poly.push(rotate([x1, y1], centerPoint, 360 / nrOfSides * i))
+      polygon.push(rotatePoint([x1, y1], centerPoint, 360 / nrOfSides * i))
     }
 
-    return poly;
+    return polygon;
 }
-
-const createSquarePolygon = (originX, originY, width, height) => {
+/**
+ * create a polygon with 4 sides [[],[],[],[]]
+ * @param {number} originX 
+ * @param {number} originY 
+ * @param {number} width 
+ * @param {number} height 
+ */
+const createSquarePolygon = (originX, originY, width, height = width) => {
     let result = [];
     result.push([originX, originY]);
     result.push([originX + width, originY]);
@@ -98,7 +116,7 @@ const calculateBoundingBox = (polyLine, padding = 0) => {
 };
 
 const rotatePointXY = (p, c, angle) => {
-    if (angle === 0) return point;
+    if (angle === 0) return p;
 
     let radians = (Math.PI / 180) * angle,
         x = p.x,
@@ -112,14 +130,17 @@ const rotatePointXY = (p, c, angle) => {
     return point(nx, ny);
 };
 
-const rotatePoint = (point, center, angle) => {
+const rotatePoint = (p, center, angle) => {
   if (angle === 0) return point;
 
+  if (!p.x) { p = point(p[0],p[1]); }
+  if (!center.x) { center= point(center[0],center[1]); }
+
   let radians = (Math.PI / 180) * angle,
-      x = point.x || point[0],
-      y = point.y || point[1],
-      cx = center.x || center[0],
-      cy = center.y || center[1],
+      x = p.x, // || p[0],
+      y = p.y, // || p[1],
+      cx = center.x, // || center[0],
+      cy = center.y, // || center[1],
       cos = Math.cos(radians),
       sin = Math.sin(radians),
       nx = cos * (x - cx) - sin * (y - cy) + cx,
@@ -175,8 +196,8 @@ const hatchCircle = (center, radius, angle, spacing) => {
   return hatchlines;
 }
 
-const hatchPolygon = (poly, angle, spacing = 0.1) => {
-    let rectangle = calculateBoundingBox(poly);
+const hatchPolygon = (polygon, angle, spacing = 0.1) => {
+    let rectangle = calculateBoundingBox(polygon);
 
     let x = rectangle[0][0];
     let y = rectangle[0][1];
@@ -190,7 +211,7 @@ const hatchPolygon = (poly, angle, spacing = 0.1) => {
     );
     
 
-    let box = calculateBoundingBox(rotatedRectangle, Math.max(height, width));
+    let box = calculateBoundingBox(rotatedRectangle, 0); //Math.max(height, width));
     
     let x2 = box[0][0];
     let y2 = box[0][1];
@@ -210,17 +231,47 @@ const hatchPolygon = (poly, angle, spacing = 0.1) => {
     for (let i = 0; i < hatchlines.length; i++) {
         let x = null;
         try {
-          x = clip(hatchlines[i], poly);
+          x = clip(hatchlines[i], polygon);
         } catch {}
         if (x) {
             x.map(l => {
                 result.push([l[0], l[1]]);
                 });
-          
         }
       }
-    
     return result;
+};
+
+const hatch2 = (polygon, angle, spacing = 0.1) => {
+  let rectangle = poly.calculateBoundingBox(polygon);//boundingBox(polygon);
+  //console.log(rectangle);
+  let x = rectangle[0][0];
+  let y = rectangle[0][1];
+  let height = rectangle[2][1] - y;
+  let width = rectangle[2][0] - x;
+  //console.log({x,y,height, width});
+  let rotatedRectangle = poly.rotatePolygon(
+    rectangle,
+    [x + width / 2, y + width / 2],
+    angle
+  );
+  //console.log(rotatedRectangle);
+  let box = poly.calculateBoundingBox(rotatedRectangle, 0);
+
+  let x2 = box[0][0];
+  let y2 = box[0][1];
+  let height2 = box[2][1] - y2;
+  let width2 = box[2][0] - x2;
+
+  let numLines = Math.floor(height2 / spacing);
+  let result = [];
+
+  for (let i = 0; i <= numLines; i++) {
+    let line = [[x2, y2 + i * spacing], [x2 + width2, y2 + i * spacing]];
+    let rotatedLine = poly.rotatePolygon(line, [x + width / 2, y + width / 2], angle);
+    result.push(rotatedLine);
+  }
+  return result;
 };
   
 const clip = (lineToClip, lineThatClips) => {
@@ -228,8 +279,8 @@ const clip = (lineToClip, lineThatClips) => {
     return polygonBoolean(lineThatClips, closedLine, 'and');
 };
   
-const drawHatchedPolygonOnCanvas = (context, posX, posY, angle, space, sideLength = 2, options = {}) => {
-    let rect = createPolygon(6, sideLength, [posX, posY]);
+const drawHatchedPolygonOnCanvas = (context, posX, posY, angle, space, sides, sideLength = 2, options = {}) => {
+    let rect = createPolygon(sides, sideLength, [posX, posY]);
     let hatched = hatchPolygon(rect, angle, space);
     hatched.map(l => {
         drawLineOnCanvas(context, l, options);
@@ -245,6 +296,22 @@ const drawHatchedPolygonOnCanvas = (context, posX, posY, angle, space, sideLengt
     //     });
     //   }
     // }
+};
+
+const drawHatchedPoly = (posX, posY, angle, space, sideLength = 2) => {
+  let rect = poly.createPolygon(6, sideLength, [posX, posY]);
+  let hatched = hatch2(rect, angle, space);
+  for (let i = 0; i < hatched.length; i++) {
+    let x = null;
+    try {
+      x = clip(hatched[i], rect);
+    } catch {}
+    if (x) {
+      x.map(l => {
+        drawLine([l[0], l[1]]);
+      });
+    }
+  }
 };
 
 const point = (x, y) => {
@@ -440,39 +507,73 @@ const pointIsInCircle = (point, center, radius) => {
   return distanceBetween(point, center) < radius;
 }
 
-module.exports.findIntersection = findIntersection;
-module.exports.isPointBetween = isPointBetween;
-module.exports.findSegmentIntersection = findSegmentIntersection;
-module.exports.isSegmentIntersected = isSegmentIntersected;
-module.exports.point = point;
-module.exports.toLine = toLine;
-module.exports.movePoint = movePoint;
-module.exports.findIntersectionPolygon = findIntersectionPolygon;
+// module.exports.findIntersection = findIntersection;
+// module.exports.isPointBetween = isPointBetween;
+// module.exports.findSegmentIntersection = findSegmentIntersection;
+// module.exports.isSegmentIntersected = isSegmentIntersected;
+// module.exports.point = point;
+// module.exports.toLine = toLine;
+// module.exports.movePoint = movePoint;
+// module.exports.findIntersectionPolygon = findIntersectionPolygon;
 
-module.exports.createPolygon = createPolygon;
-module.exports.drawPolygonOnCanvas = drawPolygonOnCanvas;
-module.exports.calculateBoundingBox = calculateBoundingBox;
-module.exports.rotatePoint = rotatePoint;
-module.exports.rotatePointXY = rotatePointXY;
-module.exports.rotatePolygon = rotatePolygon;
-module.exports.drawLineOnCanvas = drawLineOnCanvas;
+// module.exports.createPolygon = createPolygon;
+// module.exports.drawPolygonOnCanvas = drawPolygonOnCanvas;
+// module.exports.calculateBoundingBox = calculateBoundingBox;
+// module.exports.rotatePoint = rotatePoint;
+// module.exports.rotatePointXY = rotatePointXY;
+// module.exports.rotatePolygon = rotatePolygon;
+// module.exports.drawLineOnCanvas = drawLineOnCanvas;
 
-module.exports.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
-module.exports.clip = clip;
-module.exports.hatchPolygon = hatchPolygon;
-module.exports.createSquarePolygon = createSquarePolygon;
+// module.exports.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
+// module.exports.clip = clip;
+// module.exports.hatchPolygon = hatchPolygon;
+// module.exports.createSquarePolygon = createSquarePolygon;
 
-module.exports.lineEquationFromPoints = lineEquationFromPoints;
-module.exports.findCircleLineIntersections = findCircleLineIntersections;
-module.exports.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
-module.exports.hatchCircle = hatchCircle;
-module.exports.hatchDonut = hatchDonut;
+// module.exports.lineEquationFromPoints = lineEquationFromPoints;
+// module.exports.findCircleLineIntersections = findCircleLineIntersections;
+// module.exports.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
+// module.exports.hatchCircle = hatchCircle;
+// module.exports.hatchDonut = hatchDonut;
 
-module.exports.pointIsInsideBB = pointIsInsideBB;
-module.exports.clipLineToBB = clipLineToBB;
-module.exports.clipLineToCircle = clipLineToCircle;
-module.exports.pointIsInCircle = pointIsInCircle;
-module.exports.drawCircle = drawCircle;
-module.exports.distanceBetween = distanceBetween;
+// module.exports.pointIsInsideBB = pointIsInsideBB;
+// module.exports.clipLineToBB = clipLineToBB;
+// module.exports.clipLineToCircle = clipLineToCircle;
+// module.exports.pointIsInCircle = pointIsInCircle;
+// module.exports.drawCircle = drawCircle;
+// module.exports.distanceBetween = distanceBetween;
 
-module.exports.init = init;
+let poly = init;
+module.exports = poly;
+module.exports.default = poly;
+
+poly.init = init;
+poly.findIntersection = findIntersection;
+poly.isPointBetween = isPointBetween;
+poly.findSegmentIntersection = findSegmentIntersection;
+poly.isSegmentIntersected = isSegmentIntersected;
+poly.point = point;
+poly.toLine = toLine;
+poly.movePoint = movePoint;
+poly.findIntersectionPolygon = findIntersectionPolygon;
+poly.createPolygon = createPolygon;
+poly.drawPolygonOnCanvas = drawPolygonOnCanvas;
+poly.calculateBoundingBox = calculateBoundingBox;
+poly.rotatePoint = rotatePoint;
+poly.rotatePointXY = rotatePointXY;
+poly.rotatePolygon = rotatePolygon;
+poly.drawLineOnCanvas = drawLineOnCanvas;
+poly.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
+poly.clip = clip;
+poly.hatchPolygon = hatchPolygon;
+poly.createSquarePolygon = createSquarePolygon;
+poly.lineEquationFromPoints = lineEquationFromPoints;
+poly.findCircleLineIntersections = findCircleLineIntersections;
+poly.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
+poly.hatchCircle = hatchCircle;
+poly.hatchDonut = hatchDonut;
+poly.pointIsInsideBB = pointIsInsideBB;
+poly.clipLineToBB = clipLineToBB;
+poly.clipLineToCircle = clipLineToCircle;
+poly.pointIsInCircle = pointIsInCircle;
+poly.drawCircle = drawCircle;
+poly.distanceBetween = distanceBetween;

@@ -14,7 +14,11 @@ function cm(value, unit) {
     .to('cm');
 }
 
-// create svg paths from polylines [[x,y], ...]
+/**
+ * create svg paths from polylines [[x,y], ...]
+ * @param {*} polylines 
+ * @param {*} opt 
+ */
 function polyLinesToSvgPaths(polylines, opt = {}) {
   if (!opt.units || typeof opt.units !== 'string')
     throw new TypeError(
@@ -226,11 +230,14 @@ class SvgPath {
   }
 }
 
-// this class makes it easier to handle svg output
-// use in this order:
-// - new SvgFile()
-// - addLine or addArc or addCircle (repeat x times)
-// - toSvg(options)
+
+/**
+ * this class makes it easier to handle svg output
+ * use in this order:
+ * - new SvgFile()
+ * - addLine | addArc | addCircle (repeat x times)
+ * - toSvg(options)
+ */
 class SvgFile {
   constructor(options = {}) {
     this.paths = [];
@@ -333,10 +340,10 @@ const rotate = (point, center, angle) => {
   return [nx, ny];
 };
 
-module.exports.arcsToSvgPaths = arcsToSvgPaths;
-module.exports.polyLinesToSvgPaths = polyLinesToSvgPaths;
+//module.exports.arcsToSvgPaths = arcsToSvgPaths;
+//module.exports.polyLinesToSvgPaths = polyLinesToSvgPaths;
 module.exports.pathsToSvgFile = pathsToSvgFile;
-module.exports.Arc = Arc;
+//module.exports.Arc = Arc;
 module.exports.SvgFile = SvgFile;
-module.exports.createCircle = createCircle;
-module.exports.createArc = createArc;
+//module.exports.createCircle = createCircle;
+//module.exports.createArc = createArc;

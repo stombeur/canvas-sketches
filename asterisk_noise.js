@@ -78,8 +78,7 @@ const sketch = (context) => {
 
       let nrOfArms = 8;
       let n = Math.abs(noise.perlin2(c/1.2, r/1.2));
-      n = Math.ceil(n * 8);
-      console.log(n);
+      n = Math.ceil(n * 8) + 1;
       o[r].push(utils.getBitMask(n));
     }
   }
