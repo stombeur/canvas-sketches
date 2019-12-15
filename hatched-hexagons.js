@@ -199,9 +199,6 @@ const sketch = (context) => {
       if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
     	for (let i = 0; i < columns; i++) {
         
-        //drawSquare(context, posX - elementWidth /2, posY - elementHeight/2 + o[r][i][1], elementWidth, o[r][i][0]);
-        
-        //drawPolygon(context, createPolygon(6, 2, [posX,posY]));
         drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
 
     		posX = posX + (elementWidth) + margin;
