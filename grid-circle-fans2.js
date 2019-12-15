@@ -9,13 +9,13 @@ let svgFile = new penplot.SvgFile();
 
 // grid settings
 let margin = 0;
-let elementWidth = 2;
-let elementHeight = 2;
-let columns = 3;
-let rows = 5;
+let elementWidth = 3;
+let elementHeight = 3;
+let columns = 4;
+let rows = 6;
 
 const settings = {
-  dimensions: 'A6',
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -76,8 +76,6 @@ const sketch = (context) => {
           poly.drawLineOnCanvas(rotatedLine);
         }
       }
-
-      svgFile.newPath();
     }
 
     // grid repeat starts here
@@ -91,7 +89,7 @@ const sketch = (context) => {
     	for (let c = 0; c < columns; c++) {
           //draw element here
           let center = {x:posX+elementWidth/2, y:posY+elementHeight/2};
-          drawCircleWithFan(center.x, center.y, elementWidth/2, 30, o[r][c].rotate, 0.15); 
+          if (!o[r][c].skip){drawCircleWithFan(center.x, center.y, elementWidth/2, 40, o[r][c].rotate, 0.5); }
 
           //advance grid
     	    posX = posX + (elementWidth) + margin;
@@ -101,18 +99,7 @@ const sketch = (context) => {
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
-
-    svgFile.newPath();
-
-    let border = 0.5;
-    let box = [[border, border],[border, height-border],[width-border,height-border],[width-border,border]];
-    poly.drawPolygonOnCanvas(context, box);
-    svgFile.addLine(box, true);
-    border = 0.7;
-    box = [[border, border],[border, height-border],[width-border,height-border],[width-border,border]];
-    poly.drawPolygonOnCanvas(context, box);
-    svgFile.addLine(box, true);
-
+    
 
     return [
       // Export PNG as first layer
