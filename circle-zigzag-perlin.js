@@ -4,6 +4,8 @@ const canvasSketch = require('canvas-sketch');
 const penplot = require('./utils/penplot');
 const utils = require('./utils/random');
 const poly = require('./utils/poly');
+const n = require('./utils/perlin');
+const noise = n.noise;
 
 let svgFile = new penplot.SvgFile();
 
@@ -30,12 +32,17 @@ const sketch = (context) => {
   let marginTop = (context.height - drawingHeight) / 2;
   
   // randomness
+  noise.seed(Math.random());
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
-      let rotate = utils.getRandomInt(80,60);
-      let steps = utils.getRandomInt(8, 12);
+      // let steps = Math.abs(noise.perlin2(c/1.2, r/1.2));
+      // steps = Math.ceil(steps * 20) + 1;
+
+      //let rotate = utils.getRandomInt(80,60);
+      let rotate = Math.abs(noise.perlin2(c+1, r+1));
+      let steps = 10;//utils.getRandomInt(8, 12);
       o[r].push({rotate, steps});
     }
   }
