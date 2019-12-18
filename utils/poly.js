@@ -482,6 +482,12 @@ const drawCircle = context => (cx, cy, radius) => {
   context.stroke();
 }
 
+const drawArc = (cx, cy, radius, startAngle, endAngle) => {
+  context.beginPath();
+  context.arc(cx, cy, radius, 0, startAngle, endAngle);
+  context.stroke();
+}
+
 /**
  * returns the distance between two points
  * 
@@ -576,4 +582,5 @@ poly.clipLineToBB = clipLineToBB;
 poly.clipLineToCircle = clipLineToCircle;
 poly.pointIsInCircle = pointIsInCircle;
 poly.drawCircle = drawCircle;
+poly.drawArc = drawArc;
 poly.distanceBetween = distanceBetween;

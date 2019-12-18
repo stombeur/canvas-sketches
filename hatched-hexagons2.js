@@ -170,8 +170,8 @@ const sketch = (context) => {
   let margin = 0.2;
   let elementWidth = 2;
   let elementHeight = 1.8;
-  let columns = 6;
-  let rows = 12;
+  let columns = 10;
+  let rows = 18;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -181,10 +181,12 @@ const sketch = (context) => {
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
+    
     for (let i = 0; i < columns; i++) {
+      let draw = r < rows/4 || utils.getRandom(1) > (r-rows/4) * 0.05;
       let rot = utils.random(-89, 89);
       let space = utils.random(0.1,0.30);
-      o[r].push([rot,space]);
+      o[r].push([rot,space, draw]);
     }
   }
 
@@ -199,7 +201,9 @@ const sketch = (context) => {
       if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
     	for (let i = 0; i < columns; i++) {
         
-        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
+        if (o[r][i][2]) {
+          drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
+        }
 
     		posX = posX + (elementWidth) + margin;
     	}
