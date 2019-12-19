@@ -124,6 +124,7 @@ const shuffle = (array) => {
   }
 
 module.exports.getRandomInt = getRandomInt;
+module.exports.getRandomIntInclusive = getRandomIntInclusive;
 module.exports.getRandom = getRandom;
 module.exports.getRandomBitMask = getRandomBitMask;
 module.exports.flags = flags;
