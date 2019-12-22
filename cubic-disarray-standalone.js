@@ -41,7 +41,7 @@ const sketch = context => {
       let angle = 0;
       let move = 0;
       if (r >= 2) {
-        angle = random(-r, r); // introduce a random rotation
+        angle = random(-r*1.3, r*1.3); // introduce a random rotation
         move = random(0, r * 0.1); // introduce a random movement
       }
       o[r].push({ angle, move });

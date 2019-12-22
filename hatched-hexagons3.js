@@ -113,7 +113,7 @@ const boundingBox = (polyLine, padding = 0) => {
 };
 
 const hatch2 = (poly, angle, spacing = 0.1) => {
-  let rectangle = boundingBox(poly);
+  let rectangle = boundingBox(poly, 1);
   //console.log(rectangle);
   let x = rectangle[0][0];
   let y = rectangle[0][1];
