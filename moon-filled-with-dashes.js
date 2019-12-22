@@ -4,7 +4,6 @@ const canvasSketch = require('canvas-sketch');
 const penplot = require('./utils/penplot');
 const utils = require('./utils/random');
 const poly = require('./utils/poly');
-const noise = require('./utils/perlin').noise;
 
 let svgFile = new penplot.SvgFile();
 
@@ -16,7 +15,7 @@ let columns = 4;
 let rows = 4;
 
 const settings = {
-  dimensions: 'A4',
+  dimensions: 'A3',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -24,15 +23,15 @@ const settings = {
 };
 
 //297, 420
-let w = 21;
-let h = 29.7;
+let w = 29.7;
+let h = 42;
 
 const sketch = (context) => {
 
-  // let drawingWidth = (columns * (elementWidth + margin)) - margin;
-  // let drawingHeight = (rows * (elementHeight + margin)) - margin;
-  // let marginLeft = (context.width - drawingWidth) / 2;
-  // let marginTop = (context.height - drawingHeight) / 2;
+  let drawingWidth = (columns * (elementWidth + margin)) - margin;
+  let drawingHeight = (rows * (elementHeight + margin)) - margin;
+  let marginLeft = (context.width - drawingWidth) / 2;
+  let marginTop = (context.height - drawingHeight) / 2;
 
   // nr of circles -> 5 to 7
   // center is on page
@@ -47,29 +46,13 @@ const sketch = (context) => {
     circles[r] = {};
     circles[r].center = {x: utils.getRandom(w), y: utils.getRandomInt(h)};
     circles[r].r = utils.getRandom(Math.max(w/3.5, w/2+2), Math.min(w/3.5, w/2+2));
-    let displaceSignX = utils.getRandomIntInclusive(1) == 1 ? 1 : -1;
-    let displaceSignY = utils.getRandomIntInclusive(1) == 1 ? 1 : -1;
+    let displaceSignX = utils.getRandomInt(1) == 1 ? 1 : -1;
+    let displaceSignY = utils.getRandomInt(1) == 1 ? 1 : -1;
     let displaceX = utils.getRandom(2.5,1);
     let displaceY = utils.getRandom(2.5,1);
     innercircles[r] = {};
     innercircles[r].center = { x: circles[r].center.x + (displaceX * displaceSignX), y: circles[r].center.y + (displaceY * displaceSignY)  }
     innercircles[r].r = circles[r].r * utils.getRandom(0.85, 0.75);
-  }
-
-  noise.seed(Math.random());
-  let grid = [];
-  let rows = Math.floor(h) * 10;
-  let cols = Math.floor(w) * 10;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      let pValue = Math.abs(noise.perlin2(c / 100, r / 100));
-      //console.log(pValue)
-      let x = w / cols * c;
-      let y = h / rows * r;
-      let rot = pValue * 180; //utils.getRandomIntInclusive(180);
-      if (rot < 1) { rot = 0.1;}
-      grid.push({p:poly.point(x, y), rot});
-    }
   }
 
   
@@ -82,17 +65,19 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.02;
 
-    const drawDash = (origin, rot, length = 0.2) => {
-      //console.log(origin);
-      let start = [origin.x - length/2, origin.y];
-      let end = [origin.x + length/2, origin.y];
-      let line = poly.rotatePolygon([start, end], origin, rot);
+    const drawElement = (origin) => {
+        let a = 0.1;
+        let line  = [[origin.x - a, origin.y],[origin.x+ a, origin.y]];
+        let rot = utils.getRandom(180);
 
-      poly.drawLineOnCanvas(line);
-      svgFile.addLine(line, false);
+        let rotLine = poly.rotatePolygon(line, origin, rot);
+
+        poly.drawLineOnCanvas(rotLine);
+        svgFile.addLine(rotLine);
+           
     }
 
-    const drawArc = (origin) => {
+    const drawElement3 = (origin) => {
         let arc = utils.getRandom(Math.PI/2*3, Math.PI/2);
         let rot = utils.getRandom(Math.PI);
 
@@ -103,7 +88,7 @@ const sketch = (context) => {
         svgFile.addArc(origin.x, origin.y, 0.1, rot*Math.PI/180, (rot+arc)*Math.PI/180) // /Math.PI*180        
     }
 
-    const drawSquare = (origin) => {
+    const drawElement2 = (origin) => {
         //console.log(origin);
         let s = poly.createSquarePolygon(origin.x, origin.y, 0.2, 0.2);
         let corner = utils.getRandomInt(3);
@@ -116,6 +101,10 @@ const sketch = (context) => {
         poly.drawPolygonOnCanvas(context, s);
         svgFile.addLine(s, true);
       }
+
+    // grid repeat starts here
+    let posX = marginLeft;
+    let posY = marginTop;
 
     // circles = [];
     // innercircles = [];
@@ -130,16 +119,24 @@ const sketch = (context) => {
     // circles.push({center: poly.point(width/10, height/2+4), r: width/3.5});
     // innercircles.push({center: poly.point((width/10)+1.5, (height/2+4)-0.2), r: width/3.5*0.73});
 
-    grid.forEach(el => {
-      for (let i = 0; i < circles.length; i++) {
-        const circle = circles[i];
-        const innercircle = innercircles[i];
-        if (poly.pointIsInCircle(el.p, circle.center, circle.r)) {
-            if (!poly.pointIsInCircle(el.p, innercircle.center, innercircle.r))
-            { drawDash(el.p, el.rot, 0.1); break;}
+
+    for (let index = 0; index < 30000; index++) {
+        let x = utils.getRandom(width);
+        let y = utils.getRandom(height);
+        
+        let point = poly.point(x,y);
+        //console.log(point);
+     
+        for (let i = 0; i < circles.length; i++) {
+            const circle = circles[i];
+            const innercircle = innercircles[i];
+            if (poly.pointIsInCircle(point, circle.center, circle.r)) {
+                if (!poly.pointIsInCircle(point, innercircle.center, innercircle.r))
+                { drawElement(point); }
+            }
         }
+        
     }
-    });
     
 
     return [

@@ -17,7 +17,7 @@ let columns = 4;
 let rows = 4;
 
 const settings = {
-  dimensions: 'A3',
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -45,8 +45,8 @@ const sketch = (context) => {
 
     noise.seed(Math.random());
     let grid = [];
-    let rows = Math.floor(height) * 10;
-    let cols = Math.floor(width) * 10;
+    let rows = Math.floor(height) * 4;
+    let cols = Math.floor(width) * 4;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         let pValue = Math.abs(noise.perlin2(c / 100, r / 100));
@@ -83,6 +83,17 @@ const sketch = (context) => {
         svgFile.addLine(line, false);
       }
 
+      const drawArc = (origin, rotate, radius = 0.1) => {
+        let arc = utils.getRandom(Math.PI/2, Math.PI/4);
+        let rot = rotate / 180*Math.PI; //utils.getRandom(Math.PI);
+
+        context.beginPath();
+        context.arc(origin.x, origin.y, radius, rot, rot+arc);
+        context.stroke();
+
+        svgFile.addArc(origin.x, origin.y, radius, rotate, (rotate+(arc*180/Math.PI))) // /Math.PI*180        
+    }
+
     // grid repeat starts here
     let posX = marginLeft;
     let posY = marginTop;
@@ -96,7 +107,10 @@ const sketch = (context) => {
     grid.forEach(el => {
       if (poly.pointIsInCircle(el.p, circle.center, circle.radius)) {
         if (!poly.pointIsInCircle(el.p, innercircle.center, innercircle.radius))
-        { drawDash(el.p, el.rot, 0.1); }
+        { 
+         // drawDash(el.p, el.rot, 0.2); 
+         drawArc(el.p, el.rot, 0.2); 
+        }
     }
     });
 
