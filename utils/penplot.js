@@ -141,6 +141,41 @@ function formatSvgPaths(svgPaths, opt = {}) {
   return paths;
 }
 
+function formatSvgGroups(svgGroups, opt = {}) {
+  var fillStyle = opt.fillStyle || 'none';
+  var strokeStyle = opt.strokeStyle || 'black';
+  var lineWidth = opt.lineWidth;
+  var units = opt.units || 'px';
+
+  let groups = [];
+  Object.keys(svgGroups).forEach(function(key,index) {
+    let group = svgGroups[key];
+    let commands = [];
+    let plines = polyLinesToSvgPaths(group.lines, opt);
+    for (let e of plines) commands.push(e);
+    let parcs = arcsToSvgPaths(group.arcs, opt);
+    for (let e of parcs) commands.push(e);
+    let path =  commands.join(' ');
+
+    groups.push('      <g id="' + key + '"><path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" /></g>');
+
+  });
+  // svgGroups.map(p => {
+  //   let commands = [];
+  //   let plines = polyLinesToSvgPaths(p.lines, opt);
+  //   for (let e of plines) commands.push(e);
+  //   let parcs = arcsToSvgPaths(p.arcs, opt);
+  //   for (let e of parcs) commands.push(e);
+  //   //commands.push(...polyLinesToSvgPaths(p.lines, opt));
+  //   //commands.push(...arcsToSvgPaths(p.arcs, opt));
+  //   let path =  commands.join(' ');
+
+  //   groups.push('      <g><path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" /></g>');
+  // });
+
+  return groups;
+}
+
 // convert paths to an svg file
 // mostly formatting into svg-xml
 function formatSvgFile(svgPaths, opt = {}) {
@@ -240,6 +275,7 @@ class SvgPath {
  */
 class SvgFile {
   constructor(options = {}) {
+    this.groups = {};
     this.paths = [];
     this.currentPath = new SvgPath();
 
@@ -275,6 +311,64 @@ class SvgFile {
     if (!options) { options = this.options; }
 
     return formatSvgFile(formatSvgPaths(this.paths, options), options);
+  }
+}
+
+class SvgFileWithGroups {
+  constructor(options = {}) {
+    this.groups = {};
+    this.groups['default'] = {lines:[],arcs:[]};
+    this.default = this.groups['default'];
+    this.options = options;
+  }
+
+  addLine(line, close = false) {
+    this.addLineToGroup(line, 'default', close);
+  }
+
+  addLineToGroup(line, group, close = false) {
+    let copy = [];
+    for (let e of line) copy.push(e);
+    if (close){
+      copy.push(line[0]);
+    }
+    if (!this.groups[group]) { this.groups[group] = {lines:[],arcs:[]}; }
+    this.groups[group].lines.push(copy);
+  }
+
+  addCircle(cx, cy, radius) {
+    this.addCircleToGroup(cx, cy, radius, 'default')
+  }
+
+  addCircleToGroup(cx, cy, radius, group) {
+    if (!this.groups[group]) { this.groups[group] = {lines:[],arcs:[]}; }
+    this.groups[group].arcs.push(...createCircle(cx, cy, radius));
+  }
+
+  addArc(cx, cy, radius, sAngle, eAngle) {
+    this.addArcToGroup(cx, cy, radius, sAngle, eAngle, 'default');
+  }
+
+  addArcToGroup(cx, cy, radius, sAngle, eAngle, group) {
+    if (!this.groups[group]) { this.groups[group] = {lines:[],arcs:[]}; }
+    this.groups[group].arcs.push(createArc(cx, cy, radius, sAngle, eAngle));
+  }
+
+  // newPath() {
+  //   this.paths.push(this.currentPath);
+  //   this.currentPath = new SvgPath();
+  // }
+
+  toSvg(options = null){
+    //console.log(this);
+    //this.newPath();
+    if (!options) { options = this.options; }
+
+    if (this.default.lines.length === 0 && this.default.arcs.length === 0){
+      delete this.groups['default'];
+    }
+
+    return formatSvgFile(formatSvgGroups(this.groups, options), options);
   }
 }
 
@@ -345,5 +439,6 @@ const rotate = (point, center, angle) => {
 module.exports.pathsToSvgFile = pathsToSvgFile;
 //module.exports.Arc = Arc;
 module.exports.SvgFile = SvgFile;
+module.exports.SvgFileWithGroups = SvgFileWithGroups;
 //module.exports.createCircle = createCircle;
 //module.exports.createArc = createArc;

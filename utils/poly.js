@@ -48,7 +48,7 @@ const createSquarePolygon = (originX, originY, width, height = width) => {
     return result;
 }
 
-const drawPolygonOnCanvas = (context, poly, options = {}) => {
+const drawPolygonOnCanvas = (poly, options = {}) => {
     context.beginPath();
   
     context.strokeStyle = options.strokeStyle || 'black';
@@ -94,6 +94,22 @@ const drawLineOnCanvas = ( line, options = {}) => {
     context.stroke();
 }
 
+const drawArcOnCanvas = ( x, y, radius, startAngle, endAngle, options = {}) => {
+  //console.log({x,y,radius, startAngle, endAngle, options});
+  context.beginPath();
+
+  let sAngle = (Math.PI / 180) * startAngle;
+  let eAngle = (Math.PI / 180) * endAngle;
+
+  context.strokeStyle = options.strokeStyle || 'black';
+  context.lineWidth = options.lineWidth || 0.01;
+  context.lineCap = options.lineCap || 'square';
+  context.lineJoin = options.lineJoin || 'miter';
+
+  context.arc(x, y, radius, sAngle, eAngle);
+  context.stroke();
+}
+
 const calculateBoundingBox = (polyLine, padding = 0) => {
     let left = Number.MAX_VALUE,
       top = Number.MAX_VALUE,
@@ -131,7 +147,7 @@ const rotatePointXY = (p, c, angle) => {
 };
 
 const rotatePoint = (p, center, angle) => {
-  if (angle === 0) return point;
+  if (angle === 0) return p;
 
   if (!p.x) { p = point(p[0],p[1]); }
   if (!center.x) { center= point(center[0],center[1]); }
@@ -584,3 +600,4 @@ poly.pointIsInCircle = pointIsInCircle;
 poly.drawCircle = drawCircle;
 poly.drawArc = drawArc;
 poly.distanceBetween = distanceBetween;
+poly.drawArcOnCanvas = drawArcOnCanvas;

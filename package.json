@@ -17,6 +17,7 @@
     "convert-length": "^1.0.1",
     "convert-units": "^2.3.4",
     "defined": "^1.0.0",
+    "nice-color-palettes": "^3.0.0",
     "noisejs-ilmiont": "^1.2.3",
     "p5": "^0.8.0"
   }
