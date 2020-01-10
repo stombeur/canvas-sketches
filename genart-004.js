@@ -84,10 +84,13 @@ const sketch = () => {
 
       const triangle = () => {
         let h = Math.abs(rotation*30),
-            w = Math.abs(rotation*3);
-        return {line1:[[x-w/2,y-h/2],[x,y+h/2]],
-                line2:[[x,y+h/2],[x+w/2,y-h/2]],
-                arc:[x,y-h/2,w/2,180,0]};
+            w1 = Math.abs(rotation*3),
+            w2 = Math.abs(rotation);
+
+        return {line1:[[x-w1/2,y-h/2],[x-w2/2,y+h/2]],
+                line2:[[x+w2/2,y+h/2],[x+w1/2,y-h/2]],
+                arc1:[x,y-h/2,w1/2,180,0],
+                arc2:[x,y+h/2,w2/2,0,180]};
       }
       const rotate = (line) => {
         return poly.rotatePolygon(line, [x,y], radius*width*10);
@@ -102,15 +105,18 @@ const sketch = () => {
       let t = triangle();
       let l1 = rotate(t.line1);
       let l2 = rotate(t.line2);
-      let a1 = rotateArc(t.arc);
+      let a1 = rotateArc(t.arc1);
+      let a2 = rotateArc(t.arc2);
 
       poly.drawLineOnCanvas(l1, options);
       poly.drawLineOnCanvas(l2, options);
       poly.drawArcOnCanvas(...a1, options);
+      poly.drawArcOnCanvas(...a2, options);
 
       svgFile.addLineToGroup(l1, group);
       svgFile.addLineToGroup(l2, group);
       svgFile.addArcToGroup(...a1, group);
+      svgFile.addArcToGroup(...a2, group);
 
       
 
