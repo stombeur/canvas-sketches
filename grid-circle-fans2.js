@@ -62,7 +62,7 @@ const sketch = (context) => {
 
       let radius = r + overlap;
       let step = 180 / nrOfLines;
-      let fulcrum = [cx - radius - r/3, cy];
+      let fulcrum = [cx - radius - r/6, cy];
 
       let startLine = [...[fulcrum], [cx - radius, cy - 2*radius]];
       for (let i = 1; i < nrOfLines; i++) {

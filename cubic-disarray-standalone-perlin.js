@@ -5,6 +5,7 @@
 
 const canvasSketch = require('canvas-sketch');
 const { polylinesToSVG } = require('canvas-sketch-util/penplot');
+const noise = require('./utils/perlin').noise;
 
 const lines = [];
 
@@ -34,15 +35,18 @@ const sketch = context => {
   let marginPageLeft = (context.width - drawingWidth) / 2;
   let marginPageTop = (context.height - drawingHeight) / 2;
 
+  noise.seed(Math.random());
   let o = [];
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
       let angle = 0;
       let move = 0;
-      if (r >= 2) {
-        angle = random(-r*1.3, r*1.3); // introduce a random rotation
-        move = random(0, r * 0.1); // introduce a random movement
+      if (r >= 0) {
+        let aValue = Math.abs(noise.perlin2(i / 100, r / 100))*90;
+        let mValue = Math.abs(noise.perlin2(i / 100, r / 100))*8;
+        angle = aValue; //random(-r, r); // introduce a random rotation
+        move = mValue; //random(0, r * 0.1); // introduce a random movement
       }
       o[r].push({ angle, move });
     }
