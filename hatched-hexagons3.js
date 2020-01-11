@@ -6,7 +6,7 @@ const utils = require('./utils/random');
 const polygonBoolean = require('2d-polygon-boolean');
 const noise = require('./utils/perlin').noise;
 
-const svgFile = new penplot.SvgFile();
+let svgFile = new penplot.SvgFile();
 
 
 const settings = {
@@ -113,7 +113,7 @@ const boundingBox = (polyLine, padding = 0) => {
 };
 
 const hatch2 = (poly, angle, spacing = 0.1) => {
-  let rectangle = boundingBox(poly, 1);
+  let rectangle = boundingBox(poly, 2);
   //console.log(rectangle);
   let x = rectangle[0][0];
   let y = rectangle[0][1];
@@ -150,8 +150,8 @@ const clip = (line, polyClip) => {
   return polygonBoolean(polyClip, closedLine, 'and');
 };
 
-const drawHatchedPoly = (context, posX, posY, angle, space) => {
-  let rect = createPolygon(6, 2, [posX, posY]);
+const drawHatchedPoly = (context, posX, posY, angle, space, side) => {
+  let rect = createPolygon(6, side, [posX, posY]);
   let hatched = hatch2(rect, angle, space);
   for (let i = 0; i < hatched.length; i++) {
     let x = null;
@@ -167,12 +167,13 @@ const drawHatchedPoly = (context, posX, posY, angle, space) => {
 };
 
 const sketch = (context) => {
+  svgFile = new penplot.SvgFile();
 
   let margin = 0.2;
-  let elementWidth = 2;
-  let elementHeight = 1.8;
-  let columns = 8;
-  let rows = 13;
+  let elementWidth = 2.8;
+  let elementHeight = 2.4;
+  let columns = 6;
+  let rows = 11;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -184,10 +185,9 @@ const sketch = (context) => {
   for (let r = 0; r < rows; r++) {
     o[r] = [];
     for (let i = 0; i < columns; i++) {
-      let pValue = Math.abs(noise.perlin2(i / 100, r / 100));
+      let pValue = Math.abs(noise.perlin2(i / 50, r / 50));
       let rot = utils.random(-89, 89);
-      let space =  pValue+0.1; //utils.random(0.18,0.22);
-      console.log({pValue, z:pValue+0.15});
+      let space =  pValue+0.11; //utils.random(0.18,0.22);
       o[r].push([rot,space]);
     }
   }
@@ -203,12 +203,13 @@ const sketch = (context) => {
       if (r%2==0) { posX = posX + margin/2 + elementWidth/2; }
     	for (let i = 0; i < columns; i++) {
         
-        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1]);
+        drawHatchedPoly(context, posX, posY, o[r][i][0], o[r][i][1], elementWidth);
 
     		posX = posX + (elementWidth) + margin;
     	}
     	posX = marginLeft + elementWidth / 4;
-    	posY = posY + elementHeight + margin;
+      posY = posY + elementHeight + margin;
+      svgFile.newPath();
     }
 
     return [

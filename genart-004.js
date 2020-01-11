@@ -10,6 +10,7 @@ let svgFile = new SvgFileWithGroups();
 random.setSeed(random.getRandomSeed());
 console.log(`seed: ${random.getSeed()}`);
 // 469789
+// 219376
 
 //let palette = random.pick(palettes);
 let groups = ['1_group','2_group','3_group','4_group'];
@@ -53,7 +54,7 @@ const sketch = () => {
   };
 
   let points = createGrid().filter(() => {
-    return Math.random() > 0.3;
+    return Math.random() > 0.4;
   });
 
   points = random.shuffle(points);

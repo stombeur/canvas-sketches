@@ -47,16 +47,18 @@ const sketch = (context) => {
     let grid = [];
     let rows = Math.floor(height) * 4;
     let cols = Math.floor(width) * 4;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
+    for (let r = 1; r < rows; r++) {
+      let row = []; 
+      for (let c = 1; c < cols; c++) {
         let pValue = Math.abs(noise.perlin2(c / 100, r / 100));
         //console.log(pValue)
         let x = width / cols * c;
         let y = height / rows * r;
         let rot = pValue * 180; //utils.getRandomIntInclusive(180);
         if (rot < 1) { rot = 0.1;}
-        grid.push({p:poly.point(x, y), rot});
+        row.push({p:poly.point(x, y), rot});
       }
+      grid.push(row);
     }
 
     const drawSquare = (origin) => {
@@ -80,6 +82,10 @@ const sketch = (context) => {
         let line = poly.rotatePolygon([start, end], origin, rot);
 
         poly.drawLineOnCanvas(line);
+        // context.beginPath();
+        // context.moveTo(line[0][0], line[0][1]);
+        // context.lineTo(line[1][0], line[1][1]);
+        // context.stroke();
         svgFile.addLine(line, false);
       }
 
@@ -102,17 +108,36 @@ const sketch = (context) => {
     let innercircle = { center: poly.point(width/2, height/2), radius: (width/2 - 2 ) / 1.8 }
     //poly.drawCircle(context)(circle.center.x, circle.center.y, circle.radius);
 
-    //console.log(circle);
 
-    grid.forEach(el => {
-      if (poly.pointIsInCircle(el.p, circle.center, circle.radius)) {
-        if (!poly.pointIsInCircle(el.p, innercircle.center, innercircle.radius))
-        { 
-         // drawDash(el.p, el.rot, 0.2); 
-         drawArc(el.p, el.rot, 0.2); 
+    for (let r = 0; r < rows-1; r++) {
+      let row = grid[r];
+     
+      for (let c = 0; c < cols-1; c++) {
+        let el = row[c];
+        if (!poly.pointIsInCircle(el.p, circle.center, circle.radius)) {
+          drawDash(el.p, el.rot, 0.2); 
+          // drawArc(el.p, el.rot, 0.2); 
         }
+        else if (poly.pointIsInCircle(el.p, innercircle.center, innercircle.radius))
+        { 
+         drawDash(el.p, el.rot, 0.2); 
+        //  drawArc(el.p, el.rot, 0.2); 
+        }
+      }
+      svgFile.newPath();
     }
-    });
+
+    // grid.forEach(el => {
+    //   if (!poly.pointIsInCircle(el.p, circle.center, circle.radius)) {
+    //     drawDash(el.p, el.rot, 0.2); 
+    //     // drawArc(el.p, el.rot, 0.2); 
+    //   }
+    //   else if (poly.pointIsInCircle(el.p, innercircle.center, innercircle.radius))
+    //   { 
+    //    drawDash(el.p, el.rot, 0.2); 
+    //   //  drawArc(el.p, el.rot, 0.2); 
+    //   }
+    // });
 
     // for (let index = 0; index < 20000; index++) {
     //     let x = utils.getRandom(circle.radius*2) - circle.radius;
