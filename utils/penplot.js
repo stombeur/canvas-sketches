@@ -155,14 +155,14 @@ function formatSvgGroups(svgGroups, opt = {}) {
     for (let e of plines) commands.push(e);
     let parcs = arcsToSvgPaths(group.arcs, opt);
     for (let e of parcs) commands.push(e);
-    //let path =  commands.join(' ');
-    let paths = '';
-    commands.forEach((cmd) => {
-      paths +='<path d="' + cmd + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" />';
-    });
+    let path =  commands.join(' ');
+    // let paths = '';
+    // commands.forEach((cmd) => {
+    //   paths +=' <path d="' + cmd + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" />';
+    // });
 
-    //groups.push('      <g id="' + key + '"><path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" /></g>');
-    groups.push('      <g id="' + key + '">' + paths + '</g>');
+    groups.push('      <g id="' + key + '"><path d="' + path + '" fill="' + fillStyle + '" stroke="' + strokeStyle + '" stroke-width="' + lineWidth + units + '" /></g>');
+    //groups.push('      <g id="' + key + '">' + paths + '</g>');
   });
   // svgGroups.map(p => {
   //   let commands = [];
