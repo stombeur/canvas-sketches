@@ -1,6 +1,6 @@
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
-const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
@@ -10,7 +10,7 @@ console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
 
-const groups = ['1-group', '2-group'];
+const paths = [];
 
 const settings = {
   suffix: random.getSeed(),
@@ -38,7 +38,7 @@ const sketch = ({ width, height }) => {
           radius: Math.abs(radius),
           position,
           rotation: random.noise2D(u,v),
-          group: random.pick(groups)
+          group: random.pick(paths)
         });
       }
     }
@@ -46,13 +46,12 @@ const sketch = ({ width, height }) => {
   };
 
   let points = createGrid().filter(() => {
-    return Math.random() > 0.4;
+    return Math.random() > 0.8;
   });
 
   points = random.shuffle(points);
 
   return ({ context, width, height, units }) => {
-    let paths = [];
 
     const margin = width * 0.175;
 
@@ -75,7 +74,7 @@ const sketch = ({ width, height }) => {
             w1 = Math.abs(rotation*3),
             w2 = Math.abs(rotation);
 
-        return {line1:[[x-w1/2,y-h/2],[x-w2/2,y+h/2]],
+        return {line1:[[x-w2/2,y+h/2],[x-w1/2,y-h/2]],
                 line2:[[x+w2/2,y+h/2],[x+w1/2,y-h/2]],
                 arc1:[x,y-h/2,w1/2,180,0],
                 arc2:[x,y+h/2,w2/2,0,180]};
@@ -115,10 +114,10 @@ const sketch = ({ width, height }) => {
         drawLineOnCanvas(ctx, l1);
         drawArcOnCanvas(ctx, ...a1);
         drawLineOnCanvas(ctx, l2);
-        
         drawArcOnCanvas(ctx, ...a2);
       });
       
+
       paths.push(path);
 
     });
