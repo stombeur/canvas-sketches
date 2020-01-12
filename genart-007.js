@@ -5,12 +5,12 @@ const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
 
-random.setSeed(random.getRandomSeed());
+random.setSeed(7970);//random.getRandomSeed());
 console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
 
-const paths = [[],[],[]];
+const paths = [[],[],[],[],[],[],[],[],[],[]];
 
 const settings = {
   suffix: random.getSeed(),
@@ -22,7 +22,7 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const countX = 50;
+  const countX = 100;
   const countY = Math.floor(countX / width * height);
 
   const createGrid = () => {
@@ -33,12 +33,13 @@ const sketch = ({ width, height }) => {
         const v = y / (countY - 1);
         const position = [ u, v ];
         const radius = random.noise2D(u,v) * 0.035;
+        const ix = Math.floor(Math.abs(random.noise2D(u,v))*paths.length);
         points.push({
           //color: random.pick(palette), //'black',
           radius: Math.abs(radius),
           position,
           rotation: random.noise2D(u,v),
-          group: random.pick(paths)
+          group: paths[ix] //random.pick(paths)
         });
       }
     }
@@ -46,7 +47,7 @@ const sketch = ({ width, height }) => {
   };
 
   let points = createGrid().filter(() => {
-    return Math.random() > 0.55;
+    return Math.random() > 0.7;
   });
 
   points = random.shuffle(points);
@@ -104,21 +105,18 @@ const sketch = ({ width, height }) => {
         ctx.arc(x, y, radius, sAngle, eAngle);
       }
 
-      let t = triangle();
-      let l1 = rotate(t.line1);
-      let l2 = rotate(t.line2);
-      let a1 = rotateArc(t.arc1);
-      let a2 = rotateArc(t.arc2);
+      let h = Math.abs(rotation*10);
+      let line = rotate([[x,y+h/2],[x,y-h/2]]);
+      let line2 = rotate([[x-h/2,y],[x+h/2,y]]);
 
       const path = createPath(ctx => {
-        drawLineOnCanvas(ctx, l1);
-        drawArcOnCanvas(ctx, ...a1);
-        drawLineOnCanvas(ctx, l2);
-        drawArcOnCanvas(ctx, ...a2);
+        drawLineOnCanvas(ctx, line);
+        drawLineOnCanvas(ctx, line2);
       });
       
 
       group.push(path);
+    
 
     });
 
