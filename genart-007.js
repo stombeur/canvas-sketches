@@ -110,8 +110,9 @@ const sketch = ({ width, height }) => {
       let line2 = rotate([[x-h/2,y],[x+h/2,y]]);
 
       const path = createPath(ctx => {
-        drawLineOnCanvas(ctx, line);
-        drawLineOnCanvas(ctx, line2);
+        //drawLineOnCanvas(ctx, line);
+        //drawLineOnCanvas(ctx, line2);
+        drawArcOnCanvas(ctx, x, y, Math.abs(rotation*5), 0, 360);
       });
       
 

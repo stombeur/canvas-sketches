@@ -5,7 +5,7 @@ const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
 
-random.setSeed(random.getRandomSeed());
+random.setSeed(7970);//random.getRandomSeed());
 console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
@@ -14,7 +14,7 @@ const paths = [[],[],[]];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A4',//[ 2048, 2048 ]
+  dimensions: 'A3',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -22,7 +22,7 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const countX = 50;
+  const countX = 100;
   const countY = Math.floor(countX / width * height);
 
   const createGrid = () => {
@@ -32,13 +32,15 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const radius = random.noise2D(u,v) * 0.035;
+        const noise = random.noise2D(u,v);
+        const radius = Math.abs(noise) * 0.035;
+        const ix = Math.floor(Math.abs(noise)*paths.length);
         points.push({
           //color: random.pick(palette), //'black',
           radius: Math.abs(radius),
           position,
-          rotation: random.noise2D(u,v),
-          group: random.pick(paths)
+          rotation: noise,
+          group: paths[ix]
         });
       }
     }
@@ -46,14 +48,14 @@ const sketch = ({ width, height }) => {
   };
 
   let points = createGrid().filter(() => {
-    return Math.random() > 0.55;
+    return Math.random() > 0.7;
   });
 
   points = random.shuffle(points);
 
   return ({ context, width, height, units }) => {
 
-    const margin = width * 0.175;
+    const margin = width * 0.15;
 
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
