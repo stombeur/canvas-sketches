@@ -5,7 +5,9 @@ const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
 
+
 random.setSeed(7970);//random.getRandomSeed());
+
 console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
@@ -31,15 +33,18 @@ const sketch = ({ width, height }) => {
       for (let y = 0; y < countY; y++) {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
+
         const position = [ u, v ];
         const noise = random.noise2D(u,v);
         const radius = Math.abs(noise) * 0.035;
         const ix = Math.floor(Math.abs(noise)*paths.length);
+
         points.push({
           //color: random.pick(palette), //'black',
           radius: Math.abs(radius),
           position,
-          rotation: noise,
+          rotation: random.noise2D(u+2,v),
+
           group: paths[ix]
         });
       }
@@ -48,7 +53,9 @@ const sketch = ({ width, height }) => {
   };
 
   let points = createGrid().filter(() => {
+
     return Math.random() > 0.7;
+
   });
 
   points = random.shuffle(points);

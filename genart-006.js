@@ -3,8 +3,9 @@ const { lerp } = require('canvas-sketch-util/math');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
 
-const paths = [[],[],[]]; 
-//const paths = [];  //uncomment to not use groups
+// use either one depending on groups or not
+const groups = [[],[],[]]; 
+const paths = []; 
 
 const settings = {
   dimensions: 'A4',
@@ -27,7 +28,7 @@ const sketch = ({ width, height }) => {
         const position = [ u, v ];
         points.push({
           position,
-          group: random.pick(paths)
+          group: random.pick(groups)
         });
       }
     }
@@ -59,11 +60,12 @@ const sketch = ({ width, height }) => {
       });
       
       group.push(path);
-      //paths.push(path); //uncomment to not use groups
+      paths.push(path); 
 
     });
 
-    return renderGroups(paths, {
+    // use either one depending on groups or not
+    return renderGroups(groups, {
       context, width, height, units
     });
     // return renderPaths(paths, {     //uncomment to not use groups
