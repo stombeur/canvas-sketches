@@ -22,8 +22,8 @@ const sketch = context => {
   let margin = 0;
   let elementWidth = 2;
   let elementHeight = 2;
-  let columns = 6;
-  let rows = 8;
+  let columns = 2;
+  let rows = 2;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
@@ -224,7 +224,7 @@ const sketch = context => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
     context.strokeStyle = 'black';
-    context.lineWidth = 0.02;
+    context.lineWidth = 0.1;
 
     let posX = marginLeft;
     let posY = marginTop;
@@ -232,6 +232,7 @@ const sketch = context => {
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < columns; c++) {
         drawTile(posX, posY, elementWidth, o[r][c], margin);
+        //svgFile.newPath();
         posX = posX + elementWidth + margin;
       }
 
@@ -246,9 +247,15 @@ const sketch = context => {
     });
     svgFile.newPath();
 
-    // let box = [[marginLeft,marginTop],[marginLeft, height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,height-marginTop+elementWidth/2],[width-marginLeft+elementWidth/2,marginTop]];
-    // poly.drawPolygonOnCanvas(context, box);
-    // svgFile.addLine(box, true);
+    //  let box = [[marginLeft,marginTop],[marginLeft, height-marginTop],[width-marginLeft,height-marginTop],[width-marginLeft,marginTop]];
+    //  console.log(box)
+    //  poly.drawPolygonOnCanvas(box);
+    //  svgFile.addLine(box, true);
+
+    //  let cross1 = [[marginLeft+elementWidth,marginTop],[marginLeft+elementWidth,height-marginTop]];
+    //  poly.drawLineOnCanvas(cross1);
+    //  let cross2 = [[marginLeft,marginTop+elementWidth],[width-marginLeft,marginTop+elementWidth]];
+    //  poly.drawLineOnCanvas(cross2);
 
     return [
       // Export PNG as first layer

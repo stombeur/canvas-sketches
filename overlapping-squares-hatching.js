@@ -1,9 +1,9 @@
 // overlapping squares with hatching
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('./penplot');
-const utils = require('./utils');
-const poly = require('./poly');
+const penplot = require('./utils/penplot');
+const utils = require('./utils/random');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -42,6 +42,7 @@ const sketch = (context) => {
   
   return ({ context, width, height, units }) => {
     svgFile = new penplot.SvgFile();
+    poly.init(context);
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -58,7 +59,7 @@ const sketch = (context) => {
         let s =poly.createSquarePolygon(sposX, sposY, elementWidth, elementHeight);
         let lines = poly.hatchPolygon(s, o[r][i][0], o[r][i][1]);
         lines.map(l => {
-          poly.drawLineOnCanvas(context, l);
+          poly.drawLineOnCanvas(l);
           svgFile.addLine(l);
         });
         posX = posX + (elementWidth) + margin;
