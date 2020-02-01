@@ -1,3 +1,4 @@
+
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
@@ -50,7 +51,7 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const noise = random.gaussian(0.5, 0.1);//random.noise2D(u,v) * 1;
+        const noise = random.noise2D(u,v) * 1;//random.gaussian(0.25, 0.28) //
         const positionSkewed = skew(position, noise,  noise / countX, noise / countY);
         points.push({
           position: positionSkewed,
@@ -92,7 +93,8 @@ const sketch = ({ width, height }) => {
         const y = lerp(margin, height - margin, position[1]);
         
         let lineRight = null, 
-            lineDown = null;
+            lineDown = null,
+            hatch = null;
         
         if (!isLastColumn) {
           const pointRight = grid[row][column+1].position;
@@ -108,11 +110,36 @@ const sketch = ({ width, height }) => {
           lineDown = [[x,y],[x2,y2]];
         }
 
+        if (!isLastColumn && !isLastRow) {
+          const pointRight = grid[row][column+1].position;
+          const x2 = lerp(margin, width - margin, pointRight[0]);
+          const y2 = lerp(margin, height - margin, pointRight[1]);
+          const pointDown = grid[row+1][column].position;
+          const x4 = lerp(margin, width - margin, pointDown[0]);
+          const y4 = lerp(margin, height - margin, pointDown[1]);
+          const pointOpposite = grid[row+1][column+1].position;
+          const x3 = lerp(margin, width - margin, pointOpposite[0]);
+          const y3 = lerp(margin, height - margin, pointOpposite[1]);
+          
+          let n1 = grid[row][column].noise,
+              n2 = grid[row][column+1].noise,
+              n3 = grid[row+1][column].noise,
+              n4 = grid[row+1][column+1].noise;
+
+          
+
+          if ((n1+n2+n3+n4) > 1.3) {
+            let angle = Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
+            hatch = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3],[x2,y2]], angle, 1 + n1);
+          }
+        }
+
         //console.log({lineRight, lineDown})
 
         const path = createPath(ctx => {
           if (lineRight) { drawLineOnCanvas(ctx, lineRight); }
           if (lineDown) { drawLineOnCanvas(ctx, lineDown); }
+          if (hatch) { hatch.forEach(h => {drawLineOnCanvas(ctx, h);});}
         });
         
   
