@@ -51,7 +51,7 @@ const sketch = ({ width, height }) => {
 
   const createGrid = () => {
     const grid = [];
-    const skewFactor = 0; 
+    const skewFactor = 1; 
     for (let x = 0; x < countX; x++) {
       const points = [];
       for (let y = 0; y < countY; y++) {
@@ -147,11 +147,17 @@ const sketch = ({ width, height }) => {
           if (doHatch1) {//(n1+n3+n4) > 1.3) {
             let angle = 45; //Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
             hatch1 = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3]], angle, 0.8);
+            hatch1.push([[x,y],[x4,y4]]);
+            hatch1.push([[x4,y4],[x3,y3]]);
+            hatch1.push([[x3,y3],[x,y]]);
           }
 
           if (doHatch2) {//(n1+n2+n3) > 1.1) {
             let angle = 45;//Math.atan2( y-y2, x-x2 ) * 180 / Math.PI;
             hatch2 = poly.hatchPolygon([[x,y],[x3,y3],[x2,y2]], angle, 0.8);
+            hatch2.push([[x,y],[x2,y2]]);
+            hatch2.push([[x2,y2],[x3,y3]]);
+            hatch2.push([[x3,y3],[x,y]]);
           }
           
         }

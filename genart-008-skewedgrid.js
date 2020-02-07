@@ -14,7 +14,7 @@ const paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A4',//[ 2048, 2048 ]
+  dimensions: 'A3',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -50,7 +50,7 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const noise = random.gaussian(0.5, 0.1);//random.noise2D(u,v) * 1;
+        const noise = random.noise2D(u,v) * 0.85; //random.gaussian(0.5, 0.1);//
         const positionSkewed = skew(position, noise,  noise / countX, noise / countY);
         points.push({
           position: positionSkewed,
@@ -65,7 +65,7 @@ const sketch = ({ width, height }) => {
   let grid = createGrid();
 
   return ({ context, width, height, units }) => {
-
+    this.paths = [];
     const margin = width * 0.175;
 
     context.fillStyle = 'white';//background;

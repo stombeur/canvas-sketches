@@ -11,7 +11,8 @@ console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
 
-const paths = [];
+let paths = [];
+let hatches = [];
 
 const settings = {
   suffix: random.getSeed(),
@@ -51,7 +52,7 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const noise = random.noise2D(u,v) * 1;//random.gaussian(0.25, 0.28) //
+        const noise = random.noise2D(u,v) * 0.8;//random.gaussian(0.25, 0.28) //
         const positionSkewed = skew(position, noise,  noise / countX, noise / countY);
         points.push({
           position: positionSkewed,
@@ -66,6 +67,8 @@ const sketch = ({ width, height }) => {
   let grid = createGrid();
 
   return ({ context, width, height, units }) => {
+    paths = [];
+    hatches = [];
 
     const margin = width * 0.175;
 
@@ -130,7 +133,7 @@ const sketch = ({ width, height }) => {
 
           if ((n1+n2+n3+n4) > 1.3) {
             let angle = Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
-            hatch = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3],[x2,y2]], angle, 1 + n1);
+            hatch = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3],[x2,y2]], angle, 0.8);
           }
         }
 
@@ -139,11 +142,15 @@ const sketch = ({ width, height }) => {
         const path = createPath(ctx => {
           if (lineRight) { drawLineOnCanvas(ctx, lineRight); }
           if (lineDown) { drawLineOnCanvas(ctx, lineDown); }
+        });
+
+        const h = createPath(ctx => {
           if (hatch) { hatch.forEach(h => {drawLineOnCanvas(ctx, h);});}
         });
         
   
         paths.push(path);
+        if (hatch) { hatches.push(h); }
       }
     }
 
@@ -160,7 +167,7 @@ const sketch = ({ width, height }) => {
     //     extension: '.svg',
     //   }
     // ];
-    return renderPaths(paths, {
+    return renderGroups([paths,hatches], {
       context, width, height, units
     });
   };
