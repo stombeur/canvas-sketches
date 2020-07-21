@@ -74,6 +74,11 @@ const drawPolygonOnCanvas = (poly, options = {}) => {
  * @param {any} options { strokestyle, lineWidth, lineCap, lineJoin }
  */
 const drawLineOnCanvas = ( line, options = {}) => {
+
+    if (!line[0] || !line[1]) {
+      return;
+    }
+    
     let x1 = line[0].x  || line[0][0],
         x2 = line[1].x || line[1][0],
         y1 = line[0].y || line[0][1],
@@ -115,20 +120,31 @@ const calculateBoundingBox = (polyLine, padding = 0) => {
       top = Number.MAX_VALUE,
       right = 0,
       bottom = 0;
+     // console.log(polyLine)
   
     polyLine.map(p => {
       left = Math.min(p[0], left);
       top = Math.min(p[1], top);
       right = Math.max(p[0], right);
       bottom = Math.max(p[1], bottom);
+
+     //console.log({left,top, right, bottom})
+    //  console.log({in:p[0], out:left})
+    //  console.log({in:p[1], out:top})
+    //  console.log({in:p[0], out:right})
+    //  console.log({in:p[1], out:bottom})
     });
+
+
   
-    return [
+    let result = [
       [left - padding, top - padding],
       [right + padding, top - padding],
       [right + padding, bottom + padding],
       [left - padding, bottom + padding]
     ];
+   // console.log({polyLine, result});
+      return result;
 };
 
 const rotatePointXY = (p, c, angle) => {
@@ -161,6 +177,8 @@ const rotatePoint = (p, center, angle) => {
       sin = Math.sin(radians),
       nx = cos * (x - cx) - sin * (y - cy) + cx,
       ny = cos * (y - cy) + sin * (x - cx) + cy;
+
+  //console.log(x,y,cx,cy, nx, ny)
   return [nx, ny];
 };
   
@@ -212,8 +230,8 @@ const hatchCircle = (center, radius, angle, spacing) => {
   return hatchlines;
 }
 
-const hatchPolygon = (polygon, angle, spacing = 0.1) => {
-    let rectangle = calculateBoundingBox(polygon);
+const hatchPolygon = (polygon, angle, spacing = 0.1, padding = 0) => {
+    let rectangle = calculateBoundingBox(polygon, padding);
 
     let x = rectangle[0][0];
     let y = rectangle[0][1];
@@ -255,17 +273,16 @@ const hatchPolygon = (polygon, angle, spacing = 0.1) => {
                 });
         }
       }
+
     return result;
 };
 
 const hatch2 = (polygon, angle, spacing = 0.1) => {
   let rectangle = poly.calculateBoundingBox(polygon);//boundingBox(polygon);
-  //console.log(rectangle);
   let x = rectangle[0][0];
   let y = rectangle[0][1];
   let height = rectangle[2][1] - y;
   let width = rectangle[2][0] - x;
-  //console.log({x,y,height, width});
   let rotatedRectangle = poly.rotatePolygon(
     rectangle,
     [x + width / 2, y + width / 2],

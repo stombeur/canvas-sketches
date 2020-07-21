@@ -11,7 +11,7 @@ let lines = [];
 let arcs = [];
 
 const settings = {
-  dimensions: [24,31.5],
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -20,10 +20,10 @@ const settings = {
 
 const sketch = context => {
   let margin = 0;
-  let elementWidth = 2;
-  let elementHeight = 2;
-  let columns = 2;
-  let rows = 2;
+  let elementWidth = 2.2;
+  let elementHeight = 2.2;
+  let columns = 7;
+  let rows = 11;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;

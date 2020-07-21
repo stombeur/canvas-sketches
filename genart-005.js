@@ -6,7 +6,7 @@ const random = require('canvas-sketch-util/random');
 const poly = require('./utils/poly.js');
 
 
-random.setSeed(7970);//random.getRandomSeed());
+random.setSeed(random.getRandomSeed());
 
 console.log(`seed: ${random.getSeed()}`);
 // 469789
@@ -16,7 +16,7 @@ const paths = [[],[],[]];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A3',//[ 2048, 2048 ]
+  dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -24,7 +24,7 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const countX = 100;
+  const countX = 80;
   const countY = Math.floor(countX / width * height);
 
   const createGrid = () => {

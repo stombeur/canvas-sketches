@@ -287,6 +287,10 @@ class SvgFile {
   }
 
   addLine(line, close = false) {
+    if (!line[0] || !line[1]) {
+      return;
+    }
+    
     let copy = [];
     for (let e of line) copy.push(e);
     if (close){

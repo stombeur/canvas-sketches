@@ -6,7 +6,7 @@ const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
 
-random.setSeed(995935);//random.getRandomSeed());
+random.setSeed(random.getRandomSeed());//995935
 console.log(`seed: ${random.getSeed()}`);
 // 912597
 // 995601
@@ -138,28 +138,51 @@ const sketch = ({ width, height }) => {
 
           lineDiagonal = [[x,y],[x3,y3]];
           
+          // let n1 = grid[row][column].noise,
+          //     n2 = grid[row][column+1].noise,
+          //     n3 = grid[row+1][column+1].noise,
+          //     n4 = grid[row+1][column].noise;
+
+          // let noiseBoundary = 1.3;
+
           let n1 = grid[row][column].noise,
               n2 = grid[row][column+1].noise,
-              n3 = grid[row+1][column+1].noise,
-              n4 = grid[row+1][column].noise;
+              n4 = grid[row+1][column].noise,
+              n3 = grid[row+1][column+1].noise;
 
-          let noiseBoundary = 1.3;
+          spacing = 0.8;
+          dynspace = 0.7;
 
-          if (doHatch1) {//(n1+n3+n4) > 1.3) {
-            let angle = 45; //Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
-            hatch1 = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3]], angle, 0.6);
-            hatch1.push([[x,y],[x4,y4]]);
-            hatch1.push([[x4,y4],[x3,y3]]);
-            hatch1.push([[x3,y3],[x,y]]);
+          //bottom triangle
+          if ((n1+n2+n3) > 1) {
+            let angle = Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
+            let space = dynspace * (n1+n2+n3) * 1.1; //spacing;
+            hatch1 = poly.hatchPolygon([[x,y],[x3,y3],[x2,y2],[x,y]], angle, space, 5);
           }
 
-          if (doHatch2) {//(n1+n2+n3) > 1.1) {
-            let angle = 45;//Math.atan2( y-y2, x-x2 ) * 180 / Math.PI;
-            hatch2 = poly.hatchPolygon([[x,y],[x3,y3],[x2,y2]], angle, 0.6);
-            hatch2.push([[x,y],[x2,y2]]);
-            hatch2.push([[x2,y2],[x3,y3]]);
-            hatch2.push([[x3,y3],[x,y]]);
+          //top triangle
+          if ((n1+n4+n3) > 1) {
+            let angle = Math.atan2( y3-y, x3-x ) * 180 / Math.PI;
+            let space = dynspace * (n1+n4+n3) * 1.1; //spacing;
+            hatch2 = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3],[x,y]], angle, space, 5);
           }
+
+
+          // if (doHatch1) {//(n1+n3+n4) > 1.3) {
+          //   let angle = 45; //Math.atan2( y4-y, x4-x ) * 180 / Math.PI;
+          //   hatch1 = poly.hatchPolygon([[x,y],[x4,y4],[x3,y3]], angle, 0.6);
+          //   hatch1.push([[x,y],[x4,y4]]);
+          //   hatch1.push([[x4,y4],[x3,y3]]);
+          //   hatch1.push([[x3,y3],[x,y]]);
+          // }
+
+          // if (doHatch2) {//(n1+n2+n3) > 1.1) {
+          //   let angle = 45;//Math.atan2( y-y2, x-x2 ) * 180 / Math.PI;
+          //   hatch2 = poly.hatchPolygon([[x,y],[x3,y3],[x2,y2]], angle, 0.6);
+          //   hatch2.push([[x,y],[x2,y2]]);
+          //   hatch2.push([[x2,y2],[x3,y3]]);
+          //   hatch2.push([[x3,y3],[x,y]]);
+          // }
           
         }
 
