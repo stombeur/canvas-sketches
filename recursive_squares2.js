@@ -2,7 +2,7 @@
 
 const canvasSketch = require('canvas-sketch');
 const penplot = require('./utils/penplot');
-const utils = require('./utils/utils');
+const utils = require('./utils/random');
 const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
@@ -126,7 +126,8 @@ const drawCorner = (origX, origY, side, invertX, invertY, options) =>  {
 }
 
 const sketch = (context) => {
-
+  poly.init(context);
+  
   let margin = 0;
   let elementWidth = 14;
   let elementHeight = 14;

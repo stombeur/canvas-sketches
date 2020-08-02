@@ -11,7 +11,7 @@ let ribbons = [];
 let lines = [];
 
 const settings = {
-    dimensions: 'A3',
+    dimensions: 'A4',
     orientation: 'portrait',
     pixelsPerInch: 300,
     scaleToView: true,
@@ -141,7 +141,7 @@ const sketch = (context) => {
 
         let bounds = { left: posXLeft, top: vertMargin, right: posXRight, bottom: vertMargin + drawingHeight };
 
-        let i = Math.floor(nrOfRibbons  * 0.45);
+        let i = Math.floor(nrOfRibbons  * 0.75);
         for (let slot = 0; slot <= i; slot++) {
             let ltr = true;
             //if (slot%2 > 0) {ltr = false;}
@@ -171,7 +171,7 @@ const sketch = (context) => {
         });
 
         let box = [[4,4],[4, height-4],[width-4,height-4],[width-4,4]];
-        poly.drawPolygonOnCanvas(context, box);
+        poly.drawPolygonOnCanvas(box);
         svgFile.addLine([[4,4],[4, height-4],[width-4,height-4],[width-4,4]], true);
 
 

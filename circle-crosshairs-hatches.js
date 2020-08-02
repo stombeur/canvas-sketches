@@ -1,8 +1,8 @@
 // hatched donuts
 
 const canvasSketch = require('canvas-sketch');
-const penplot = require('../utils/penplot');
-const poly = require('../utils/poly');
+const penplot = require('./utils/penplot');
+const poly = require('./utils/poly');
 
 let svgFile = new penplot.SvgFile();
 
@@ -64,7 +64,57 @@ const sketch = (context) => {
     context.strokeStyle = 'black';
     context.lineWidth = 0.01;
 
+    let rmax = (width-margin*2) / 2;
+    let rmin = rmax * 4/5;
+    let rborder = rmax*2;
+    let center = poly.point(width/2, height/2);
+    poly.drawCircle(context)(center.x, center.y, rmax);
+    poly.drawCircle(context)(center.x, center.y, rmin);
     
+    let p1 = poly.point(width/2, height/2 - rmax - 2);
+    let p2 = poly.rotatePointXY(p1, center, 30);
+    let p4 = poly.point(width/2, height/2 - rmin + 2);
+    let p3 = poly.rotatePointXY(p4, center, 30);
+    let pZ1 = poly.point(width/2, height/2 - rborder);
+    let pZ2 = poly.rotatePointXY(pZ1, center, 30);
+    let pZ3 = poly.point(width/2, height/2 + rborder);
+    let pZ4 = poly.rotatePointXY(pZ3, center, 30);
+
+    poly.drawCircle(context)(p1.x, p1.y, 1);
+    poly.drawCircle(context)(p2.x, p2.y, 1);
+    poly.drawCircle(context)(p3.x, p3.y, 1);
+    poly.drawCircle(context)(p4.x, p4.y, 1);
+
+    
+    poly.drawPolygonOnCanvas([[p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y],[p4.x,p4.y]])
+    let x = poly.hatchDonut(center, rmax, rmin, 30, 0.1);
+    //console.log(x)
+    //let y = poly.hatchPolygon([[p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y],[p4.x,p4.y]], 5, 0.1)
+    poly.drawLineOnCanvas([[pZ3.x, pZ3.y],[pZ1.x, pZ1.y]]);
+    poly.drawLineOnCanvas([[pZ4.x, pZ4.y],[pZ2.x, pZ2.y]]);
+
+    x.forEach(l => {
+        //poly.drawLineOnCanvas(l);
+       
+        try {
+            console.log(l);
+            console.log([[l[0].x,l[0].y],[l[1].x,l[1].y]]);
+           // poly.drawLineOnCanvas([[l[0].x,l[0].y],[l[1].x,l[1].y]]);
+            let l1 = poly.clip([[l[0].x,l[0].y],[l[1].x,l[1].y]], [[pZ3.x, pZ3.y],[pZ1.x, pZ1.y]]);
+            poly.drawLineOnCanvas([[l1[0].x,l1[0].y],[l1[1].x,l1[1].y]]);
+        // console.log(l1)
+        // let l2 = [[l1[0][0],l1[0][1]],[l1[1][0], l1[1][1]]];
+       // console.log(l2);
+    //poly.drawLineOnCanvas(l1);
+        }
+        catch {
+           // poly.drawLineOnCanvas(l);
+        }
+        // console.log(l,l1)
+       // let l2 = poly.clipLineToCircle(l, center, rmax);
+        //let l2 = poly.clipLineToCircle(l, center, rmin);
+        
+    });
     // let bb = {xmin:margin, ymin:margin, xmax:width-margin, ymax:height-margin};
 
     // let circles = [];

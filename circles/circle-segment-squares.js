@@ -10,7 +10,7 @@ const poly = require('../utils/poly');
 let svgFile = new penplot.SvgFile();
 
 const settings = {
-  dimensions: 'A3',
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -20,8 +20,8 @@ const settings = {
 const sketch = (context) => {
 
   let margin = 0.2;
-  let elementWidth = 3;
-  let elementHeight = 3;
+  let elementWidth = 2.2;
+  let elementHeight = 2.2;
   let columns = 6;
   let rows = 10;
   

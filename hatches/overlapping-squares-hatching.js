@@ -8,7 +8,7 @@ const poly = require('../utils/poly');
 let svgFile = new penplot.SvgFile();
 
 const settings = {
-  dimensions: 'A3',
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -20,8 +20,8 @@ const sketch = (context) => {
   let margin = -0.2;
   let elementWidth = 3;
   let elementHeight = 3;
-  let columns = 6;
-  let rows = 10;
+  let columns = 4;
+  let rows = 6;
   
   let drawingWidth = (columns * (elementWidth + margin)) - margin;
   let drawingHeight = (rows * (elementHeight + margin)) - margin;
@@ -52,12 +52,13 @@ const sketch = (context) => {
     let posX = marginLeft;
     let posY = marginTop;
 
+    for (let a = 0; a<o[0][0][0].length; a++) {
     for (let r = 0; r < rows; r++) {
     	for (let i = 0; i < columns; i++) {
         let sposX = posX + o[r][i][2];
         let sposY = posY + o[r][i][3];
         let s =poly.createSquarePolygon(sposX, sposY, elementWidth, elementHeight);
-        let lines = poly.hatchPolygon(s, o[r][i][0], o[r][i][1]);
+        let lines = poly.hatchPolygon(s, o[r][i][0][a], o[r][i][1]);
         lines.map(l => {
           poly.drawLineOnCanvas(l);
           svgFile.addLine(l);
@@ -69,6 +70,7 @@ const sketch = (context) => {
     	posX = marginLeft;
     	posY = posY + elementHeight + margin;
     }
+  }
 
     // let bounds = poly.createSquarePolygon(marginLeft, marginTop, drawingWidth, drawingHeight);
     // let hatchLines = poly.hatchPolygon(bounds, 30, 0.5);

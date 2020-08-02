@@ -11,7 +11,7 @@ let lines = [];
 let arcs = [];
 
 const settings = {
-  dimensions: [24,31.5],
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
   scaleToView: true,
@@ -22,8 +22,8 @@ const sketch = context => {
   let margin = 0;
   let elementWidth = 2;
   let elementHeight = 2;
-  let columns = 1;
-  let rows = 1;
+  let columns = 5;
+  let rows = 5;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
@@ -129,7 +129,7 @@ const sketch = context => {
 
       // draw square tile
       let s = poly.createSquarePolygon(x, y, side);
-      poly.drawPolygonOnCanvas(context, s);
+      poly.drawPolygonOnCanvas(s);
 
       // draw inner quarter circle
       let center1 = poly.point(x+padding, y+padding);
