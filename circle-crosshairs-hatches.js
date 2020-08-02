@@ -88,6 +88,7 @@ const sketch = (context) => {
     
     poly.drawPolygonOnCanvas([[p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y],[p4.x,p4.y]])
     let x = poly.hatchDonut(center, rmax, rmin, 30, 0.1);
+    //x.slice(30,40).forEach(l => { poly.drawLineOnCanvas(l); });
     //console.log(x)
     //let y = poly.hatchPolygon([[p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y],[p4.x,p4.y]], 5, 0.1)
     poly.drawLineOnCanvas([[pZ3.x, pZ3.y],[pZ1.x, pZ1.y]]);
@@ -95,6 +96,25 @@ const sketch = (context) => {
 
     x.forEach(l => {
         //poly.drawLineOnCanvas(l);
+
+        let int1 = poly.findIntersection(l[0], l[1], p1, p4);
+        //poly.drawCircle(context)(int1.x, int1.y, 1);
+        let int2 = poly.findIntersection(l[0], l[1], p2, p3);
+        //poly.drawCircle(context)(int2.x, int2.y, 1);
+        if (poly.pointIsInCircle(int1, center, rmax) ) {
+          if (!poly.pointIsInCircle(int1, center, rmin)){
+            
+            if (!poly.pointIsInCircle(int2, center, rmin)) {
+              //segment cuts both
+              poly.drawLineOnCanvas(l);
+            }
+            else {
+              //segment cuts left only
+              
+            }
+          //poly.drawCircle(context)(int1.x, int1.y, 1);
+          }
+        }
        
         try {
             console.log(l);
