@@ -2,24 +2,18 @@ const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
-//const palettes = require('nice-color-palettes');
 const poly = require('./utils/poly.js');
 
-
-random.setSeed(random.getRandomSeed());
-
+random.setSeed(random.getRandomSeed());//359079
 console.log(`seed: ${random.getSeed()}`);
-// 469789
-// 219376
 
 const paths = [[],[],[]];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A4',//[ 2048, 2048 ]
+  dimensions: 'A4',
   orientation: 'portrait',
   pixelsPerInch: 300,
-  //scaleToView: true,
   units: 'mm',
 };
 
@@ -39,39 +33,30 @@ const sketch = ({ width, height }) => {
         const radius = Math.abs(noise) * 0.035;
         const ix = Math.floor(Math.abs(noise)*paths.length);
 
-        points.push({
-          //color: random.pick(palette), //'black',
-          radius: Math.abs(radius),
-          position,
-          rotation: random.noise2D(u+2,v),
-
-          group: paths[ix]
-        });
+        points.push({ radius: Math.abs(radius),
+                      position,
+                      rotation: random.noise2D(u+2,v),
+                      group: paths[ix]
+                    });
       }
     }
     return points;
   };
 
   let points = createGrid().filter(() => {
-
     return Math.random() > 0.7;
-
   });
-
   points = random.shuffle(points);
 
   return ({ context, width, height, units }) => {
-
     const margin = width * 0.15;
-
-    context.fillStyle = 'white';//background;
+    context.fillStyle = 'white';//=background;
     context.fillRect(0, 0, width, height);
 
     points.forEach(data => {
       const {
         position,
         radius,
-        //color,
         rotation,
         group
       } = data;
@@ -82,21 +67,22 @@ const sketch = ({ width, height }) => {
         let h = Math.abs(rotation*30),
             w1 = Math.abs(rotation*3),
             w2 = Math.abs(rotation);
-
         return {line1:[[x-w2/2,y+h/2],[x-w1/2,y-h/2]],
                 line2:[[x+w2/2,y+h/2],[x+w1/2,y-h/2]],
                 arc1:[x,y-h/2,w1/2,180,0],
                 arc2:[x,y+h/2,w2/2,0,180]};
       }
-      const rotate = (line) => {
-        return poly.rotatePolygon(line, [x,y], radius*width*10);
-      }
+
+      let rot = radius*width*10;
+
+      const rotate = (line) => { return poly.rotatePolygon(line, [x,y], rot); }
+
       const rotateArc = (arc) => {
-        let rot = radius*width*10;
         let [x1,y1,r,s,e] = arc;
         let [rotx1,roty1] = poly.rotatePoint([x1,y1], [x,y], rot);
         return [rotx1,roty1,r,s+rot,e+rot];
       }
+
       const drawLineOnCanvas = (ctx, line) => {
         let x1 = line[0].x  || line[0][0],
             x2 = line[1].x || line[1][0],
@@ -106,18 +92,16 @@ const sketch = ({ width, height }) => {
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
       }
-      const drawArcOnCanvas = (ctx, x, y, radius, startAngle, endAngle) => {
-        let sAngle = (Math.PI / 180) * startAngle;
-        let eAngle = (Math.PI / 180) * endAngle;
 
-        ctx.arc(x, y, radius, sAngle, eAngle);
+      const drawArcOnCanvas = (ctx, x, y, radius, startAngle, endAngle) => {
+        ctx.arc(x, y, radius, (Math.PI / 180) * startAngle, (Math.PI / 180) * endAngle);
       }
 
       let t = triangle();
-      let l1 = rotate(t.line1);
-      let l2 = rotate(t.line2);
-      let a1 = rotateArc(t.arc1);
-      let a2 = rotateArc(t.arc2);
+      let l1 = rotate(t.line1),
+          l2 = rotate(t.line2),
+          a1 = rotateArc(t.arc1),
+          a2 = rotateArc(t.arc2);
 
       const path = createPath(ctx => {
         drawLineOnCanvas(ctx, l1);
@@ -125,25 +109,10 @@ const sketch = ({ width, height }) => {
         drawLineOnCanvas(ctx, l2);
         drawArcOnCanvas(ctx, ...a2);
       });
-      
 
       group.push(path);
-
     });
 
-    // return [
-    //   // Export PNG as first layer
-    //   context.canvas,
-    //   // Export SVG for pen plotter as second layer
-    //   {
-    //     data: pathsToSVG(paths, {
-    //       width,
-    //       height,
-    //       units
-    //     }),
-    //     extension: '.svg',
-    //   }
-    // ];
     return renderGroups(paths, {
       context, width, height, units
     });

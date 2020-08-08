@@ -231,7 +231,12 @@ const hatchCircle = (center, radius, angle, spacing) => {
 }
 
 const hatchPolygon = (polygon, angle, spacing = 0.1, padding = 0) => {
-    let rectangle = calculateBoundingBox(polygon, padding);
+    let polygonNotP = polygon.map(p => {
+      return [p.x || p[0], p.y || p[1]];
+    });
+
+
+    let rectangle = calculateBoundingBox(polygonNotP, padding);
 
     let x = rectangle[0][0];
     let y = rectangle[0][1];
@@ -265,7 +270,7 @@ const hatchPolygon = (polygon, angle, spacing = 0.1, padding = 0) => {
     for (let i = 0; i < hatchlines.length; i++) {
         let x = null;
         try {
-          x = clip(hatchlines[i], polygon);
+          x = clip(hatchlines[i], polygonNotP);
         } catch {}
         if (x) {
             x.map(l => {
@@ -521,6 +526,30 @@ const drawArc = (cx, cy, radius, startAngle, endAngle) => {
   context.stroke();
 }
 
+const drawPolygon = context => (polygon) => {
+  let polygonP = [];
+  if (polygon[0].x) {
+    polygonP = polygon;
+  }
+  else {
+    polygon.forEach(element => {
+      polygonP.push(point(element[0], element[1]));
+    });
+  }
+
+  context.beginPath();
+
+  context.moveTo(polygonP[0].x, polygonP[0].y);
+
+  polygonP.slice(1,polygonP.length).forEach(e => {
+    context.lineTo(e.x, e.y);
+  });
+
+  context.lineTo(polygonP[0].x, polygonP[0].y);
+
+  context.stroke();
+}
+
 /**
  * returns the distance between two points
  * 
@@ -615,6 +644,7 @@ poly.clipLineToBB = clipLineToBB;
 poly.clipLineToCircle = clipLineToCircle;
 poly.pointIsInCircle = pointIsInCircle;
 poly.drawCircle = drawCircle;
+poly.drawPolygon = drawPolygon;
 poly.drawArc = drawArc;
 poly.distanceBetween = distanceBetween;
 poly.drawArcOnCanvas = drawArcOnCanvas;

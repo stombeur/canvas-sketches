@@ -24,6 +24,9 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
+  paths = [];
+  hatches = [];
+  
   const countX = 10;
   const countY = Math.floor(countX / width * height);
 

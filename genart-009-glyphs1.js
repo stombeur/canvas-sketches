@@ -14,7 +14,7 @@ const paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A3',//[ 2048, 2048 ]
+  dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -24,7 +24,7 @@ const settings = {
 
 
 const sketch = ({ width, height }) => {
-  const countX = 25;
+  const countX = 15;
   const countY = Math.floor(countX / width * height);
   const l = (width / countX) * (1 / 5);
 

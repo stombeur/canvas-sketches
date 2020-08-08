@@ -19,6 +19,7 @@
     "defined": "^1.0.0",
     "nice-color-palettes": "^3.0.0",
     "noisejs-ilmiont": "^1.2.3",
-    "p5": "^0.8.0"
+    "p5": "^0.8.0",
+    "polybooljs": "1.2.0"
   }
 }
