@@ -3,12 +3,12 @@
 const canvasSketch = require('canvas-sketch');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 
-const penplot = require('./utils/penplot');
-const poly = require('./utils/poly');
+const penplot = require('../utils/penplot');
+const poly = require('../utils/poly');
 const random = require('canvas-sketch-util/random');
-const random2 = require('./utils/random');
+const random2 = require('../utils/random');
 
-const postcards = require('./utils/postcards');
+const postcards = require('../utils/postcards');
 
 random.setSeed(random.getRandomSeed());//359079
 

@@ -2,8 +2,8 @@ const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
 const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
-const poly = require('./utils/poly.js');
-const postcards = require('./utils/postcards');
+const poly = require('../utils/poly.js');
+const postcards = require('../utils/postcards');
 
 random.setSeed(random.getRandomSeed());
 

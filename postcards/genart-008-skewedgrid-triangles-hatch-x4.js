@@ -4,8 +4,8 @@ const { lerp } = require('canvas-sketch-util/math');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
-const poly = require('./utils/poly.js');
-const postcards = require('./utils/postcards');
+const poly = require('../utils/poly.js');
+const postcards = require('../utils/postcards');
 
 // random.setSeed(random.getRandomSeed());//995935
 // console.log(`seed: ${random.getSeed()}`);
@@ -17,8 +17,8 @@ const postcards = require('./utils/postcards');
 
 const skewFactor = 0.5;
 
-const paths = [];
-const hatches = [];
+let paths = [];
+let hatches = [];
 
 const settings = {
   suffix: random.getSeed(),
@@ -93,7 +93,8 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
 
     const margin = width * 0.05;
-  
+    paths = [];
+    hatches = [];
 
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
@@ -101,6 +102,7 @@ const sketch = ({ width, height }) => {
 
     const draw = (origin, w, h) => {
       random.setSeed(random.getRandomSeed());
+      console.log(`origin: ${origin} seed: ${random.getSeed()}`);
       let grid = createGrid(10, width, height);
 
       for (let row = 0; row < grid.length; row++) {
@@ -228,19 +230,6 @@ const sketch = ({ width, height }) => {
 
     postcards.drawQuad(draw, width, height);
 
-    // return [
-    //   // Export PNG as first layer
-    //   context.canvas,
-    //   // Export SVG for pen plotter as second layer
-    //   {
-    //     data: pathsToSVG(paths, {
-    //       width,
-    //       height,
-    //       units
-    //     }),
-    //     extension: '.svg',
-    //   }
-    // ];
     return renderGroups([paths,hatches], {
       context, width, height, units
     });

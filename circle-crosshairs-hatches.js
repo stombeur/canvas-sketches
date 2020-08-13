@@ -5,7 +5,7 @@ const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/pe
 
 const penplot = require('./utils/penplot');
 const poly = require('./utils/poly');
-const polybool = require('polybooljs');
+//const polybool = require('polybooljs');
 const random = require('canvas-sketch-util/random');
 let svgFile = new penplot.SvgFile();
 
