@@ -25,7 +25,7 @@ const sketch = ({ width, height }) => {
    
   return ({ context, width, height, units }) => {
     paths = [];
-    let marginRatio = 0.175;
+    let marginRatio = 0.09;
 
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
@@ -48,7 +48,7 @@ const sketch = ({ width, height }) => {
       for (let j = 1; j < nrOfBands; j++) {
         let rout = rmax / nrOfBands * (j+1);
         let n = Math.abs(random.noise2D(rmax, j))  * 360;
-        let o = random2.getRandomInclusive(1,0.7) * 17;
+        let o = random2.getRandomInclusive(1,0.7) * 24;
 
         drawArc(center, rout, n+o, n)
       }
