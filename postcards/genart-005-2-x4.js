@@ -5,7 +5,7 @@ const random = require('canvas-sketch-util/random');
 const poly = require('../utils/poly.js');
 const postcards = require('../utils/postcards');
 
-random.setSeed(random.getRandomSeed());
+
 
 const settings = {
   suffix: random.getSeed(),
@@ -15,7 +15,7 @@ const settings = {
   units: 'mm',
 };
 
-const paths = [];
+let paths = [];
 
 const createGrid = (count, width, height) => {
   const points = [];
@@ -44,8 +44,8 @@ const sketch = ({ width, height }) => {
   
 
   return ({ context, width, height, units }) => {
-    const count = 40;
-
+    const count = 45;
+    paths = [];
 
     const drawLineOnCanvas = (ctx, line) => {    
       ctx.moveTo(line[0][0], line[0][1]);
@@ -64,6 +64,8 @@ const sketch = ({ width, height }) => {
 
     const draw = (origin, w, h) => {
       const margin = w * 0.20;
+      
+      random.setSeed(random.getRandomSeed());
 
       let points = createGrid(count, w, h).filter(() => {
         return Math.random() > 0.81;

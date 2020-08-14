@@ -22,7 +22,7 @@ let hatches = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A3',//[ 2048, 2048 ]
+  dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
