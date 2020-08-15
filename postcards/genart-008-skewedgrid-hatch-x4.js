@@ -15,7 +15,7 @@ const postcards = require('../utils/postcards');
 //880711
 //995935
 
-const skewFactor = 0.65;
+const skewFactor = 0.7;
 let initRandom = random.getRandomSeed();
 
 let paths = [];
@@ -23,7 +23,7 @@ let hatches = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A3',//[ 2048, 2048 ]
+  dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -65,8 +65,8 @@ const createGrid = (count, width, height) => {
       points.push({
         position: positionSkewed,
         noise,
-        hatch1: noise < 0.92 && noise > 0.48,
-        hatch2: noise < 0.53 && noise > 0.24
+        hatch1: noise < 0.95 && noise > 0.45,
+        hatch2: noise < 0.50 && noise > 0.20
       });
     }
     grid.push(points);

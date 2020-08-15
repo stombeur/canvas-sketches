@@ -89,7 +89,7 @@ const createGrid = (countX, width, height, origin) => {
 
 
 const sketch = ({ width, height }) => {
-  const countX = 15;
+  const countX = 12;
 
   return ({ context, width, height, units }) => {
    
