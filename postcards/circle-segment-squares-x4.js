@@ -11,7 +11,7 @@ console.log(`seed: ${random.getSeed()}`);
 // 469789
 // 219376
   
-const paths = [];
+let paths = [];
 
 const settings = {
   suffix: random.getSeed(),
@@ -79,11 +79,11 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
-
     
+    paths = [];
 
     const draw = (origin, w, h) => {
-      this.paths = [];
+      
       const marginX = w * 0.15;
 
       let grid = createGrid(columns, rows);
@@ -91,7 +91,7 @@ const sketch = ({ width, height }) => {
       let marginY = (h - (size * rows)) / 2;
 
       let radius = size / 2;
-      let divide = 10
+      let divide = 12;
       let step = radius / divide;
 
       for (let r = 0; r < rows; r++) {
