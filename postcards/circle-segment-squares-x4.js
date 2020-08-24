@@ -5,6 +5,9 @@ const random = require('canvas-sketch-util/random');
 //const palettes = require('nice-color-palettes');
 //const poly = require('../utils/poly.js');
 const postcards = require('../utils/postcards');
+const penplot = require('../utils/penplot');
+
+let svgFile = new penplot.SvgFile();
 
 random.setSeed(random.getRandomSeed());
 console.log(`seed: ${random.getSeed()}`);
@@ -34,20 +37,22 @@ const drawLine = (line) => {
   });
 }
 
-const drawArc = (center, radius, sAngle, eAngle) => {
-  let cx = center.x || center[0],
-      cy = center.y || center[1];
+// const drawArc = (center, radius, sAngle, eAngle) => {
+//   let cx = center.x || center[0],
+//       cy = center.y || center[1];
 
-  return createPath(ctx => {
-    ctx.arc(
-      cx,
-      cy,
-      radius,
-      (Math.PI / 180) * sAngle,
-      (Math.PI / 180) * eAngle
-    );
-  });
-};
+//   return createPath(ctx => {
+//     ctx.arc(
+//       cx,
+//       cy,
+//       radius,
+//       (Math.PI / 180) * sAngle,
+//       (Math.PI / 180) * eAngle
+//     );
+//   });
+// };
+
+
 
 // const drawArc = (center, radius, sAngle, eAngle) => {
 //   const path = createPath(ctx => {
@@ -79,8 +84,19 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
+    context.strokeStyle = 'black';
+    context.lineWidth = 0.4;
+
+    const drawArc = (cx, cy, radius, sAngle, eAngle) => {
+      context.beginPath();
+      context.arc(cx, cy, radius, (Math.PI / 180) * sAngle, (Math.PI / 180) * eAngle);
+      context.stroke();
+    
+      svgFile.addArc(cx, cy, radius, sAngle, eAngle);
+    }
     
     paths = [];
+    svgFile = new penplot.SvgFile();
 
     const draw = (origin, w, h) => {
       
@@ -102,7 +118,9 @@ const sketch = ({ width, height }) => {
           let [x,y] = postcards.reorigin([x0,y0], origin);
 
           for (let s = 0; s < (divide); s++) {
-            paths.push(drawArc([x + radius, y + radius], s * step, segment[0], segment[0] + 270));
+            //paths.push(drawArc([x + radius, y + radius], s * step, segment[0], segment[0] + 270));
+            paths.push(drawArc(x + radius, y + radius, s * step, segment[0], segment[0] + 270));
+            //svgFile.addArc(x + radius, y + radius, s * step, segment[0], segment[0] + 270);
           }
         }
       }
@@ -111,9 +129,22 @@ const sketch = ({ width, height }) => {
 
     postcards.drawQuad(draw, width, height);
 
-    return renderPaths(paths, {
-      context, width, height, units
-    });
+    // return renderPaths(paths, {
+    //   context, width, height, units
+    // });
+    return [
+      // Export PNG as first layer
+      context.canvas,
+      // Export SVG for pen plotter as second layer
+      {
+        data: svgFile.toSvg({
+          width,
+          height,
+          units
+        }),
+        extension: '.svg',
+      }
+    ];
   };
 };
 
