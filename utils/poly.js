@@ -575,6 +575,7 @@ const pointIsInCircle = (point, center, radius) => {
   return distanceBetween(point, center) < radius;
 }
 
+
 // module.exports.findIntersection = findIntersection;
 // module.exports.isPointBetween = isPointBetween;
 // module.exports.findSegmentIntersection = findSegmentIntersection;
