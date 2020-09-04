@@ -21,7 +21,7 @@ const settings = {
 const sketch = ({ width, height }) => {
   paths = [];
 
-  let margin = 1;
+  let margin = 2;
   let elementWidth = 1;
   let elementHeight = 1;
   let columns = 1;
@@ -72,7 +72,7 @@ const sketch = ({ width, height }) => {
     let rmax = (width-margin*2) / 2;
     let center = poly.point(width/2, height/2);
 
-    let nrOfBands = 30;
+    let nrOfBands = 26;
     
     for (let j = 1; j < nrOfBands; j++) {
       let rout = rmax / nrOfBands * (j+1);
