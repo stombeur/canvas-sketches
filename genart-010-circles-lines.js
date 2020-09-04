@@ -52,7 +52,7 @@ const settings = {
 
 const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
-    const count = 45;
+    const count = 10;
     paths = [];
 
 
@@ -62,7 +62,7 @@ const sketch = ({ width, height }) => {
       random.setSeed(random.getRandomSeed());
 
       let points = createGrid(count, w, h).filter(() => {
-        return Math.random() > 0.9975;
+        return Math.random() > 0.8;
       });
 
       points.forEach(data => {
@@ -77,12 +77,12 @@ const sketch = ({ width, height }) => {
         const [x,y] = postcards.reorigin([x0,y0], origin);
   
         paths.push(createPath(ctx => {
-          drawArcOnCanvas(ctx, x, y, 2, 0, 360);
+          drawArcOnCanvas(ctx, x, y, 4, 0, 360);
         }));
       });
     }
 
-    postcards.drawQuad(draw, width, height);
+    postcards.drawSingle(draw, width, height);
 
     return renderPaths([paths], {
       context, width, height, units
