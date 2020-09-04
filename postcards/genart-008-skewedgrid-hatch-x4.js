@@ -60,7 +60,7 @@ const createGrid = (count, width, height) => {
       const u = x / (countX - 1);
       const v = y / (countY - 1);
       const position = [ u, v ];
-      const noise = random.noise2D(u,v) * 1;//random.gaussian(0.25, 0.28) //
+      const noise = random.noise2D(u,v) * 2;//random.gaussian(0.25, 0.28) //
       const positionSkewed = skew(position, noise,  noise / countX * skewFactor, noise / countY * skewFactor);
       points.push({
         position: positionSkewed,

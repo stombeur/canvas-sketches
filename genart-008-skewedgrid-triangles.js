@@ -14,10 +14,10 @@ console.log(`seed: ${random.getSeed()}`);
 //880711
 //995935
 
-const skewFactor = 0.5;
+const skewFactor = 1;
 
-const paths = [];
-const hatches = [];
+let paths = [];
+let hatches = [];
 
 const settings = {
   suffix: random.getSeed(),
@@ -76,7 +76,8 @@ const sketch = ({ width, height }) => {
   let grid = createGrid();
 
   return ({ context, width, height, units }) => {
-
+    paths = [];
+    hatches = [];
     const margin = width * 0.125;
 
     context.fillStyle = 'white';//background;

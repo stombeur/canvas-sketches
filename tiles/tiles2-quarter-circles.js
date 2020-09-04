@@ -22,8 +22,8 @@ const sketch = context => {
   let margin = 0;
   let elementWidth = 2.2;
   let elementHeight = 2.2;
-  let columns = 7;
-  let rows = 11;
+  let columns = 6;
+  let rows = 10;
 
   let drawingWidth = columns * (elementWidth + margin) - margin;
   let drawingHeight = rows * (elementHeight + margin) - margin;
