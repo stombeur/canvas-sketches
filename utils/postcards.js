@@ -21,6 +21,10 @@ const reorigin = (point, origin) => {
     f([width/2,height/2], width/2, height/2);
   }
 
+  const drawSingle = (f, width, height) => {
+    f([0,0], width, height);
+  }
+
   const drawOct = (f, width, height) => {
     f([0,0], width/4, height/2);
     f([width/4,0], width/4, height/2);
@@ -84,6 +88,7 @@ const reorigin = (point, origin) => {
   }
 
 module.exports.reorigin = reorigin;
+module.exports.drawSingle = drawSingle;
 module.exports.drawQuad = drawQuad;
 module.exports.drawOct = drawOct;
 module.exports.drawQuadCutLines = drawQuadCutLines;
