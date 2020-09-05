@@ -68,6 +68,7 @@ const settings = {
 const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
     const count = 14;
+    
     paths = [];
 
 
@@ -79,15 +80,24 @@ const sketch = ({ width, height }) => {
       let points = createGrid(count, w, h).filter(() => {
         return Math.random() > 0.85;
       });
-
+      
       let m = new Map();
+      let lines = new Map();
 
       const increase = (key) => {
         let k = JSON.stringify(key);
-        if (!m.has(k)) { m.set(k, 1); }
+        if (!m.has(k)) { m.set(k, {p: key, r: 1}); }
         else {
-          m.set(k, m.get(k)+1);
+          va = m.get(k);
+          va.r = va.r + 1;
+          m.set(k, va);
         }
+      }
+
+      const addLine = (p1, p2) => {
+        //drawLineOnCanvas(ctx, [p1, p2]); 
+        increase(p1);
+        lines.set(JSON.stringify([p1,p2]), {p1, p2});
       }
 
       points.forEach(data => {
@@ -110,35 +120,73 @@ const sketch = ({ width, height }) => {
         p.sort((a,b) => poly.distanceBetween([x,y], a) - poly.distanceBetween([x,y], b));
 
         paths.push(createPath(ctx => {
-          drawLineOnCanvas(ctx, [[x,y], p[1]]); increase(p[1]); //m.set(p[1], (m.get(p[1]))+1);
-          drawLineOnCanvas(ctx, [[x,y], p[2]]); increase(p[2]); // m.set(p[2], (m.get(p[2]))+1);
-          drawLineOnCanvas(ctx, [[x,y], p[3]]); increase(p[3]); // m.set(p[3], (m.get(p[3]))+1);
-          // drawLineOnCanvas(ctx, [[x,y], p[4]]); increase(p[4]); // m.set(p[4], (m.get(p[4]))+1);
-          // drawLineOnCanvas(ctx, [[x,y], p[5]]); increase(p[5]); // m.set(p[4], (m.get(p[4]))+1);
+          addLine([x,y], p[1]); 
+          addLine([x,y], p[2]);
+          addLine([x,y], p[3]);
+          // doLine(ctx, [x,y], p[4]);
+          // doLine(ctx, [x,y], p[5]);
         }));
 
+       
         
       });
 
       m.forEach((v, k) => {
-        let [x,y] = JSON.parse(k);
-        console.log([x,y])
+        let [x,y] = v.p;
+       // console.log([x,y])
         paths.push(createPath(ctx => {
-          let maxr = v;
-          let nrOfCircles = v;
+          let maxr = v.r;
+          let nrOfCircles = v.r;
           let step = maxr / nrOfCircles;
           // for (let i = 1; i <= nrOfCircles; i++) {
           //   drawArcOnCanvas(ctx, x, y, i * step, 0, 360);
           // }
-          drawArcOnCanvas(ctx, x, y, 2, 0, 360);
+          drawArcOnCanvas(ctx, x, y, v.r, 0, 360);
       }));
       });
-      
+     
+      lines.forEach((v,k)=> {
+         //todo: 
+        // derive line equation
+        // intersect line with circle
+        // check which intersection is between the two endpoints of the segment
+
+        let [p1,p2] = [v.p1, v.p2];
+        let eq = poly.lineEquationFromPoints(p1,p2);
+
+        let c1 = m.get(JSON.stringify(p1));
+        let c2 = m.get(JSON.stringify(p2));
+        let i1 = poly.findCircleLineIntersectionsWithY(c1.r, c1.p[0], c1.p[1], eq.m, eq.n);
+        let i2 = poly.findCircleLineIntersectionsWithY(c2.r, c2.p[0], c2.p[1], eq.m, eq.n);
+
+        
+        
+        let p1b, p2b;
+        if (i1.length > 0) {
+          p1b = i1[0];
+          if (!poly.isPointBetween(i1[0], p1, p2)) {
+            p1b = i1[1];
+          }
+        }
+        if (i2.length > 0) {
+          p2b = i2[0];
+          if (!poly.isPointBetween(i2[0], p1, p2)) {
+            p2b = i2[1];
+          }
+        }
+        if (p1b && p2b) {
+          paths.push(createPath(ctx => {
+            drawLineOnCanvas(ctx, [p1b, p2b])
+          }));
+        }
+
+      });
+
     }
 
     postcards.drawQuad(draw, width, height);
 
-    return renderPaths([paths], {
+    return renderPaths(paths, {
       context, width, height, units
     });
   };

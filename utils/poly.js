@@ -437,6 +437,22 @@ const findCircleLineIntersectionsP = (r, c, line) => {
             .map(xInt => {return point(xInt[0], (m*xInt + n))});
 }
 
+const findCircleLineIntersectionsWithY = (r, h, k, m, n) => {
+  let x = findCircleLineIntersections(r, h, k, m, n);
+  if (x.length === 0) { return x; }
+  if (x.length === 1) { 
+    let y = m * x[0][0] + n;
+    return [[x[0][0],y]]
+  }
+  if (x.length === 2) { 
+
+    let y1 = m * x[0][0] + n;
+    let y2 = m * x[1][0] + n;
+
+    return [[x[0][0],y1],[x[1][0],y2]]
+   }
+}
+
 const findCircleLineIntersections = (r, h, k, m, n) => {
   // circle: (x - h)^2 + (y - k)^2 = r^2
   // line: y = m * x + n
@@ -638,6 +654,7 @@ poly.createSquarePolygon = createSquarePolygon;
 poly.lineEquationFromPoints = lineEquationFromPoints;
 poly.findCircleLineIntersections = findCircleLineIntersections;
 poly.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
+poly.findCircleLineIntersectionsWithY = findCircleLineIntersectionsWithY;
 poly.hatchCircle = hatchCircle;
 poly.hatchDonut = hatchDonut;
 poly.pointIsInsideBB = pointIsInsideBB;
