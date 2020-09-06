@@ -139,15 +139,14 @@ const sketch = ({ width, height }) => {
       m.forEach((v, k) => {
         let [x,y] = v.p;
        // console.log([x,y])
-        drawCircles.push(createPath(ctx => {
-          let maxr = v.r;
-          let nrOfCircles = v.r;
+       let maxr = v.r;
+          let nrOfCircles = 3;
           let step = maxr / nrOfCircles;
-          // for (let i = 1; i <= nrOfCircles; i++) {
-          //   drawArcOnCanvas(ctx, x, y, i * step, 0, 360);
-          // }
-          drawArcOnCanvas(ctx, x, y, v.r, 0, 360);
-      }));
+          for (let i = 1; i <= nrOfCircles; i++) {
+            drawCircles.push(createPath(ctx => {
+              drawArcOnCanvas(ctx, x, y, i * step, 0, 360);
+            }));
+          }
       });
      
       lines.forEach((v,k)=> {
