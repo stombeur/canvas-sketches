@@ -77,6 +77,7 @@ const sketch = ({ width, height }) => {
       const margin = w * 0.20;
       
       random.setSeed(random.getRandomSeed());
+      console.log(random.getSeed());
 
       let points = createGrid(count, w, h).filter(() => {
         return Math.random() > 0.85;
@@ -87,10 +88,10 @@ const sketch = ({ width, height }) => {
 
       const increase = (key) => {
         let k = JSON.stringify(key);
-        if (!m.has(k)) { m.set(k, {p: key, r: 1}); }
+        if (!m.has(k)) { m.set(k, {p: key, r: 0.55}); }
         else {
           va = m.get(k);
-          va.r = va.r + 1;
+          va.r = va.r + 0.55;
           m.set(k, va);
         }
       }
@@ -179,20 +180,24 @@ const sketch = ({ width, height }) => {
         // todo iterate over m
         // check if there are intersections
         // split line
-        // todo split until no more intersections
         m.forEach((v,k)=> {
           if (k === JSON.stringify(p1) || k === JSON.stringify(p2)) { return; }
           let int = poly.findCircleLineIntersectionsWithY(v.r, v.p[0], v.p[1], eq.m, eq.n);
           if (int.length > 1) {
             if (poly.isPointBetween(int[0], p1, p2) && poly.isPointBetween(int[1], p1, p2)) {
-              console.log('intersect')
               ok = false;
               paths.push(createPath(ctx => {
-                //drawLineOnCanvas(ctx, [p1, p2])
-                drawLineOnCanvas(ctx, [p1b, int[0]]);
-                drawLineOnCanvas(ctx, [int[1], p2b]);
-                // drawArcOnCanvas(ctx, int[0][0], int[0][1], 1, 0, 360);
-                // drawArcOnCanvas(ctx, int[1][0], int[1][1], 1, 0, 360);
+                let d1 = poly.distanceBetween(p1b, int[0]);
+                let d2 = poly.distanceBetween(p1b, int[1]);
+                if (d1 < d2) {
+                  drawLineOnCanvas(ctx, [p1b, int[0]]);
+                  drawLineOnCanvas(ctx, [int[1], p2b]);
+                }
+                else {
+                  drawLineOnCanvas(ctx, [p1b, int[1]]);
+                  drawLineOnCanvas(ctx, [int[0], p2b]);
+                }
+
               }));
             
             }
@@ -202,10 +207,7 @@ const sketch = ({ width, height }) => {
 
         if (ok && p1b && p2b) {
           paths.push(createPath(ctx => {
-            // let d = ctx.getLineDash();
-            // ctx.setLineDash([1,4]);
-            //drawLineOnCanvas(ctx, [p1b, p2b])
-            // ctx.setLineDash(d);
+            drawLineOnCanvas(ctx, [p1b, p2b])
           }));
         }
 
@@ -213,7 +215,7 @@ const sketch = ({ width, height }) => {
 
     }
 
-    postcards.drawSingle(draw, width, height);
+    postcards.drawQuad(draw, width, height);
 
     return renderPaths(paths, {
       context, width, height, units
