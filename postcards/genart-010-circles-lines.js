@@ -1,13 +1,15 @@
 
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
-const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderPaths, renderGroups, createPath } = require('canvas-sketch-util/penplot');
 const postcards = require('../utils/postcards');
 const poly = require('../utils/poly');
 const random = require('canvas-sketch-util/random');
 const { clipPolylinesToBox } = require('canvas-sketch-util/geometry');
+const { drawCircle } = require('../utils/poly');
 
-let paths = [];
+let drawLines = [];
+let drawCircles = [];
 
 const createGrid = (count, width, height) => {
   const points = [];
@@ -70,7 +72,8 @@ const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
     const count = 14;
     
-    paths = [];
+    drawLines = [];
+    drawCircles = [];
 
 
     const draw = (origin, w, h) => {
@@ -121,7 +124,7 @@ const sketch = ({ width, height }) => {
         });
         p.sort((a,b) => poly.distanceBetween([x,y], a) - poly.distanceBetween([x,y], b));
 
-        paths.push(createPath(ctx => {
+        drawLines.push(createPath(ctx => {
           addLine([x,y], p[1]); 
           addLine([x,y], p[2]);
           addLine([x,y], p[3]);
@@ -136,7 +139,7 @@ const sketch = ({ width, height }) => {
       m.forEach((v, k) => {
         let [x,y] = v.p;
        // console.log([x,y])
-        paths.push(createPath(ctx => {
+        drawCircles.push(createPath(ctx => {
           let maxr = v.r;
           let nrOfCircles = v.r;
           let step = maxr / nrOfCircles;
@@ -186,7 +189,7 @@ const sketch = ({ width, height }) => {
           if (int.length > 1) {
             if (poly.isPointBetween(int[0], p1, p2) && poly.isPointBetween(int[1], p1, p2)) {
               ok = false;
-              paths.push(createPath(ctx => {
+              drawLines.push(createPath(ctx => {
                 let d1 = poly.distanceBetween(p1b, int[0]);
                 let d2 = poly.distanceBetween(p1b, int[1]);
                 if (d1 < d2) {
@@ -206,7 +209,7 @@ const sketch = ({ width, height }) => {
         });
 
         if (ok && p1b && p2b) {
-          paths.push(createPath(ctx => {
+          drawLines.push(createPath(ctx => {
             drawLineOnCanvas(ctx, [p1b, p2b])
           }));
         }
@@ -217,7 +220,7 @@ const sketch = ({ width, height }) => {
 
     postcards.drawQuad(draw, width, height);
 
-    return renderPaths(paths, {
+    return renderGroups([drawLines, drawCircles], {
       context, width, height, units
     });
   };
