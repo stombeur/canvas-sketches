@@ -5,6 +5,7 @@ const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const postcards = require('../utils/postcards');
 const poly = require('../utils/poly');
 const random = require('canvas-sketch-util/random');
+const { clipPolylinesToBox } = require('canvas-sketch-util/geometry');
 
 let paths = [];
 
@@ -159,8 +160,6 @@ const sketch = ({ width, height }) => {
         let i1 = poly.findCircleLineIntersectionsWithY(c1.r, c1.p[0], c1.p[1], eq.m, eq.n);
         let i2 = poly.findCircleLineIntersectionsWithY(c2.r, c2.p[0], c2.p[1], eq.m, eq.n);
 
-        
-        
         let p1b, p2b;
         if (i1.length > 0) {
           p1b = i1[0];
@@ -174,9 +173,39 @@ const sketch = ({ width, height }) => {
             p2b = i2[1];
           }
         }
-        if (p1b && p2b) {
+
+        let ok = true;
+
+        // todo iterate over m
+        // check if there are intersections
+        // split line
+        // todo split until no more intersections
+        m.forEach((v,k)=> {
+          if (k === JSON.stringify(p1) || k === JSON.stringify(p2)) { return; }
+          let int = poly.findCircleLineIntersectionsWithY(v.r, v.p[0], v.p[1], eq.m, eq.n);
+          if (int.length > 1) {
+            if (poly.isPointBetween(int[0], p1, p2) && poly.isPointBetween(int[1], p1, p2)) {
+              console.log('intersect')
+              ok = false;
+              paths.push(createPath(ctx => {
+                //drawLineOnCanvas(ctx, [p1, p2])
+                drawLineOnCanvas(ctx, [p1b, int[0]]);
+                drawLineOnCanvas(ctx, [int[1], p2b]);
+                // drawArcOnCanvas(ctx, int[0][0], int[0][1], 1, 0, 360);
+                // drawArcOnCanvas(ctx, int[1][0], int[1][1], 1, 0, 360);
+              }));
+            
+            }
+             
+          }
+        });
+
+        if (ok && p1b && p2b) {
           paths.push(createPath(ctx => {
-            drawLineOnCanvas(ctx, [p1b, p2b])
+            // let d = ctx.getLineDash();
+            // ctx.setLineDash([1,4]);
+            //drawLineOnCanvas(ctx, [p1b, p2b])
+            // ctx.setLineDash(d);
           }));
         }
 
@@ -184,7 +213,7 @@ const sketch = ({ width, height }) => {
 
     }
 
-    postcards.drawQuad(draw, width, height);
+    postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {
       context, width, height, units
