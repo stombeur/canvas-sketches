@@ -10,6 +10,7 @@ const { drawCircle } = require('../utils/poly');
 
 let drawLines = [];
 let drawCircles = [];
+let drawHatchLines = [];
 
 const createGrid = (count, width, height) => {
   const points = [];
@@ -74,6 +75,7 @@ const sketch = ({ width, height }) => {
     
     drawLines = [];
     drawCircles = [];
+    drawHatchLines = [];
 
 
     const draw = (origin, w, h) => {
@@ -128,14 +130,40 @@ const sketch = ({ width, height }) => {
           addLine([x,y], p[1]); 
           addLine([x,y], p[2]);
           addLine([x,y], p[3]);
-          // doLine(ctx, [x,y], p[4]);
-          // doLine(ctx, [x,y], p[5]);
         }));
 
        
         
       });
 
+      // draw hatched background
+      let f = p => postcards.reorigin(p, origin);
+      let margin2 = margin/3*2;
+      let box = [f([margin2, margin2]),f([w - margin2,margin2]),f([w - margin2,h - margin2]),f([margin2, h - margin2])];
+      let hatchlines = poly.hatchPolygon(box, -35, 7, 0);
+      hatchlines.forEach(l => {
+        // ints = start, intersections with circles, end
+        let ints = [];
+        ints.push(l[0]); // add start
+        let eq = poly.lineEquationFromPoints(l[0],l[1]);
+
+        // find all intersections with circles
+        m.forEach((v,k) => {
+          let int = poly.findCircleLineIntersectionsWithY(v.r+2, v.p[0], v.p[1], eq.m, eq.n);
+          if (int.length > 0) {
+            ints.push(...int);
+          }
+        });
+        ints.push(l[1]); // add end
+        ints.sort((a,b) => a[0] - b[0]); // sort left to right
+        for (let index = 0; index < ints.length; index+=2) {
+          drawHatchLines.push(createPath(ctx => {
+            drawLineOnCanvas(ctx, [ints[index], ints[index+1]]);
+          }));
+        }
+      });
+
+      // draw all circles + concentric rings
       m.forEach((v, k) => {
         let [x,y] = v.p;
        // console.log([x,y])
@@ -219,7 +247,7 @@ const sketch = ({ width, height }) => {
 
     postcards.drawQuad(draw, width, height);
 
-    return renderGroups([drawLines, drawCircles], {
+    return renderGroups([drawLines, drawCircles, drawHatchLines], {
       context, width, height, units
     });
   };
