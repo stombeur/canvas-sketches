@@ -5,7 +5,7 @@ const penplot = require('../utils/penplot');
 const utils = require('../utils/random');
 const poly = require('../utils/poly');
 
-let svgFile = new penplot.SvgFile();
+let svgFile = new penplot.SvgFileWithGroups();
 
 const settings = {
   dimensions: 'A4',
@@ -41,7 +41,7 @@ const sketch = (context) => {
   }
   
   return ({ context, width, height, units }) => {
-    svgFile = new penplot.SvgFile();
+    svgFile = new penplot.SvgFileWithGroups();
     poly.init(context);
 
     context.fillStyle = 'white';
@@ -62,10 +62,11 @@ const sketch = (context) => {
           let lines = poly.hatchPolygon(s, o[r][i][0][a], o[r][i][1]);
           lines.map(l => {
             poly.drawLineOnCanvas(l);
-            svgFile.addLine(l);
+            //svgFile.addLine(l);
+            svgFile.addLineToGroup(l, a+1);
           });
           posX = posX + (elementWidth) + margin;
-          svgFile.newPath();
+          
         }
 
         posX = marginLeft;

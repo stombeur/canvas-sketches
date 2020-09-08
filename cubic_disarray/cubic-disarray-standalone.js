@@ -23,8 +23,8 @@ const sketch = context => {
   let marginBetweenElements = 0.05;
   let elementWidth = 1.5;
   let elementHeight = 1.5;
-  let columns = 8;
-  let rows = 14; 
+  let columns = 10;
+  let rows = 16; 
 
   // position drawing in center of page
   let drawingWidth =

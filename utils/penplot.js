@@ -30,10 +30,14 @@ function polyLinesToSvgPaths(polylines, opt = {}) {
   let commands = [];
   polylines.forEach(line => {
     line.forEach((point, j) => {
+      if (!point) {return;}
+      try {
       const type = j === 0 ? 'M' : 'L';
       const x = (TO_PX * cm(point[0], units)).toFixed(decimalPlaces);
       const y = (TO_PX * cm(point[1], units)).toFixed(decimalPlaces);
       commands.push(`${type} ${x} ${y}`);
+    }
+    catch{console.log(point)}
     });
   });
 
@@ -376,6 +380,7 @@ class SvgFileWithGroups {
       delete this.groups['default'];
     }
 
+    console.log(this.groups)
     return formatSvgFile(formatSvgGroups(this.groups, options), options);
   }
 }
