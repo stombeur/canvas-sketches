@@ -20,6 +20,21 @@ const reorigin = (point, origin) => {
     f([width/2,0], width/2, height/2);
     f([width/2,height/2], width/2, height/2);
   }
+  const drawQuadQuad = (f, width, height) => {
+    drawOffsetQuad(f, width/2, height/2, [0,0]);
+    drawOffsetQuad(f, width/2, height/2, [width/2,0]);
+    drawOffsetQuad(f, width/2, height/2, [width/2,height/2]);
+    drawOffsetQuad(f, width/2, height/2, [0,height/2]);
+  }
+
+  const drawOffsetQuad = (f, width, height, offsetOrigin) => {
+    let [x,y] = [offsetOrigin[0] , offsetOrigin[1]];
+
+    f([x,y], width/2, height/2);
+    f([x,y+height/2], width/2, height/2);
+    f([x+width/2,y], width/2, height/2);
+    f([x+width/2,y+height/2], width/2, height/2);
+  }
 
   const drawSingle = (f, width, height) => {
     f([0,0], width, height);
@@ -93,3 +108,5 @@ module.exports.drawQuad = drawQuad;
 module.exports.drawOct = drawOct;
 module.exports.drawQuadCutLines = drawQuadCutLines;
 module.exports.drawQuadAddressLines = drawQuadAddressLines;
+module.exports.drawOffsetQuad = drawOffsetQuad;
+module.exports.drawQuadQuad = drawQuadQuad;
