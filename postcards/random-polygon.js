@@ -82,7 +82,7 @@ const sketch = ({ width, height }) => {
       //   drawLines.push(drawArc(center, rad, 0, 360));
       // }
 
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < 1; j++) {
         
         let isConvex = false;
         let points = [];
@@ -90,30 +90,31 @@ const sketch = ({ width, height }) => {
           let nr_of_sides = random.range(5, 9);
           let radius = 1;
           let start = postcards.reorigin([w/2, h/2-radiuses[radius]], origin);
-          let startAngle = random.pick([...Array(30).keys()]);
+          let startAngle = random.pick([...Array(360).keys()]);
           start = poly.rotatePoint(start, center, startAngle);
           points = [start];
         //debugger;
-        for (let i = 0; i < nr_of_sides; i++) {
-          let last = points[points.length-1]
-          radius = radius + (random.boolean() ? 1 : -1);
-          if (radius < 0) { radius = 0; }
-          if (radius === radiuses.length) { radius = radiuses.length - 1; }
-  
-          let close = i+1 > nr_of_sides;
-          if (close) { 
-            drawLines.push(drawLine([last, points[0]]));
-          } else {
-            let q2 = [center[0], center[1] - radiuses[radius]];
-            q2 = poly.rotatePoint(q2, center, 360 / nr_of_sides * (i+1));
+          let templines = [];
+          for (let i = 0; i < nr_of_sides; i++) {
+            let last = points[points.length-1]
+            radius = radius + (random.boolean() ? 1 : -1);
+            if (radius < 0) { radius = 0; }
+            if (radius === radiuses.length) { radius = radiuses.length - 1; }
     
-            
-            drawLines.push(drawLine([last, q2]));
-            points.push(q2);
+            let close = i+1 > nr_of_sides;
+            if (close) { 
+              templines.push(drawLine([last, points[0]]));
+            } else {
+              let q2 = [center[0], center[1] - radiuses[radius]];
+              q2 = poly.rotatePoint(q2, center, startAngle + 360 / nr_of_sides * (i+1));
+
+              templines.push(drawLine([last, q2]));
+              points.push(q2);
+            }
+    
           }
-  
-        }
           isConvex = poly.isPolygonConvex(points);
+          if (isConvex) { drawLines.push(...templines)}
         }
       }
 
@@ -124,8 +125,8 @@ const sketch = ({ width, height }) => {
 
     //postcards.drawOct(draw, width, height);
 
-    let rows = 3;
-    let columns = 4;
+    let rows = 8;
+    let columns = 10;
     let margin = 8;
 
     let ww = width - (margin*2);

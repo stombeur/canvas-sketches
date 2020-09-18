@@ -621,6 +621,37 @@ const toPolygonP = (polygon) =>{
 }
 
 const isPolygonConvex = (polygon) => {
+  if (polygon.length < 3) { return false; }
+
+  var [old_x, old_y] = polygon[polygon.length-2];
+  var [new_x, new_y] = polygon[polygon.length-1];
+  let new_direction = Math.atan2(new_y - old_y, new_x - old_x);
+  let old_direction = 0;
+  let angle_sum = 0;
+  let orientation = 1;
+
+  for (let i = 0; i < polygon.length; i++) {
+    old_x = new_x;
+    old_y = new_y;
+    old_direction = new_direction;
+    [new_x, new_y] = polygon[i];
+    new_direction = Math.atan2(new_y - old_y, new_x - old_x);
+    let angle = new_direction - old_direction;
+    if (angle <= - Math.PI) { angle += (Math.PI*2); }
+    else if (angle > Math.PI){angle -= (Math.PI*2); }
+    if (i == 0)  //# if first time through loop, initialize orientation
+    { 
+      if (angle === 0) { return false; }
+      orientation = angle > 0 ? 1 : -1;
+    } else {
+      if (orientation * angle <= 0) { return false; }
+    }
+    angle_sum += angle;
+  }
+  return Math.abs(Math.round(angle_sum / (Math.PI*2))) == 1;
+}
+
+const isPolygonConvexEx = (polygon) => {
   polygon = toPolygonP(polygon);
   let lastSign = null;
 
