@@ -621,6 +621,7 @@ const toPolygonP = (polygon) =>{
 }
 
 const isPolygonConvex = (polygon) => {
+  //https://stackoverflow.com/questions/471962/how-do-i-efficiently-determine-if-a-polygon-is-convex-non-convex-or-complex/45372025#45372025
   if (polygon.length < 3) { return false; }
 
   var [old_x, old_y] = polygon[polygon.length-2];
