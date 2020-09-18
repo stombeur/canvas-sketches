@@ -591,6 +591,63 @@ const pointIsInCircle = (point, center, radius) => {
   return distanceBetween(point, center) < radius;
 }
 
+const crossProduct = (p1, p2, p3) => {
+
+  if (!p1.x) { p1 = point(p1[0], p1[1]); }
+  if (!p2.x) { p2 = point(p2[0], p2[1]); }
+  if (!p3.x) { p3 = point(p3[0], p3[1]); }
+
+
+  var dx1 = p2.x - p1.x;
+  var dy1 = p2.y - p1.y;
+  var dx2 = p3.x - p2.x;
+  var dy2 = p3.y - p2.y;
+
+  var zcrossproduct = dx1 * dy2 - dy1 * dx2;
+  return zcrossproduct;
+}
+
+const toPolygonP = (polygon) =>{
+  let polygonP = [];
+  if (polygon[0].x) {
+    polygonP = polygon;
+  }
+  else {
+    polygon.forEach(element => {
+      polygonP.push(point(element[0], element[1]));
+    });
+  }
+  return polygonP;
+}
+
+const isPolygonConvex = (polygon) => {
+  polygon = toPolygonP(polygon);
+  let lastSign = null;
+
+  for (let i = 2; i < polygon.length; i++) {
+      //calculate crossproduct from 3 consecutive points
+      let crossproduct = crossProduct(polygon[i - 2], polygon[i - 1], polygon[i]);
+  console.log(i + ". crossproduct from ("+ polygon[i - 2].x +" "+polygon[i - 1].x +" "+polygon[i].x +"): " + crossproduct);
+      let currentSign = Math.sign(crossproduct);
+      if (lastSign == null) {
+        //last sign init
+        lastSign = currentSign;
+      }
+
+      if (lastSign !== currentSign) {
+          //different sign in cross products,no need to check the remaining points --> concave polygon --> return function
+          return false;
+      }
+      lastSign = currentSign;
+  }
+
+  //first point must check between second and last point, this is the last 3 points that can break convexity
+  var crossproductFirstPoint = crossProduct(polygon[polygon.length - 2], polygon[0], polygon[1]);
+  
+  console.log("cross product first point: ", crossproductFirstPoint);
+  
+  return (lastSign === Math.sign(crossproductFirstPoint));
+}
 
 // module.exports.findIntersection = findIntersection;
 // module.exports.isPointBetween = isPointBetween;
@@ -666,3 +723,5 @@ poly.drawPolygon = drawPolygon;
 poly.drawArc = drawArc;
 poly.distanceBetween = distanceBetween;
 poly.drawArcOnCanvas = drawArcOnCanvas;
+poly.crossProduct = crossProduct;
+poly.isPolygonConvex = isPolygonConvex;

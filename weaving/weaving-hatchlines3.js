@@ -141,7 +141,7 @@ const sketch = (context) => {
 
         let bounds = { left: posXLeft, top: vertMargin, right: posXRight, bottom: vertMargin + drawingHeight };
 
-        let i = Math.floor(nrOfRibbons  * 0.75);
+        let i = Math.floor(nrOfRibbons  * 0.5);
         for (let slot = 0; slot <= i; slot++) {
             let ltr = true;
             //if (slot%2 > 0) {ltr = false;}

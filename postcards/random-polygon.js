@@ -9,7 +9,7 @@ let drawLines = [];
 
 const settings = {
   dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'portrait',
+  orientation: 'landscape',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
@@ -75,38 +75,70 @@ const sketch = ({ width, height }) => {
       let center = postcards.reorigin([w/2, h/2], origin);
 
       let big_radius = (w - margin)/2;
-      let radiuses = [big_radius, big_radius - margin/2, big_radius - margin, big_radius - (1.5*margin)];
+      let radiuses = [big_radius, big_radius - margin/2, big_radius - margin, big_radius - (1.5*margin), big_radius - (2*margin), big_radius - (2.5*margin)];
 
-      let nr_of_sides = random.range(5, 7);
+      // for (let r = 0; r < radiuses.length; r++) {
+      //   const rad = radiuses[r];
+      //   drawLines.push(drawArc(center, rad, 0, 360));
+      // }
 
-      let radius = 1;
-      let start = postcards.reorigin([h/2, margin], origin);
-      start = poly.rotatePoint(start, center, random.pick([...Array(30).keys()]));
-      let points = [start];
-      //debugger;
-      for (let i = 0; i < nr_of_sides; i++) {
-        let last = points[points.length-1]
-        radius = random.pick([-1,1])+radius;
-        if (radius < 0) { radius = 0; }
-        if (radius === radiuses.length) { radius = radiuses.length - 1; }
-
-        let close = i+1 > nr_of_sides;
-        if (close) { 
-          drawLines.push(drawLine([last, points[0]]));
-        } else {
-          let q2 = [center[0], center[1] - radiuses[radius]];
-          q2 = poly.rotatePoint(q2, center, 360 / nr_of_sides * (i+1));
+      for (let j = 0; j < 5; j++) {
+        
+        let isConvex = false;
+        let points = [];
+        while (!isConvex) {
+          let nr_of_sides = random.range(5, 9);
+          let radius = 1;
+          let start = postcards.reorigin([w/2, h/2-radiuses[radius]], origin);
+          let startAngle = random.pick([...Array(30).keys()]);
+          start = poly.rotatePoint(start, center, startAngle);
+          points = [start];
+        //debugger;
+        for (let i = 0; i < nr_of_sides; i++) {
+          let last = points[points.length-1]
+          radius = radius + (random.boolean() ? 1 : -1);
+          if (radius < 0) { radius = 0; }
+          if (radius === radiuses.length) { radius = radiuses.length - 1; }
   
-          
-          drawLines.push(drawLine([last, q2]));
-          points.push(q2);
+          let close = i+1 > nr_of_sides;
+          if (close) { 
+            drawLines.push(drawLine([last, points[0]]));
+          } else {
+            let q2 = [center[0], center[1] - radiuses[radius]];
+            q2 = poly.rotatePoint(q2, center, 360 / nr_of_sides * (i+1));
+    
+            
+            drawLines.push(drawLine([last, q2]));
+            points.push(q2);
+          }
+  
         }
+          isConvex = poly.isPolygonConvex(points);
+        }
+      }
 
+     
+      
+
+    }
+
+    //postcards.drawOct(draw, width, height);
+
+    let rows = 3;
+    let columns = 4;
+    let margin = 8;
+
+    let ww = width - (margin*2);
+    let hh = height - (margin*2);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < columns; c++) {
+        let x = ww/columns*c + margin;
+        let y = hh/rows*r + margin;
+        draw([x,y], ww/columns, hh/rows);
       }
       
     }
-
-    postcards.drawSingle(draw, width, height);
 
     return renderPaths(drawLines, {
       context, width, height, units
