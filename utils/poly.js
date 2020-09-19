@@ -437,6 +437,7 @@ const findCircleLineIntersectionsP = (r, c, line) => {
             .map(xInt => {return point(xInt[0], (m*xInt + n))});
 }
 
+
 const findCircleLineIntersectionsWithY = (r, h, k, m, n) => {
   let x = findCircleLineIntersections(r, h, k, m, n);
   if (x.length === 0) { return x; }
@@ -620,6 +621,14 @@ const toPolygonP = (polygon) =>{
   return polygonP;
 }
 
+/**
+ * returns if a polygon is convex
+ * if nr of points > 2
+ * and every angle is < 180degrees 
+ * and every angle is oriented the same way
+ * and the sum of all angles is 360degrees
+ * @param {[[x1,y]1,[x2,y2,...]]} polygon 
+ */
 const isPolygonConvex = (polygon) => {
   //https://stackoverflow.com/questions/471962/how-do-i-efficiently-determine-if-a-polygon-is-convex-non-convex-or-complex/45372025#45372025
   if (polygon.length < 3) { return false; }
@@ -652,6 +661,9 @@ const isPolygonConvex = (polygon) => {
   return Math.abs(Math.round(angle_sum / (Math.PI*2))) == 1;
 }
 
+/***
+ * does not work, to be checked
+ */
 const isPolygonConvexEx = (polygon) => {
   polygon = toPolygonP(polygon);
   let lastSign = null;
@@ -680,41 +692,6 @@ const isPolygonConvexEx = (polygon) => {
   
   return (lastSign === Math.sign(crossproductFirstPoint));
 }
-
-// module.exports.findIntersection = findIntersection;
-// module.exports.isPointBetween = isPointBetween;
-// module.exports.findSegmentIntersection = findSegmentIntersection;
-// module.exports.isSegmentIntersected = isSegmentIntersected;
-// module.exports.point = point;
-// module.exports.toLine = toLine;
-// module.exports.movePoint = movePoint;
-// module.exports.findIntersectionPolygon = findIntersectionPolygon;
-
-// module.exports.createPolygon = createPolygon;
-// module.exports.drawPolygonOnCanvas = drawPolygonOnCanvas;
-// module.exports.calculateBoundingBox = calculateBoundingBox;
-// module.exports.rotatePoint = rotatePoint;
-// module.exports.rotatePointXY = rotatePointXY;
-// module.exports.rotatePolygon = rotatePolygon;
-// module.exports.drawLineOnCanvas = drawLineOnCanvas;
-
-// module.exports.drawHatchedPolygonOnCanvas = drawHatchedPolygonOnCanvas;
-// module.exports.clip = clip;
-// module.exports.hatchPolygon = hatchPolygon;
-// module.exports.createSquarePolygon = createSquarePolygon;
-
-// module.exports.lineEquationFromPoints = lineEquationFromPoints;
-// module.exports.findCircleLineIntersections = findCircleLineIntersections;
-// module.exports.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
-// module.exports.hatchCircle = hatchCircle;
-// module.exports.hatchDonut = hatchDonut;
-
-// module.exports.pointIsInsideBB = pointIsInsideBB;
-// module.exports.clipLineToBB = clipLineToBB;
-// module.exports.clipLineToCircle = clipLineToCircle;
-// module.exports.pointIsInCircle = pointIsInCircle;
-// module.exports.drawCircle = drawCircle;
-// module.exports.distanceBetween = distanceBetween;
 
 let poly = init;
 module.exports = poly;
