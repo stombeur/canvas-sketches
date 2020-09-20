@@ -119,6 +119,8 @@ const sketch = ({ width, height }) => {
         }
         let points2 = [];
         let templines = [];
+        let facetlines = [];
+        let facetpoints = [];
 
         // facetlijnen
         let skip = 1;
@@ -131,15 +133,36 @@ const sketch = ({ width, height }) => {
           if (int.length > 1 && !poly.isPointBetween(int[0], center, points[i]))
           {intpoint = int[1];}
           intpoint = [intpoint.x, intpoint.y];
-          templines.push([points[i], intpoint]); 
+          facetlines.push([points[i], intpoint]); 
           points2.push(intpoint);       
         }
 
+        if (skipIndex>-1) {
+          //debugger;
+          let inverseSkipIndex = Math.floor(points.length/2);
+          let l1 = facetlines[inverseSkipIndex], l2 = facetlines[inverseSkipIndex+1];
+          let v1 = [l1[1][0]-l1[0][0], l1[1][1]-l1[0][1]]; //vector1
+          let v2 = [l2[1][0]-l2[0][0], l2[1][1]-l2[0][1]]; //vector2
+          let vavg = v1;//[(v1[0]+v2[0])/2, (v1[1]+v2[1])/2];
+          for (let f = 0; f < facetlines.length; f++) {
+            let v = vavg;
+            //debugger;
+            if (f === inverseSkipIndex) { v = v1; facetpoints.push(facetlines[f][1]);}
+            else if (f === inverseSkipIndex+1) { v = v2; facetpoints.push(facetlines[f][1]);}
+            else {
+            let l = facetlines[f];
+            templines.push([l[0], [l[1][0]+v[0], l[1][1]+v[1]]]);
+            facetpoints.push([l[1][0]+v[0], l[1][1]+v[1]]);
+            }
+          }
+        }
+
         // facetverbindingen
-        let last = points2[points2.length-1];
-        for (let i = 0; i < points2.length; i++) {
-          templines.push([last, points2[i]]);
-          last = points2[i];
+        let last = facetpoints[facetpoints.length-1];
+        for (let i = 0; i < facetpoints.length; i++) {
+         
+          templines.push([last, facetpoints[i]]);
+          last = facetpoints[i];
         }
 
         templines.forEach(l => {
