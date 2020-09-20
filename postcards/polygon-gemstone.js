@@ -75,7 +75,7 @@ const sketch = ({ width, height }) => {
       let center = postcards.reorigin([w/2, h/2], origin);
 
       let big_radius = (w - margin)/2;
-      let radiuses1 = [big_radius, big_radius - margin/4];//, big_radius - margin, big_radius - (1.5*margin)];
+      let radiuses1 = [big_radius, big_radius - margin/5, big_radius - margin/4, big_radius - margin/3, big_radius - margin/2];//, big_radius - margin, big_radius - (1.5*margin)];
       let radiuses2 = [big_radius - margin/1.5, big_radius - margin/1];//, big_radius - (2.5*margin)];
 
       // for (let r = 0; r < radiuses.length; r++) {
@@ -88,7 +88,7 @@ const sketch = ({ width, height }) => {
         let isConvex = false;
         let points = [];
         while (!isConvex) {
-          let nr_of_sides = random.range(5, 7);
+          let nr_of_sides = random.range(6, 9);
           let radius = 1;
           let start = postcards.reorigin([w/2, h/2-radiuses1[radius]], origin);
           let startAngle = random.pick([...Array(360).keys()]);
