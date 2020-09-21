@@ -1,11 +1,11 @@
 
 const canvasSketch = require('canvas-sketch');
 const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
-const postcards = require('../utils/postcards');
+const postcards = require('./utils/postcards');
 const random = require('canvas-sketch-util/random');
-const poly = require('../utils/poly');
+const { distanceBetween } = require('./utils/poly');
+const poly = require('./utils/poly');
 
-let drawLines = [];
 
 const settings = {
   dimensions: 'A4',//[ 2048, 2048 ]
@@ -54,6 +54,10 @@ const drawLineOnCanvas = (ctx, line) => {
   ctx.lineTo(x2, y2);
 };
 
+
+let paths = [];
+
+
 const drawGemstone = (circle) => {
   //debugger;
 
@@ -77,7 +81,7 @@ const drawGemstone = (circle) => {
         let points = [];
         while (!isConvex) {
           let nr_of_sides = random.range(6, 9);
-          let radius = 1;
+          let radius = 0;
           let start = [circle.c[0], circle.c[1] - radiuses1[radius]];//postcards.reorigin([w/2, h/2-radiuses1[radius]], origin);
           let startAngle = random.pick([...Array(360).keys()]);
           start = poly.rotatePoint(start, center, startAngle);
@@ -103,7 +107,7 @@ const drawGemstone = (circle) => {
     
           }
           isConvex = poly.isPolygonConvex(points);
-          if (isConvex) { drawLines.push(...templines)}
+          if (isConvex) { paths.push(...templines)}
         }
         let points2 = [];
         let templines = [];
@@ -154,58 +158,90 @@ const drawGemstone = (circle) => {
         }
 
         templines.forEach(l => {
-          drawLines.push(drawLine(l));
+          paths.push(drawLine(l));
         });
         
       }
 }
 
-
 const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
-
-    drawLines = [];
-
-    // binnen cirkel blijven
-    // aantal segmenten random onder en bovengrens
-    // lengte per segment bepalen 
-    // hoe convex blijven?
-    // naar binnen springen (kleinere cirkels)
 
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
+    let circles = [];
+
     const draw = (origin, w, h) => {
-      this.paths = [];
-      const margin = w * 0.15;
-      let center = postcards.reorigin([w/2, h/2], origin);
 
-      drawGemstone({c:center,r:(w - margin)/2,m:margin})
+      let margin = w * 0.09;
+      let ww = w - (margin*2);
+      let hh = h - (margin*2);
 
-      
-      
+      let rmax = Math.min(hh,ww) / 5;
+      let rmin = rmax / 5;
+      let steps = 100;
+      let triesBeforeNextStep = 1000;
 
-    }
+      let rcurrent = rmax;
+      let rincrease = (rmax - rmin) / steps;
 
-    //postcards.drawOct(draw, width, height);
+      //always draw first circle
+      let xmin = origin[0]+margin+rcurrent/2;
+      let xmax = origin[0]+margin+ww-rcurrent/2;
+      let ymin = origin[1]+margin+rcurrent/2;
+      let ymax = origin[1]+margin+hh-rcurrent/2;
+      let c = [random.range(xmin, xmax),random.range(ymin, ymax)];
+      circles.push({c,r:rcurrent});
+      //paths.push(drawArc(c, rcurrent, 0, 360));
 
-    let rows = 1;
-    let columns = 1;
-    let margin = 8;
+       while (rcurrent >= rmin) {
+        //draw circles until no more room
+        xmin = origin[0]+margin+rcurrent/2;
+        xmax = origin[0]+margin+ww-rcurrent/2;
+        ymin = origin[1]+margin+rcurrent/2;
+        ymax = origin[1]+margin+hh-rcurrent/2;
 
-    let ww = width - (margin*2);
-    let hh = height - (margin*2);
+        let exhausted = false;
+        //debugger;
+        while(!exhausted) {
+          let nrOfCirclesAdded = 0;
+          for (let j = 0; j < triesBeforeNextStep; j++) {
+            c = [random.range(xmin, xmax),random.range(ymin, ymax)];
+            let intersect = false;
+            circles.forEach(circle => { 
+              let d = distanceBetween(c, circle.c);
+              if (d < rcurrent + circle.r){ intersect = true;}
+            });
+            if (!intersect){
+              circles.push({c,r:rcurrent});
+              //paths.push(drawArc(c, rcurrent, 0, 360));
+              nrOfCirclesAdded++;
+              break;
+            }
+          }
+          if (nrOfCirclesAdded === 0) { exhausted = true;}
+        }
+        
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < columns; c++) {
-        let x = ww/columns*c + margin;
-        let y = hh/rows*r + margin;
-        draw([x,y], ww/columns, hh/rows);
+        rcurrent -= rincrease;
       }
-      
-    }
 
-    return renderPaths(drawLines, {
+      // const margin = w * 0.15;
+      // let center = postcards.reorigin([w/2, h/2], origin);
+
+      circles.forEach(circle => {
+        drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
+      });
+  
+      
+    };
+
+
+
+    postcards.drawSingle(draw, width, height);
+
+    return renderPaths(paths, {
       context, width, height, units
     });
   };
