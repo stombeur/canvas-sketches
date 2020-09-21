@@ -171,9 +171,10 @@ const sketch = ({ width, height }) => {
     context.fillRect(0, 0, width, height);
 
     let circles = [];
+  
 
     const draw = (origin, w, h) => {
-
+      paths = [];
       let margin = w * 0.09;
       let ww = w - (margin*2);
       let hh = h - (margin*2);
