@@ -170,11 +170,13 @@ const sketch = ({ width, height }) => {
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
-    let circles = [];
-  
+    
+    paths = [];
 
     const draw = (origin, w, h) => {
-      paths = [];
+      
+      let circles = [];
+
       let margin = w * 0.09;
       let ww = w - (margin*2);
       let hh = h - (margin*2);
@@ -234,13 +236,38 @@ const sketch = ({ width, height }) => {
       circles.forEach(circle => {
         drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
       });
-  
+
+      xmin = origin[0]+1;
+      xmax = origin[0]+w-1;
+      ymin = origin[1]+1;
+      ymax = origin[1]+h-1;
+      let box = [[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]];
+      let hatchlines = poly.hatchPolygon(box, 0.1, 1.5, 50);
+      hatchlines.forEach(l => {
+        // ints = start, intersections with circles, end
+        let ints = [];
+        ints.push(l[0]); // add start
+        let eq = poly.lineEquationFromPoints(l[0],l[1]);
+
+        // find all intersections with circles
+        circles.forEach((circle) => {
+          let int = poly.findCircleLineIntersectionsWithY(circle.r+1, circle.c[0], circle.c[1], eq.m, eq.n);
+          if (int.length > 0) {
+            ints.push(...int);
+          }
+        });
+        ints.push(l[1]); // add end
+        ints.sort((a,b) => a[0] - b[0]); // sort left to right
+        for (let index = 0; index < ints.length; index+=2) {
+          paths.push(drawLine([ints[index], ints[index+1]]));
+        }
+      });
       
     };
 
 
 
-    postcards.drawSingle(draw, width, height);
+    postcards.drawQuad(draw, width, height);
 
     return renderPaths(paths, {
       context, width, height, units
