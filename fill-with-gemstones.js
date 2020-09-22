@@ -174,15 +174,17 @@ const sketch = ({ width, height }) => {
       let circles = [];
 
       let margin = w * 0.09;
+      if (type === "single") { margin = w * 0.14; }
       let ww = w - (margin*2);
       let hh = h - (margin*2);
 
       let rmax = Math.min(hh,ww) / 5;
-      if (type === "single") { rmax = Math.min(hh,ww) / 3 }
+      if (type === "single") { rmax = Math.min(hh,ww) / 3; }
       let rmin = rmax / 5;
       let steps = 100;
       let triesBeforeNextStep = 1000;
       if (type === "few") { steps = 4; triesBeforeNextStep = 1;}
+      if (type === "more") { steps = 4; triesBeforeNextStep = 10;}
 
       let rcurrent = rmax;
       let rincrease = (rmax - rmin) / steps;
@@ -242,7 +244,7 @@ const sketch = ({ width, height }) => {
       ymin = origin[1]+1;
       ymax = origin[1]+h-1;
       let box = [[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]];
-      let hatchlines = poly.hatchPolygon(box, 0.1, 1.5, 50);
+      let hatchlines = poly.hatchPolygon(box, 89.99, 1.5, 50);
       hatchlines.forEach(l => {
         // ints = start, intersections with circles, end
         let ints = [];
@@ -265,7 +267,7 @@ const sketch = ({ width, height }) => {
       
     };
 
-    let options = {1:"full", 2:"full", 3:"single", 4:"few"};
+    let options = {1:"full", 2:"more", 3:"single", 4:"few"};
 
     postcards.drawQuad(draw, width, height, options);
 
