@@ -1,6 +1,6 @@
 
 const canvasSketch = require('canvas-sketch');
-const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const postcards = require('./utils/postcards');
 const random = require('canvas-sketch-util/random');
 const { distanceBetween } = require('./utils/poly');
@@ -56,6 +56,7 @@ const drawLineOnCanvas = (ctx, line) => {
 
 
 let paths = [];
+let background = [];
 
 
 const drawGemstone = (circle) => {
@@ -67,13 +68,6 @@ const drawGemstone = (circle) => {
   let margin = circle.m;
   let radiuses1 = [big_radius, big_radius - margin/5, big_radius - margin/4, big_radius - margin/3, big_radius - margin/2];//, big_radius - margin, big_radius - (1.5*margin)];
   let radiuses2 = [big_radius - margin/1.5, big_radius - margin/1];//, big_radius - (2.5*margin)];
-  // let radiuses1 = [big_radius, big_radius - (step), big_radius - (2*step), big_radius - (3*step), big_radius - (3.5*step)];//, big_radius - margin, big_radius - (1.5*margin)];
-  // let radiuses2 = [big_radius - (2*step), big_radius - (step)];//, big_radius - (2.5*margin)];
-
-      // for (let r = 0; r < radiuses.length; r++) {
-      //   const rad = radiuses[r];
-      //   drawLines.push(drawArc(center, rad, 0, 360));
-      // }
 
       for (let j = 0; j < 1; j++) {
         
@@ -172,9 +166,11 @@ const sketch = ({ width, height }) => {
 
     
     paths = [];
+    background = [];
 
-    const draw = (origin, w, h) => {
-      
+    const draw = (origin, w, h, options) => {
+      let type = options[options.index];
+      console.log(type)
       let circles = [];
 
       let margin = w * 0.09;
@@ -182,9 +178,11 @@ const sketch = ({ width, height }) => {
       let hh = h - (margin*2);
 
       let rmax = Math.min(hh,ww) / 5;
+      if (type === "single") { rmax = Math.min(hh,ww) / 3 }
       let rmin = rmax / 5;
       let steps = 100;
       let triesBeforeNextStep = 1000;
+      if (type === "few") { steps = 4; triesBeforeNextStep = 1;}
 
       let rcurrent = rmax;
       let rincrease = (rmax - rmin) / steps;
@@ -199,6 +197,7 @@ const sketch = ({ width, height }) => {
       //paths.push(drawArc(c, rcurrent, 0, 360));
 
        while (rcurrent >= rmin) {
+        if (type === "single") { break; }
         //draw circles until no more room
         xmin = origin[0]+margin+rcurrent/2;
         xmax = origin[0]+margin+ww-rcurrent/2;
@@ -237,6 +236,7 @@ const sketch = ({ width, height }) => {
         drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
       });
 
+      // draw background
       xmin = origin[0]+1;
       xmax = origin[0]+w-1;
       ymin = origin[1]+1;
@@ -259,17 +259,17 @@ const sketch = ({ width, height }) => {
         ints.push(l[1]); // add end
         ints.sort((a,b) => a[0] - b[0]); // sort left to right
         for (let index = 0; index < ints.length; index+=2) {
-          paths.push(drawLine([ints[index], ints[index+1]]));
+          background.push(drawLine([ints[index], ints[index+1]]));
         }
       });
       
     };
 
+    let options = {1:"full", 2:"full", 3:"single", 4:"few"};
 
+    postcards.drawQuad(draw, width, height, options);
 
-    postcards.drawQuad(draw, width, height);
-
-    return renderPaths(paths, {
+    return renderGroups([paths, background], {
       context, width, height, units
     });
   };
