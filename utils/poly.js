@@ -273,6 +273,50 @@ const hyperspacePolygon = (polygon, anglespacing = 1, padding = -1) => {
   return result;
 };
 
+const hyperspacePolygonDouble = (polygon, anglespacing = 1, padding = -1, offset = [0,0]) => {
+  let polygonNotP = polygon.map(p => {
+    return [p.x || p[0], p.y || p[1]];
+  });
+
+  // todo: why is padding so important
+  let rectangle = calculateBoundingBox(polygonNotP);
+  if (padding === -1) { padding = Math.max(rectangle[2][1], rectangle[2][0]); }
+  rectangle = calculateBoundingBox(polygonNotP, padding);
+
+  let x = rectangle[0][0];
+  let y = rectangle[0][1];
+  let height = rectangle[2][1] - y;
+  let width = rectangle[2][0] - x;
+  
+  let center = [x + width/2 + offset[0], y + height/2 + offset[1]];
+
+  let numLines = Math.ceil(180 / anglespacing);
+  let radialLines = [];
+
+  for (let i = 1; i <= numLines; i++) {
+    let rotatedPoint1 = rotatePoint([center[0], center[1] - height/2], [center[0], center[1]], (anglespacing*i));
+    let rotatedPoint2 = rotatePoint(rotatedPoint1, [center[0], center[1]], 180);
+    let rotatedLine = ([rotatedPoint2, rotatedPoint1]);
+    radialLines.push(rotatedLine);
+  }
+
+  let result = [];
+  for (let i = 0; i < radialLines.length; i++) {
+      let x = null;
+      try {
+        x = clip(radialLines[i], polygonNotP);
+      } catch {}
+      if (x) {
+          x.map(l => {
+              if (l.length === 2) {result.push([l[0], l[1]]); }
+              else { result.push([l[l.length-2],l[l.length-1]]); }
+              });
+      }
+    }
+
+  return result;
+};
+
 const hatchPolygon = (polygon, angle, spacing = 0.1, padding = 0) => {
     let polygonNotP = polygon.map(p => {
       return [p.x || p[0], p.y || p[1]];
@@ -808,4 +852,5 @@ poly.drawArcOnCanvas = drawArcOnCanvas;
 poly.crossProduct = crossProduct;
 poly.isPolygonConvex = isPolygonConvex;
 poly.hyperspacePolygon = hyperspacePolygon;
+poly.hyperspacePolygonDouble = hyperspacePolygonDouble;
 poly.dashLine = dashLine;

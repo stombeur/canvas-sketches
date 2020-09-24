@@ -43,6 +43,8 @@ const drawLine = (l) => {
 }
 
 const drawLineOnCanvas = (ctx, line) => {
+  try {
+  //if (!line || line.length === 0 || !line[0] || !line[1]) { return; }
   let x1 = line[0].x  || line[0][0],
       x2 = line[1].x || line[1][0],
       y1 = line[0].y || line[0][1],
@@ -52,6 +54,9 @@ const drawLineOnCanvas = (ctx, line) => {
 
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
+  } catch {
+    console.error(line);
+  }
 };
 
 
@@ -118,6 +123,7 @@ const drawGemstone = (circle) => {
           let intpoint = int[0];
           if (int.length > 1 && !poly.isPointBetween(int[0], center, points[i]))
           {intpoint = int[1];}
+          if (!intpoint) { continue; }
           intpoint = [intpoint.x, intpoint.y];
           facetlines.push([points[i], intpoint]); 
           points2.push(intpoint);       
@@ -154,7 +160,16 @@ const drawGemstone = (circle) => {
         templines.forEach(l => {
           paths.push(drawLine(l));
         });
-        
+
+        //console.log(templines);
+
+       // let polygon = templines.map(l => l[0] );
+       
+        // let hatches = poly.hatchPolygon(facetpoints, random.range(5,85), 0.5, 100);
+        //  //console.log(hatches)
+        // hatches.forEach(h => {
+        //   paths.push(drawLine(h));
+        // });
       }
 }
 
@@ -238,13 +253,15 @@ const sketch = ({ width, height }) => {
         drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
       });
 
+      let centerOffset = [random.range(-15, 15), random.range(-15, 10)];
+
       // draw background
       xmin = origin[0]+1;
       xmax = origin[0]+w-1;
       ymin = origin[1]+1;
       ymax = origin[1]+h-1;
       let box = [[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]];
-      let hatchlines = poly.hyperspacePolygon(box, 2);
+      let hatchlines = poly.hyperspacePolygonDouble(box, 2.6, -1, centerOffset);
       let linesFromDashes = [];
       hatchlines.forEach(l => {
         let nr = random.rangeFloor(4, 17);
@@ -252,39 +269,74 @@ const sketch = ({ width, height }) => {
         let dashes = poly.dashLine(l, segments);
         let blank = false;
         
-        dashes.forEach(d => { 
-          if (!blank) { linesFromDashes.push(d);}
-          blank = !blank;
-        });
+        // dashes.forEach(d => { 
+        //   if (!blank) { linesFromDashes.push(d);}
+        //   blank = !blank;
+        // });
+        linesFromDashes.push(l);
         
         //paths.push(drawLine(l));
       });
-      debugger;
-      linesFromDashes.forEach(l => {
+      //debugger;
+      let linesAfterHatch = [];
+      hatchlines.forEach(l => {
         // ints = start, intersections with circles, end
         let ints = [];
+       // if (l[1][0] < l[0][0]) { ints.push(l[0]); }
+        //else { ints.push(l[0]);}
         ints.push(l[0]); // add start
         let eq = poly.lineEquationFromPoints(l[0],l[1]);
 
         // find all intersections with circles
         circles.forEach((circle) => {
+          //debugger;
           let int = poly.findCircleLineIntersectionsWithY(circle.r+1, circle.c[0], circle.c[1], eq.m, eq.n);
+          // if (poly.pointIsInCircle(l[0], circle.c, circle.r)) {  
+          //   ints.shift();
+          // }
+          // if (poly.pointIsInCircle(l[1], circle.c, circle.r)) {  
+          //   ints.pop();
+          // }
           if (int.length > 0) {
             ints.push(...int);
           }
         });
-        ints.push(l[1]); // add end
+        //if (l[1][0] > l[0][0]) { ints.push(l[1]); }
+        ints.push(l[1]); //add end
         ints.sort((a,b) => a[0] - b[0]); // sort left to right
         for (let index = 0; index < ints.length; index+=2) {
-          background.push(drawLine([ints[index], ints[index+1]]));
+          let ll = [ints[index], ints[index+1]];
+          if (!ll[1]) { continue; }
+          //background.push(drawLine(ll));
+          linesAfterHatch.push(ll);
         }
+        //background.push(drawLine(l));
       });
-      
+      let center = [origin[0]+w/2 + centerOffset[0], origin[1]+h/2 + centerOffset[1]];
+      linesAfterHatch.forEach(l => {
+        
+
+        let nr = random.rangeFloor(2, 20);
+        let segments = [...new Array(nr)].map(()=> random.range(1, 25));
+        let dashes = poly.dashLine(l, segments);
+        let blank = false;
+        
+        dashes.forEach(d => { 
+          if (poly.pointIsInCircle(d[0], center, 29)) { return;}
+          if (poly.pointIsInCircle(d[1], center, 12)) { return;}
+          if(d[0][1] === d[1][1]) { return; }
+          if (!blank) { background.push(drawLine(d));}
+          blank = !blank;
+        });
+        //linesFromDashes.push(l);
+        
+        //background.push(drawLine(l));
+      });
     };
 
     let options = {1:"few", 2:"more", 3:"more", 4:"few"};
 
-    postcards.drawSingle(draw, width, height, options);
+    postcards.drawQuad(draw, width, height, options);
 
     return renderGroups([paths, background], {
       context, width, height, units
