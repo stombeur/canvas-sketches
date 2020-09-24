@@ -244,7 +244,7 @@ const sketch = ({ width, height }) => {
       ymin = origin[1]+1;
       ymax = origin[1]+h-1;
       let box = [[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]];
-      let hatchlines = poly.hatchPolygon(box, 89.99, 1.5, 50);
+      let hatchlines = poly.hatchPolygon(box, 89.99, 3, 50);
       hatchlines.forEach(l => {
         // ints = start, intersections with circles, end
         let ints = [];
@@ -267,9 +267,9 @@ const sketch = ({ width, height }) => {
       
     };
 
-    let options = {1:"full", 2:"more", 3:"single", 4:"few"};
+    let options = {1:"few", 2:"more", 3:"more", 4:"few"};
 
-    postcards.drawQuad(draw, width, height, options);
+    postcards.drawSingle(draw, width, height, options);
 
     return renderGroups([paths, background], {
       context, width, height, units
