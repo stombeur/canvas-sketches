@@ -230,6 +230,49 @@ const hatchCircle = (center, radius, angle, spacing) => {
   return hatchlines;
 }
 
+const hyperspacePolygon = (polygon, anglespacing = 1, padding = -1) => {
+  let polygonNotP = polygon.map(p => {
+    return [p.x || p[0], p.y || p[1]];
+  });
+
+  // todo: why is padding so important
+  let rectangle = calculateBoundingBox(polygonNotP);
+  if (padding === -1) { padding = Math.max(rectangle[2][1], rectangle[2][0]); }
+  rectangle = calculateBoundingBox(polygonNotP, padding);
+
+  let x = rectangle[0][0];
+  let y = rectangle[0][1];
+  let height = rectangle[2][1] - y;
+  let width = rectangle[2][0] - x;
+  
+  let center = [x + width/2, y + height/2];
+
+  let numLines = Math.ceil(360 / anglespacing);
+  let radialLines = [];
+
+  for (let i = 1; i <= numLines; i++) {
+    let line = [[center[0], center[1]],[center[0], center[1] - height/2]];
+    let rotatedLine = rotatePolygon(line, center, anglespacing * i);
+    radialLines.push(rotatedLine);
+  }
+
+  let result = [];
+  for (let i = 0; i < radialLines.length; i++) {
+      let x = null;
+      try {
+        x = clip(radialLines[i], polygonNotP);
+      } catch {}
+      if (x) {
+          x.map(l => {
+              if (l.length === 2) {result.push([l[0], l[1]]); }
+              else { result.push([l[l.length-2],l[l.length-1]]); }
+              });
+      }
+    }
+
+  return result;
+};
+
 const hatchPolygon = (polygon, angle, spacing = 0.1, padding = 0) => {
     let polygonNotP = polygon.map(p => {
       return [p.x || p[0], p.y || p[1]];
@@ -693,6 +736,36 @@ const isPolygonConvexEx = (polygon) => {
   return (lastSign === Math.sign(crossproductFirstPoint));
 }
 
+const dashLine = (line, segments, dashlength = 1) => {
+  let lineNotP = line.map(p => {
+    return [p.x || p[0], p.y || p[1]];
+  });
+  //debugger;
+  let result = [];
+
+  if (segments === null || segments.length === 0) {
+    let l = distanceBetween(line[0], line[1]);
+    let nrOfSegments = Math.floor(l / dashlength);
+    segments = Array(nrOfSegments).fill(dashlength);
+  }
+
+  let sum = segments.reduce((a, c) => a + c, 0);
+
+  
+  let v = [lineNotP[1][0]-lineNotP[0][0],lineNotP[1][1]-lineNotP[0][1]];
+  let dx = v[0] / sum;
+  let dy = v[1] / sum;
+
+  let last = lineNotP[0];
+  for (let i = 0; i < segments.length; i++) {
+    let p = [last[0]+dx*segments[i], last[1]+dy*segments[i]];
+    result.push([last, p]);
+    last = p;
+  }
+
+  return result;
+}
+
 let poly = init;
 module.exports = poly;
 module.exports.default = poly;
@@ -734,3 +807,5 @@ poly.drawArc = drawArc;
 poly.drawArcOnCanvas = drawArcOnCanvas;
 poly.crossProduct = crossProduct;
 poly.isPolygonConvex = isPolygonConvex;
+poly.hyperspacePolygon = hyperspacePolygon;
+poly.dashLine = dashLine;
