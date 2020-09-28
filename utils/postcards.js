@@ -49,6 +49,7 @@ const reorigin = (point, origin) => {
   }
 
   const drawSingle = (f, width, height, opt = null) => {
+    opt.index = 1;
     f([0,0], width, height, opt);
   }
 
