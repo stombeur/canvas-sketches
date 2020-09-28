@@ -60,12 +60,14 @@ const drawLineOnCanvas = (ctx, line) => {
 };
 
 
-let paths = [];
-let background = [];
-
+let paths1 = [];
+let paths2 = [];
+let background1 = [];
+let background2 = [];
 
 const drawGemstone = (circle) => {
   //debugger;
+  let gemstone = [];
 
   let big_radius = circle.r;
   let center = circle.c;
@@ -106,7 +108,7 @@ const drawGemstone = (circle) => {
     
           }
           isConvex = poly.isPolygonConvex(points);
-          if (isConvex) { paths.push(...templines)}
+          if (isConvex) { gemstone.push(...templines)}
         }
         let points2 = [];
         let templines = [];
@@ -158,7 +160,7 @@ const drawGemstone = (circle) => {
         }
 
         templines.forEach(l => {
-          paths.push(drawLine(l));
+          gemstone.push(drawLine(l));
         });
 
         //console.log(templines);
@@ -171,6 +173,7 @@ const drawGemstone = (circle) => {
         //   paths.push(drawLine(h));
         // });
       }
+  return gemstone;
 }
 
 const sketch = ({ width, height }) => {
@@ -180,8 +183,10 @@ const sketch = ({ width, height }) => {
     context.fillRect(0, 0, width, height);
 
     
-    paths = [];
-    background = [];
+    paths1 = [];
+    paths2 = [];
+    background1 = [];
+    background2 = [];
 
     const draw = (origin, w, h, options) => {
       let type = options[options.index];
@@ -250,7 +255,9 @@ const sketch = ({ width, height }) => {
       // let center = postcards.reorigin([w/2, h/2], origin);
 
       circles.forEach(circle => {
-        drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
+        let lines = drawGemstone({c:circle.c,r:circle.r,m:circle.r*2*0.15});
+        if (random.boolean()) { paths1.push(lines); }
+        else { paths2.push(lines);}
       });
 
       let centerOffset = [random.range(-15, 15), random.range(-15, 10)];
@@ -313,6 +320,7 @@ const sketch = ({ width, height }) => {
         //background.push(drawLine(l));
       });
       let center = [origin[0]+w/2 + centerOffset[0], origin[1]+h/2 + centerOffset[1]];
+      let backLayer = false;
       linesAfterHatch.forEach(l => {
         
 
@@ -321,16 +329,18 @@ const sketch = ({ width, height }) => {
         let dashes = poly.dashLine(l, segments);
         let blank = false;
         
+        
         dashes.forEach(d => { 
           if (poly.pointIsInCircle(d[0], center, 29)) { return;}
           if (poly.pointIsInCircle(d[1], center, 12)) { return;}
           if(d[0][1] === d[1][1]) { return; }
-          if (!blank) { background.push(drawLine(d));}
+          if (!blank) { 
+            if(backLayer){background1.push(drawLine(d));}
+            else {background2.push(drawLine(d));}
+          }
           blank = !blank;
         });
-        //linesFromDashes.push(l);
-        
-        //background.push(drawLine(l));
+        backLayer = !backLayer;
       });
     };
 
@@ -338,7 +348,7 @@ const sketch = ({ width, height }) => {
 
     postcards.drawQuad(draw, width, height, options);
 
-    return renderGroups([paths, background], {
+    return renderGroups([paths1, paths2, background1, background2], {
       context, width, height, units
     });
   };
