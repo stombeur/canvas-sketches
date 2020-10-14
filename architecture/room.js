@@ -55,7 +55,27 @@ export class room {
         return [this.points[m2], this.points[m1]];
     }
 
-    extrude(sideNr, distance, angle) {
+    getExtraDisplacement(angle, a) {
+        if (angle) { // angle is not null and coincidentally not 0
+            // d = 
+           // let a = Math.abs(this.points[3][1] - this.points[2][1]); // y distance
+            let rad = (Math.PI / 180) * angle;
+            let d = Math.abs(a * Math.sin(rad) / Math.cos(rad));
+            if (angle < 0 && angle > -90) { 
+                //p3 is moved outward
+                //p3[0] += d;
+                return [0,d];
+            }
+            if (angle > 0 && angle < 90) { 
+                //p2 is moved outward
+                //p2[0] += d;
+                return [d,0];
+            }
+        } 
+        return [0,0]  
+    }
+
+    extrude(sideNr, distance, angle = null) {
         if (this.extrudedSides.includes(sideNr)) { return null; }
 
         let re = new room();
@@ -136,44 +156,39 @@ export class room {
                 // 3 = extruded(p3)
                 // extruded = side1
 
-                vx = distance;
-                vy = 0;
-                if (this.points[3][0] !== this.points[2][0]) {
-                    //debugger;
-                    let dx = this.points[3][0] - this.points[2][0];
-                    let dy = this.points[3][1] - this.points[2][1];
-                    let a = Math.atan2(dy, dx);
-                    console.log(a * 180 / Math.PI)
-                    if (dx<0) {
-                        a = Math.PI - Math.atan2(dy, dx);
-                    }
-                    vx = distance * Math.sin(a);
-                    vy = distance * Math.cos(a);
-                }
-                
-                let deltav2 = 0, deltav3 =0;
-                if (angle < 0 && angle > -90) { 
-                    //rotate p3 around p2
-                    deltav3 = - Math.hypot((this.points[3][1]-this.points[2][1]), (this.points[3][0]-this.points[2][0]) )* Math.sin((Math.PI / 180) * angle);
-                }
-                if (angle > 0 && angle < 90) { 
-                    //rotate p2 around p3
-                    deltav2 = + Math.hypot((this.points[3][1]-this.points[2][1]), (this.points[3][0]-this.points[2][0]) ) * Math.sin((Math.PI / 180) * angle);
-                }
-
                 p0 = this.points[3];
                 p1 = this.points[2];
-                p2 = [this.points[2][0] + vx + deltav2, this.points[2][1] + vy];
-                p3 = [this.points[3][0] + vx +deltav3, this.points[3][1] + vy];
+                p2 = [this.points[2][0] + distance, this.points[2][1]];
+                p3 = [this.points[3][0] + distance, this.points[3][1]];
+                
+                let d = this.getExtraDisplacement(angle, this.points[3][1] - this.points[2][1]);
+                p3[0] += d[1];
+                p2[0] += d[0];
 
-                // if (angle < 0 && angle > -90) { 
-                //     //rotate p3 around p2
-                //     p3[0] = p3[0] - (p3[1]-p2[1]) * Math.sin((Math.PI / 180) * angle);
-                // }
-                // if (angle > 0 && angle < 90) { 
-                //     //rotate p2 around p3
-                //     p2[0] = p2[0] + (p3[1]-p2[1]) * Math.sin((Math.PI / 180) * angle);
-                // }
+                // if (angle) { // angle is not null and coincidentally not 0
+                //     // d = 
+                //     let a = Math.abs(this.points[3][1] - this.points[2][1]); // y distance
+                //     let rad = (Math.PI / 180) * angle;
+                //     let d = Math.abs(a * Math.sin(rad) / Math.cos(rad));
+                //     if (angle < 0 && angle > -90) { 
+                //         //p3 is moved outward
+                //         p3[0] += d;
+                //     }
+                //     if (angle > 0 && angle < 90) { 
+                //         //p2 is moved outward
+                //         p2[0] += d;
+                //     }
+                // }   
+
+                if (this.points[3][0] !== this.points[2][0]) {
+                    // rotate new p2 and p3 around angle between points above
+                    let dx = this.points[3][0] - this.points[2][0];
+                    let dy = this.points[3][1] - this.points[2][1];
+                    let a = dx>0 ? Math.atan2(dy, dx) : Math.PI - Math.atan2(dy, dx);
+                    
+                    p2 = poly.rotatePoint(p2, this.points[2], a / Math.PI * 180);
+                    p3 = poly.rotatePoint(p3, this.points[3], a / Math.PI * 180);
+                }
 
                 re.points.push(p0, p1, p2, p3);
                 re.extrudedSides.push(1);

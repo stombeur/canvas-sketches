@@ -38,11 +38,11 @@ const sketch = ({ width, height }) => {
     rooms.push(origin);
     rooms.push(origin.extrude(1, 10));
     rooms.push(origin.extrude(2, 10));
-    rooms.push(origin.extrude(3, 10, 30));
+    rooms.push(origin.extrude(3, 10, -28));
     rooms.push(origin.extrude(4, 10));
     
     //debugger;
-    rooms.push(rooms[3].extrude(3, 30, 24));
+    rooms.push(rooms[3].extrude(3, 30));
     //rooms.push(rooms[1].extrude(1, 30));
     
 
