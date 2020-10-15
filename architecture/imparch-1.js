@@ -1,6 +1,7 @@
 
 const canvasSketch = require('canvas-sketch');
 const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { createArcPath, createLinePath } = require('../utils/paths');
 import {room} from './room';
 
 const settings = {
@@ -12,23 +13,6 @@ const settings = {
 };
 
 let paths = [];
-
-const drawLineOnCanvas = (ctx, line) => {
-  try {
-  //if (!line || line.length === 0 || !line[0] || !line[1]) { return; }
-  let x1 = line[0].x  || line[0][0],
-      x2 = line[1].x || line[1][0],
-      y1 = line[0].y || line[0][1],
-      y2 = line[1].y || line[1][1];
-
-  //console.log({line:[[x1,y1],[x2,y2]]})
-
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  } catch {
-    console.error(line);
-  }
-};
 
 const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
@@ -43,17 +27,21 @@ const sketch = ({ width, height }) => {
     
     //debugger;
     rooms.push(rooms[4].extrude(4, 30,-20));
-    rooms.push(rooms[5].extrude(3, 30,-20));
-    rooms.push(rooms[5].extrude(4, 30));
+    //rooms.push(rooms[5].extrude(3, 30,-20));
+    //rooms.push(rooms[5].extrude(4, 30));
     
+    
+    rooms[5].addStairs(4, 2, 15);
+    rooms[4].addColumnade(1, 3, 5, 1);
 
     
     rooms.forEach(r => {
       if (!r) { return; }
       r.drawLines(l => {
-        paths.push(createPath(ctx => {
-          drawLineOnCanvas(ctx, l);
-        }));
+        paths.push(createLinePath(l));
+      });
+      r.drawCircles((center, radius) => {
+        paths.push(createArcPath(center, radius, 0, 360));
       });
     });
     

@@ -1,13 +1,14 @@
 const poly = require('../utils/poly');
 
 export class room {
-    constructor(points = null) {
+    constructor(points = null, unit = 10) {
         if (points && Array.isArray(points) && points.length > 0) {
             this.points = points;
         }
         else {
             this.points = [];
         }
+        this.unit = unit;
     }
 
     static from(origin, side) {
@@ -21,11 +22,15 @@ export class room {
         r.push([origin[0] + side/2, origin[1] - side/2]);
         r.push([origin[0] + side/2, origin[1] + side/2]);
 
-        return new room(r);
+        return new room(r, side);
     }
 
     points = [];
     extrudedSides = [];
+    decoratedSides = [];
+    unit = 0;
+    stairs;
+    columns;
 
     extrudableSides() {
         return [1,2,3,4].filter(x => !this.extrudedSides.includes(x));
@@ -40,12 +45,28 @@ export class room {
              }
         }
 
+        if (this.stairs) { l.push(...this.stairs); }
+
         return l;
+    }
+
+    circles() {
+        let c = [];
+
+        if (this.columns) { c.push(...this.columns); }
+
+        return c;
     }
 
     drawLines(fn) {
         this.lines().forEach(l => {
             fn(l);
+            });
+    }
+
+    drawCircles(fn) {
+        this.circles().forEach(c => {
+            fn(c.c, c.r);
             });
     }
 
@@ -205,8 +226,102 @@ export class room {
         }
 
         this.extrudedSides.push(sideNr); 
+        re.unit = this.unit;
         //add to extruded!
         return re;
+    }
 
+    addStairs(sideNr, step = 5, width = 10, perpendicular = true) {
+        //debugger;
+        if (this.stairs || this.decoratedSides.includes(sideNr)) { return; }
+        this.stairs = [];
+        this.decoratedSides.push(sideNr);
+        //draw alongside wall
+        //clip with polygon/room outline
+        //orient towards opposite wall?
+        //not always perp to lining wall
+
+        let side = this.getSide(sideNr);
+        let length = poly.distanceBetween(side[0], side[1]);
+        let steps = Math.floor(length / step);
+        let dxdy = [side[1][0] - side[0][0], side[1][1] - side[0][1]];
+        let vector = [dxdy[0]/steps, dxdy[1]/steps];
+        let start = [[side[0][0], side[0][1]]];
+        let angle = 0;
+        switch(sideNr) {
+            case 1:
+                angle = Math.PI - Math.atan2(dxdy[0], dxdy[1]);
+                start.push([start[0][0] + width, start[0][1]]);
+                break;
+            case 2:
+                angle = Math.atan2(dxdy[1], dxdy[0]);
+                start.push([start[0][0], start[0][1] + width]);
+                break;
+            case 3:
+                angle = - Math.atan2(dxdy[0], dxdy[1]);
+                start.push([start[0][0] - width, start[0][1]]);
+                break;
+            case 4:
+                angle = Math.PI + Math.atan2(dxdy[1], dxdy[0]);
+                start.push([start[0][0], start[0][1] - width]);
+                break;
+        }
+
+        if (perpendicular)  {
+            let rotstart = poly.rotatePoint(start[1], start[0], angle/ Math.PI * 180);
+            start[1] = rotstart;
+        }
+
+        for (let s = 0; s < steps; s++) {
+            let stair = [
+                [start[0][0]+vector[0]*s,start[0][1]+vector[1]*s],
+                [start[1][0]+vector[0]*s,start[1][1]+vector[1]*s]
+            ];
+            this.stairs.push(stair);
+        }
+    }
+
+    addColumnade(sideNr, step = 5, width = 5, r = 5, perpendicular = true) {
+        if (this.columns || this.decoratedSides.includes(sideNr)) { return; }
+        this.columns = [];
+        this.decoratedSides.push(sideNr);
+
+        let side = this.getSide(sideNr);
+        let length = poly.distanceBetween(side[0], side[1]);
+        let steps = Math.floor(length / step);
+        let dxdy = [side[1][0] - side[0][0], side[1][1] - side[0][1]];
+        let vector = [dxdy[0]/steps, dxdy[1]/steps];
+        let center_rot = [[side[0][0], side[0][1]]];
+        let center_circle;
+        let angle = 0;
+
+        switch(sideNr) {
+            case 1:
+                angle = Math.PI - Math.atan2(dxdy[0], dxdy[1]);
+                center_circle = [center_rot[0][0] + width, center_rot[0][1]];
+                break;
+            case 2:
+                angle = Math.atan2(dxdy[1], dxdy[0]);
+                center_circle = [center_rot[0][0], center_rot[0][1] + width];
+                break;
+            case 3:
+                angle = - Math.atan2(dxdy[0], dxdy[1]);
+                center_circle = [center_rot[0][0] - width, center_rot[0][1]];
+                break;
+            case 4:
+                angle = Math.PI + Math.atan2(dxdy[1], dxdy[0]);
+                center_circle = [center_rot[0][0], center_rot[0][1] - width];
+                break;
+        }
+
+        // if (perpendicular)  {
+        //     let rotp = poly.rotatePoint(center_circle, center_rot, angle/ Math.PI * 180);
+        //     center_circle = rotp;
+        // }
+
+        for (let s = 1; s < steps; s++) {
+            let c = [center_circle[0]+vector[0]*s,center_circle[1]+vector[1]*s];
+            this.columns.push({c,r});
+        }
     }
 }
