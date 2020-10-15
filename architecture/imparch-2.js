@@ -1,9 +1,10 @@
 
 const canvasSketch = require('canvas-sketch');
-const { renderPaths } = require('canvas-sketch-util/penplot');
+const { renderPaths, renderGroups } = require('canvas-sketch-util/penplot');
 import {room} from './room';
 const random = require('canvas-sketch-util/random');
 const { createArcPath, createLinePath } = require('../utils/paths');
+const poly = require('../utils/poly');
 
 const settings = {
   dimensions: 'A4',//[ 2048, 2048 ]
@@ -13,13 +14,13 @@ const settings = {
   units: 'mm',
 };
 
-const drawPlan = (paths, center, width) => {
+const drawPlan = (center, width) => {
   let rooms = [];
   let unit = width/12;
   let origin = room.from(center, unit);
   rooms.push(origin);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 14; i++) {
     //debugger
     let r = random.pick(rooms);
     let s = random.pick(r.extrudableSides());
@@ -41,36 +42,59 @@ const drawPlan = (paths, center, width) => {
     }
   }  
 
+  return rooms;
   
-  rooms.forEach(r => {
-    if (!r) { return; }
-    r.drawLines(l => {
-      paths.push(createLinePath(l));
-    });
-    r.drawCircles((center, radius) => {
-      paths.push(createArcPath(center, radius, 0, 360));
-    });
-  });
+
 }
 
 const sketch = ({ width, height }) => {
-  return ({ context, width, height, units }) => {
-    let paths = [];
+  
+  let margin = [6, 6];
+  let columns = 2, rows = 3;
 
-    let margin = [6, 6];
-    let columns = 4, rows = 5;
+  let elementW = (width - margin[0]) / columns;
+  let elementH = (height - margin[1]) / rows;
 
-    let elementW = (width - margin[0]) / columns;
-    let elementH = (height - margin[1]) / rows;
+  let plans = [];
 
-    for (let c = 0; c < columns; c++) {
-        for (let r = 0; r < rows; r++) {
-          let center = [margin[0] + c*elementW + elementW/2, margin[1] + r*elementH + elementH/2];
-          drawPlan(paths, center, elementW);
-        }
+  for (let c = 0; c < columns; c++) {
+    for (let r = 0; r < rows; r++) {
+      let center = [margin[0] + c*elementW + elementW/2, margin[1] + r*elementH + elementH/2];
+      let rooms = drawPlan(center, elementW);
+
+      const points = [];
+      let x = rooms.map(r => r.plan().map(p => points.push(...p) ));
+      let bb = poly.calculateBoundingBox(points);
+      let bbcenter = [[(bb[1][0]-bb[0][0])/2+bb[0][0]],[(bb[1][1]-bb[0][1])/2+bb[0][1]]];
+
+      let v = [center[0]-bbcenter[0], center[1]-bbcenter[1]];
+      //rooms.forEach(r => r.move(v));
+
+      plans.push(rooms);
     }
+  }
+  
+  return ({ context, width, height, units }) => {
+    
+    let planPaths = [];
+    let otherPaths = [];
 
-    return renderPaths([paths], {
+    plans.forEach(p => {
+      p.forEach(r => {
+        if (!r) { return; }
+        r.drawPlan(l => {
+          planPaths.push(createLinePath(l));
+        });
+        r.drawLines(l => {
+          otherPaths.push(createLinePath(l));
+        });
+        r.drawCircles((center, radius) => {
+          otherPaths.push(createArcPath(center, radius, 0, 360));
+        });
+      });
+    });
+
+    return renderGroups([planPaths, otherPaths], {
       context, width, height, units
     });
   };

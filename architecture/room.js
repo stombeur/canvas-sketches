@@ -36,7 +36,7 @@ export class room {
         return [1,2,3,4].filter(x => !this.extrudedSides.includes(x));
     }
 
-    lines() {
+    plan() {
         let l = [];
         for (let i = 0; i < this.points.length; i++) {
             let sideNr = i+1;
@@ -44,6 +44,11 @@ export class room {
                l.push([this.points[i], this.points[(i+1)%this.points.length]]);  
              }
         }
+        return l;
+    }
+
+    lines() {
+        let l = [];
 
         if (this.stairs) { l.push(...this.stairs); }
 
@@ -56,6 +61,12 @@ export class room {
         if (this.columns) { c.push(...this.columns); }
 
         return c;
+    }
+
+    drawPlan(fn) {
+        this.plan().forEach(l => {
+            fn(l);
+            });
     }
 
     drawLines(fn) {
@@ -323,5 +334,13 @@ export class room {
             let c = [center_circle[0]+vector[0]*s,center_circle[1]+vector[1]*s];
             this.columns.push({c,r});
         }
+    }
+
+    move(vector) {
+        //console.log(vector)
+        this.points.forEach(p => {
+            p[0] = p[0] + vector[0];
+            p[1] = p[1] + vector[1];
+        })
     }
 }
