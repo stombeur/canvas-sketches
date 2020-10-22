@@ -452,9 +452,9 @@ const toLine = (point1, point2) => {
   return [[x1, y1],[x2, y2]];
 }
 
-const movePoint = (p, vector) => {
-  return point(p.x + vector.x, p.y + vector.y);
-} 
+// const movePoint = (p, vector) => {
+//   return point(p.x + vector.x, p.y + vector.y);
+// } 
 
 const findIntersection = (P1, P2, P3, P4) => {
   if (!P1.x) { P1 = point(P1[0], P1[1]); }
@@ -810,6 +810,38 @@ const dashLine = (line, segments, dashlength = 1) => {
   return result;
 }
 
+const movePoint = (p, vector) => {
+  let isArray = !p.x;
+  let p1 = p;
+  //let v1 = vector;
+
+  if (isArray) { p1 = point(p[0], p[1]); }
+  //if(!v1.x) { v1 = point(vector[0], vector[1]); }
+
+  p1.x = p1.x + (vector.x ? vector.x : vector[0]);
+  p1.y = p1.y + (vector.y ? vector.y : vector[1]);
+
+  if (isArray) { return [p1.x, p1.y]; }
+  return p1;
+}
+
+const movePoly = (p, vector) => {
+  let result = p.map(e => movePoint(e, vector));
+  return result;
+}
+
+const createVector = (from, to) => {
+  let returnAsArray = !to.x;
+
+  if (!to.x) { to = point(to[0], to[1]); }
+  if (!from.x) { from = point(from[0], from[1]); }
+
+  let result = [to.x - from.x, to.y - from.y ];
+
+  if (returnAsArray) { return result; }
+  return point(...result);
+}
+
 let poly = init;
 module.exports = poly;
 module.exports.default = poly;
@@ -822,7 +854,6 @@ poly.findSegmentIntersection = findSegmentIntersection;
 poly.isSegmentIntersected = isSegmentIntersected;
 poly.point = point;
 poly.toLine = toLine;
-poly.movePoint = movePoint;
 poly.findIntersectionPolygon = findIntersectionPolygon;
 poly.createPolygon = createPolygon;
 poly.drawPolygonOnCanvas = drawPolygonOnCanvas;
@@ -854,3 +885,6 @@ poly.isPolygonConvex = isPolygonConvex;
 poly.hyperspacePolygon = hyperspacePolygon;
 poly.hyperspacePolygonDouble = hyperspacePolygonDouble;
 poly.dashLine = dashLine;
+poly.movePoint = movePoint;
+poly.movePoly = movePoly;
+poly.createVector = createVector;

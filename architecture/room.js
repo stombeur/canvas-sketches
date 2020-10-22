@@ -1,3 +1,6 @@
+import { boundingbox } from '../utils/boundingbox';
+import { polyline } from '../utils/polyline';
+
 const poly = require('../utils/poly');
 
 export class room {
@@ -9,6 +12,9 @@ export class room {
             this.points = [];
         }
         this.unit = unit;
+
+        let bb = boundingbox.from(this.points);
+        this.center = bb.center;
     }
 
     static from(origin, side) {
@@ -31,6 +37,7 @@ export class room {
     unit = 0;
     stairs;
     columns;
+    center = [];
 
     extrudableSides() {
         return [1,2,3,4].filter(x => !this.extrudedSides.includes(x));
@@ -124,7 +131,7 @@ export class room {
 
         **/
 
-        let re = new room();
+        let re;
         let p0, p1, p2, p3, d, vx, vy;
         switch(sideNr) {
             case 1:
@@ -153,7 +160,7 @@ export class room {
                     p1 = poly.rotatePoint(p1, this.points[1], a / Math.PI * 180);
                 }
 
-                re.points.push(p0, p1, p2, p3);
+                re = new room([p0, p1, p2, p3]);
                 re.extrudedSides.push(3);
                 break;
             case 2:
@@ -178,7 +185,7 @@ export class room {
                     p1 = poly.rotatePoint(p1, this.points[1], a / Math.PI * 180);
                 }
                 
-                re.points.push(p0, p1, p2, p3);
+                re = new room([p0, p1, p2, p3]);
                 re.extrudedSides.push(4);
                 break;
             case 3:
@@ -204,7 +211,7 @@ export class room {
                     p3 = poly.rotatePoint(p3, this.points[3], a / Math.PI * 180);
                 }
 
-                re.points.push(p0, p1, p2, p3);
+                re = new room([p0, p1, p2, p3]);
                 re.extrudedSides.push(1);
                 break;
             case 4:
@@ -229,7 +236,7 @@ export class room {
                     p0 = poly.rotatePoint(p0, this.points[0], a / Math.PI * 180);
                 }
 
-                re.points.push(p0, p1, p2, p3);
+                re = new room([p0, p1, p2, p3]);
                 re.extrudedSides.push(2);
                 break;
                 default:
@@ -259,10 +266,16 @@ export class room {
         let vector = [dxdy[0]/steps, dxdy[1]/steps];
         let start = [[side[0][0], side[0][1]]];
         let angle = 0;
+        let po = [];
+        po.push(side[0], side[1]);
         switch(sideNr) {
             case 1:
                 angle = Math.PI - Math.atan2(dxdy[0], dxdy[1]);
                 start.push([start[0][0] + width, start[0][1]]);
+                po.push(
+                    [side[1][0] + width, side[1][1]],
+                    [side[0][0] + width, side[0][1]]
+                    );
                 break;
             case 2:
                 angle = Math.atan2(dxdy[1], dxdy[0]);
@@ -282,6 +295,9 @@ export class room {
             let rotstart = poly.rotatePoint(start[1], start[0], angle/ Math.PI * 180);
             start[1] = rotstart;
         }
+   
+        //this.stairs = poly.hatchPolygon(po, 45, 5);
+
 
         for (let s = 0; s < steps; s++) {
             let stair = [
@@ -337,10 +353,41 @@ export class room {
     }
 
     move(vector) {
-        //console.log(vector)
-        this.points.forEach(p => {
-            p[0] = p[0] + vector[0];
-            p[1] = p[1] + vector[1];
-        })
+        if (this.points) { this.points = poly.movePoly(this.points, vector); }
+        if (this.stairs) {this.stairs = this.stairs.map(s => poly.movePoly(s, vector)); }
+        if (this.columns) {this.columns.forEach(col => {
+            col.c = poly.movePoint(col.c, vector);
+        });}
+    }
+
+    moveToCenter(center) {
+        this.move([center[0] - this.center[0], center[1] - this.center[1] ])
+    }
+
+    static linkroomlines(rooms) {
+        let result = new polyline();
+        //debugger;
+        let lines = [];
+        rooms.forEach(r => { 
+            lines.push(...r.plan()); 
+        });
+        //console.log(lines)
+        let start = lines[0];
+        let current = lines[0];
+        let end = false;
+        //console.log('lines: ' + lines.length)
+        let count = 0;
+        while(!end) {
+            result.add(current[0]);
+            count++;
+            //console.log('added point ', current[0][0], current[0][1])
+            let next = lines.find(l => l[0][0] === current[1][0] && l[0][1] === current[1][1]);
+            if (next[0][0] === start[0][0] && next[0][1] === start[0][1]) { end = true;}
+            current = next;
+            if (count > lines.length + 1) { end = true; console.log('did not exit')}
+        }
+        //console.log('polyline points: ' + result.points.length)
+
+        return result;
     }
 }
