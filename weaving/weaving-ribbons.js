@@ -17,7 +17,10 @@ const settings = {
 };
 
 const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines, slot, ribbons) => {
-    let result = [];
+    let result = {
+        outsidelines: [],
+        insidelines: []
+    };
 
     let x = start.x;
     let y = start.y;
@@ -45,10 +48,13 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
     }
     let rib = new ribbon(ribbonLines); //{ lines: ribbonLines, left: ribbonLines[0], right: ribbonLines[nrOfLines - 1] };
 
-    let linesToDraw = [];
+    let linesToDrawInside = [];
+    let linesToDrawOutside = [];
 
-    ribbonLines.forEach(rl => {
-        let line = rl;
+    for (let i = 0; i < ribbonLines.length; i++) {
+        let line = ribbonLines[i];
+        let outside = (i === 0 || i === (ribbonLines.length-1));
+        
         ribbons.forEach(rx => {
             let r = rx.rib;
             let firstPart = clipLine(r.left, line, false);
@@ -57,13 +63,32 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
             secondPart = clipLine(r.left, secondPart, false);
             line = [...secondPart];
 
-            if (!lineEquals(line, firstPart)) { linesToDraw.push(firstPart); }
+            if (!lineEquals(line, firstPart)) { outside ? linesToDrawOutside.push(firstPart) : linesToDrawInside.push(firstPart); }
             //if (!lineEquals(line, secondPart)) { linesToDraw.push(secondPart); }
 
         });
         //if (ribbons.length === 0) { linesToDraw.push(line); }
-        linesToDraw.push(line);
-    });
+        outside ? linesToDrawOutside.push(line) : linesToDrawInside.push(line);
+
+    }
+
+    // ribbonLines.forEach(rl => {
+    //     let line = rl;
+    //     ribbons.forEach(rx => {
+    //         let r = rx.rib;
+    //         let firstPart = clipLine(r.left, line, false);
+    //         firstPart = clipLine(r.right, firstPart, true);
+    //         let secondPart = clipLine(r.right, line, true);
+    //         secondPart = clipLine(r.left, secondPart, false);
+    //         line = [...secondPart];
+
+    //         if (!lineEquals(line, firstPart)) { linesToDraw.push(firstPart); }
+    //         //if (!lineEquals(line, secondPart)) { linesToDraw.push(secondPart); }
+
+    //     });
+    //     //if (ribbons.length === 0) { linesToDraw.push(line); }
+    //     linesToDraw.push(line);
+    // });
 
 
     ribbons.push({ slot, rib });
@@ -71,9 +96,13 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
         return a.slot - b.slot;
     });
 
-    linesToDraw.forEach(l => {
+    linesToDrawOutside.forEach(l => {
         let angle = Math.atan2(l[1][1] - l[0][1], l[1][0] - l[0][0]) * 180 / Math.PI;
-        if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { result.push(l); }
+        if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { result.outsidelines.push(l); }
+    });
+    linesToDrawInside.forEach(l => {
+        let angle = Math.atan2(l[1][1] - l[0][1], l[1][0] - l[0][0]) * 180 / Math.PI;
+        if ((44.8 < angle && angle < 45.2) || (134.8 < angle && angle < 135.2)) { result.insidelines.push(l); }
     });
 
     return result;
@@ -104,7 +133,10 @@ const sketch = ({ width, height }) => {
     let alllines = [];
     
     const prepare = (origin, w, h, opts) => {
-        let lines = [];
+        let result = {
+            insidelines:  [],
+            outsidelines: []
+        }
         let ribbons = [];
         
         let horMargin = w / 60;
@@ -137,7 +169,8 @@ const sketch = ({ width, height }) => {
             let angle = 45;//ltr ? 45 : 135;
 
             let r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
-            lines.push(...r1);
+            result.outsidelines.push(...r1.outsidelines);
+            result.insidelines.push(...r1.insidelines);
 
             let positionRight = slotsRight[slot];
             y = posY + (ribbonWidthAngle * positionRight);
@@ -145,10 +178,10 @@ const sketch = ({ width, height }) => {
             angle = 135;
 
             let r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons)
-            lines.push(...r2);
-
+            result.outsidelines.push(...r2.outsidelines);
+            result.insidelines.push(...r2.insidelines);
         }
-        alllines.push(lines);
+        alllines.push(result);
     }
 
     postcards.drawQuad(prepare, width, height);
@@ -156,31 +189,35 @@ const sketch = ({ width, height }) => {
 
     return ({ context, width, height, units }) => {
         // do drawing stuff here
-        let allpaths = [];  
-        
+        let outsidepaths = [];  
+        let insidepaths = [];  
+
         const draw = (origin, w, h, opts) => {
-            let paths = [];
             let lines = opts.alllines[opts.index-1];
             let bb = { xmin: 4 + origin[0], ymin: 4 + origin[1], xmax: w - 4 + origin[0], ymax: h - 4 + origin[1] };
 
-            lines.forEach(l => {
+            lines.outsidelines.forEach(l => {
                 let clippedLine = poly.clipLineToBB(l, bb);
                 if (clippedLine && clippedLine[0]) {
-                    paths.push(createLinePath(clippedLine));
+                    outsidepaths.push(createLinePath(clippedLine));
+                }
+            });
+            lines.insidelines.forEach(l => {
+                let clippedLine = poly.clipLineToBB(l, bb);
+                if (clippedLine && clippedLine[0]) {
+                    insidepaths.push(createLinePath(clippedLine));
                 }
             });
 
             let box = new polyline([[origin[0]+4,origin[1]+4],[origin[0]+4, origin[1]+h-4],[origin[0]+w-4, origin[1]+h-4],[origin[0]+w-4, origin[1]+4]]);
             box.tolines().forEach(l => {
-                paths.push(createLinePath(l));
+                outsidepaths.push(createLinePath(l));
             });
-
-            allpaths.push(paths);
         }
 
         postcards.drawQuad(draw, width, height, {alllines});
 
-        return renderGroups([...allpaths], {
+        return renderGroups([outsidepaths, insidepaths], {
         context, width, height, units
         });
     };
