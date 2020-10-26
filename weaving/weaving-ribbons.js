@@ -134,7 +134,8 @@ const sketch = ({ width, height }) => {
     
     const prepare = (origin, w, h, opts) => {
         let result = {
-            insidelines:  [],
+            insidelinesleft:  [],
+            insidelinesright:  [],
             outsidelines: []
         }
         let ribbons = [];
@@ -147,9 +148,9 @@ const sketch = ({ width, height }) => {
         let posXRight = drawingWidth + horMargin  + origin[0];
         let posY = vertMargin - drawingWidth + origin[1];
         
-        let nrOfLines = 4;
+        let nrOfLines = 8;
 
-        let ribbonWidth = w / 21;
+        let ribbonWidth = w / 17;
         let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth, 2));
         let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth, 2));
 
@@ -170,7 +171,7 @@ const sketch = ({ width, height }) => {
 
             let r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
             result.outsidelines.push(...r1.outsidelines);
-            result.insidelines.push(...r1.insidelines);
+            result.insidelinesleft.push(...r1.insidelines);
 
             let positionRight = slotsRight[slot];
             y = posY + (ribbonWidthAngle * positionRight);
@@ -179,7 +180,7 @@ const sketch = ({ width, height }) => {
 
             let r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons)
             result.outsidelines.push(...r2.outsidelines);
-            result.insidelines.push(...r2.insidelines);
+            result.insidelinesright.push(...r2.insidelines);
         }
         alllines.push(result);
     }
@@ -190,7 +191,8 @@ const sketch = ({ width, height }) => {
     return ({ context, width, height, units }) => {
         // do drawing stuff here
         let outsidepaths = [];  
-        let insidepaths = [];  
+        let insidepaths1 = [];  
+        let insidepaths2 = [];  
 
         const draw = (origin, w, h, opts) => {
             let lines = opts.alllines[opts.index-1];
@@ -202,10 +204,16 @@ const sketch = ({ width, height }) => {
                     outsidepaths.push(createLinePath(clippedLine));
                 }
             });
-            lines.insidelines.forEach(l => {
+            lines.insidelinesleft.forEach(l => {
                 let clippedLine = poly.clipLineToBB(l, bb);
                 if (clippedLine && clippedLine[0]) {
-                    insidepaths.push(createLinePath(clippedLine));
+                    insidepaths1.push(createLinePath(clippedLine));
+                }
+            });
+            lines.insidelinesright.forEach(l => {
+                let clippedLine = poly.clipLineToBB(l, bb);
+                if (clippedLine && clippedLine[0]) {
+                    insidepaths2.push(createLinePath(clippedLine));
                 }
             });
 
@@ -217,7 +225,7 @@ const sketch = ({ width, height }) => {
 
         postcards.drawQuad(draw, width, height, {alllines});
 
-        return renderGroups([outsidepaths, insidepaths], {
+        return renderGroups([outsidepaths, insidepaths1, insidepaths2], {
         context, width, height, units
         });
     };
