@@ -1,5 +1,6 @@
 import { boundingbox } from '../utils/boundingbox';
 import { polyline } from '../utils/polyline';
+import { clipregion } from '../utils/regionClip';
 
 const poly = require('../utils/poly');
 
@@ -29,6 +30,19 @@ export class room {
         r.push([origin[0] + side/2, origin[1] + side/2]);
 
         return new room(r, side);
+    }
+
+    static copy(roomToCopy) {
+        let clonedRoom = new room(JSON.parse(JSON.stringify(roomToCopy.points)), roomToCopy.unit);
+
+        clonedRoom.extrudedSides = roomToCopy.extrudedSides.slice();
+        clonedRoom.decoratedSides = roomToCopy.decoratedSides.slice();
+        clonedRoom.center = roomToCopy.center.slice();
+
+        clonedRoom.colums = roomToCopy.columns ? JSON.parse(JSON.stringify(roomToCopy.columns)) : null;
+        clonedRoom.stairs = roomToCopy.stairs ? JSON.parse(JSON.stringify(roomToCopy.stairs)) : null;
+
+        return clonedRoom;
     }
 
     points = [];
@@ -160,7 +174,7 @@ export class room {
                     p1 = poly.rotatePoint(p1, this.points[1], a / Math.PI * 180);
                 }
 
-                re = new room([p0, p1, p2, p3]);
+                re = new room([p0, p1, p2, p3], distance);
                 re.extrudedSides.push(3);
                 break;
             case 2:
@@ -185,7 +199,7 @@ export class room {
                     p1 = poly.rotatePoint(p1, this.points[1], a / Math.PI * 180);
                 }
                 
-                re = new room([p0, p1, p2, p3]);
+                re = new room([p0, p1, p2, p3], distance);
                 re.extrudedSides.push(4);
                 break;
             case 3:
@@ -211,7 +225,7 @@ export class room {
                     p3 = poly.rotatePoint(p3, this.points[3], a / Math.PI * 180);
                 }
 
-                re = new room([p0, p1, p2, p3]);
+                re = new room([p0, p1, p2, p3], distance);
                 re.extrudedSides.push(1);
                 break;
             case 4:
@@ -236,7 +250,7 @@ export class room {
                     p0 = poly.rotatePoint(p0, this.points[0], a / Math.PI * 180);
                 }
 
-                re = new room([p0, p1, p2, p3]);
+                re = new room([p0, p1, p2, p3], distance);
                 re.extrudedSides.push(2);
                 break;
                 default:
@@ -366,28 +380,27 @@ export class room {
 
     static linkroomlines(rooms) {
         let result = new polyline();
-        //debugger;
         let lines = [];
         rooms.forEach(r => { 
             lines.push(...r.plan()); 
         });
-        //console.log(lines)
         let start = lines[0];
         let current = lines[0];
         let end = false;
-        //console.log('lines: ' + lines.length)
         let count = 0;
         while(!end) {
             result.add(current[0]);
             count++;
-            //console.log('added point ', current[0][0], current[0][1])
             let next = lines.find(l => l[0][0] === current[1][0] && l[0][1] === current[1][1]);
             if (next[0][0] === start[0][0] && next[0][1] === start[0][1]) { end = true;}
             current = next;
             if (count > lines.length + 1) { end = true; console.log('did not exit')}
         }
-        //console.log('polyline points: ' + result.points.length)
 
         return result;
+    }
+
+    static toClipRegion(rooms) {
+        return this.linkroomlines(rooms).toClipRegion();
     }
 }

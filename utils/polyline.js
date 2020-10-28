@@ -1,5 +1,7 @@
+import { clip } from "../utils/poly";
 import { point } from "./point";
-
+import { clipregion } from "./regionClip";
+const poly = require('../utils/poly');
 
 export class polyline {
     constructor(points = null) {
@@ -19,6 +21,11 @@ export class polyline {
             return [ppr.x, ppr.y];
         });
         return new polyline(rotatedPoints);
+    }
+
+    move(vector) {
+        if (this.points) { this.points = poly.movePoly(this.points, vector); }
+        return this;
     }
 
     tolines() {
@@ -41,6 +48,14 @@ export class polyline {
         //console.log(a)
         return a;
     }
+
+    toClipRegion() {
+        let r = new clipregion();
+        r.addRegion(this.points);
+        return r;
+    }
+
+
 
     // sortPointsCW() {
     //     this.points.sort((a,b)=>a.y - b.y);
