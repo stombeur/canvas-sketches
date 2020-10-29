@@ -39,7 +39,7 @@ export class room {
         clonedRoom.decoratedSides = roomToCopy.decoratedSides.slice();
         clonedRoom.center = roomToCopy.center.slice();
 
-        clonedRoom.colums = roomToCopy.columns ? JSON.parse(JSON.stringify(roomToCopy.columns)) : null;
+        clonedRoom.columns = roomToCopy.columns ? JSON.parse(JSON.stringify(roomToCopy.columns)) : null;
         clonedRoom.stairs = roomToCopy.stairs ? JSON.parse(JSON.stringify(roomToCopy.stairs)) : null;
 
         return clonedRoom;
@@ -372,6 +372,7 @@ export class room {
         if (this.columns) {this.columns.forEach(col => {
             col.c = poly.movePoint(col.c, vector);
         });}
+        return this;
     }
 
     moveToCenter(center) {

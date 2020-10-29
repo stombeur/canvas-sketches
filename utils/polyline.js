@@ -55,7 +55,11 @@ export class polyline {
         return r;
     }
 
-
+    centroid() {
+        const avgx = (this.points.reduce((a,b) => a + b[0], 0) / this.points.length) || 0;
+        const avgy = (this.points.reduce((a,b) => a + b[1], 0) / this.points.length) || 0;
+        return [avgx, avgy];
+    }
 
     // sortPointsCW() {
     //     this.points.sort((a,b)=>a.y - b.y);

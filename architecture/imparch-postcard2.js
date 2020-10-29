@@ -11,9 +11,13 @@ import { polyline } from "../utils/polyline";
 import { boundingbox } from '../utils/boundingbox';
 const postcards = require('../utils/postcards');
 
+random.setSeed(random.getRandomSeed());
+console.log(`seed: ${random.getSeed()}`);
+
 const settings = {
+  suffix: random.getSeed(),
   dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'portrait',
+  orientation: 'landscape',
   pixelsPerInch: 300,
   //scaleToView: true, 
   units: 'mm',
@@ -25,7 +29,7 @@ const drawPlan = (center, width) => {
   let origin = room.from(center, unit);
   rooms.push(origin);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 14; i++) {
     let r = random.pick(rooms);
     let s = random.pick(r.extrudableSides());
     let d = random.pick([unit/2, unit, unit*2]);
@@ -88,65 +92,88 @@ const sketch = ({ width, height }) => {
   let plans = [];
 
   const prepare = (origin, w, h) => {
-    let bounds = boundingbox.from([origin, postcards.reorigin([w, 0], origin), postcards.reorigin([w, h], origin), postcards.reorigin([0, h], origin)]);
-    let rooms = drawPlan(bounds.center, w);
-    let linkedrooms = room.linkroomlines(rooms);
-    let bb = boundingbox.from(linkedrooms.points);
-    rooms.forEach(r => r.move(poly.createVector(bb.center, bounds.center)));
-    linkedrooms = room.linkroomlines(rooms);
+    let boundsL = boundingbox.from([origin, postcards.reorigin([w/2, 0], origin), postcards.reorigin([w/2, h], origin), postcards.reorigin([0, h], origin)]);
+    let roomsL = drawPlan(boundsL.center, w/2);
+    let boundsR = boundingbox.from([postcards.reorigin([w/2, 0], origin), postcards.reorigin([w, 0], origin), postcards.reorigin([w, h], origin), postcards.reorigin([w/2, h], origin)]);
+    let roomsR = roomsL.map(r => room.copy(r).move([w/2, 0]));
 
-    let startregion = room.toClipRegion(rooms);
+    let lines = [];
+    let arcs = [];
+    let hatches = [];
+
+    // draw left side unchanged
+    let vl = poly.createVector(boundingbox.from(room.linkroomlines(roomsL).points).center, boundsL.center); //center in bounds
+    roomsL.forEach(r => {
+      r.move(vl);
+
+      lines.push(...r.plan());
+      if (r.columns) { arcs.push(...r.columns); }
+      if (r.stairs) { lines.push(...r.stairs); }
+    });
+
+    let hatchL = roomsL.map(r => room.copy(r).move([w/80, w/80]));
+    let originalRegionL = room.toClipRegion(roomsL);
+    let hatchRegionL = room.toClipRegion(hatchL);
+    hatchRegionL = hatchRegionL.diff(originalRegionL);
+    hatchRegionL.regions.forEach(hh => {
+      let x = hatch.inside(hh, 10, h/150);
+      hatches.push(...x);
+    })
+
+
+    // draw right side exploded
+    let vr = poly.createVector(boundingbox.from(room.linkroomlines(roomsR).points).center, boundsR.center); //center in bounds
+    roomsR.forEach(r => {
+      r.move(vr);
+    });
+
+    let startregionR = room.toClipRegion(roomsR);
+    let originalRegionR = room.toClipRegion(roomsR);
     let times = random.pick([3,4,5]);
     
     for (let i = 0; i < times; i++) {
       let vertical = random.boolean();
       let divider = random.range(2,3);
-      let dist = 3;
-      let vertdivider = [postcards.reorigin([w/divider, 0], origin),postcards.reorigin([w-(w/divider), h], origin)];
-      let hordivider = [postcards.reorigin([0, h/divider], origin),postcards.reorigin([w, h-(h/divider)], origin)];
-      startregion = vertical ? startregion.splitVertically(vertdivider, bounds, [dist, dist]) : startregion = startregion.splitHorizontally(hordivider, bounds, [dist, dist]);
-      rooms.forEach(r => pushOutwards(r, vertical ? vertdivider : hordivider, dist));
+      let dist = w/40;
+      let vertdivider = [postcards.reorigin([w/2 + (w/2)/divider, 0], origin),postcards.reorigin([w/2 + w/2-((w/2)/divider), h], origin)];
+      let hordivider = [postcards.reorigin([w/2, h/divider], origin),postcards.reorigin([w, h-(h/divider)], origin)];
+      startregionR = vertical ? startregionR.splitVertically(vertdivider, boundsR, [dist, dist]) : startregionR.splitHorizontally(hordivider, boundsR, [dist, dist]);
+      roomsR.forEach(r => pushOutwards(r, vertical ? vertdivider : hordivider, -dist));
     }
-
-    let lines = [];
-    let arcs = [];
-    rooms.forEach(r => {
-      //lines.push(...r.plan());
+    lines.push(...startregionR.toLines());
+    roomsR.forEach(r => {
       if (r.columns) { arcs.push(...r.columns); }
       if (r.stairs) { lines.push(...r.stairs); }
     });
 
-    let hatches = [];
-    let originalRegion = room.toClipRegion(rooms);
-    let hatchregion = originalRegion.diff(startregion);
-    hatchregion.regions.forEach(hh => {
+    let hatchregionR = originalRegionR.diff(startregionR);
+    hatchregionR.regions.forEach(hh => {
       let x = hatch.inside(hh, 10, h/150);
       hatches.push(...x);
     })
 
-    lines.push(...startregion.toLines());
     plans.push({lines, hatches, arcs});
   }
 
-  postcards.drawSingle(prepare, width, height);
+  postcards.drawQuad(prepare, width, height);
   
   return ({ context, width, height, units }) => {
     
     let planPaths = [];
-    let otherPaths = [];
+    let hatchPaths = [];
 
     const draw = (origin, w, h) => {
       plans.forEach(p => {
         p.lines.forEach(l => { planPaths.push(createLinePath(l)); })
-        p.hatches.forEach(l => { otherPaths.push(createLinePath(l)); })
+        p.hatches.forEach(l => { hatchPaths.push(createLinePath(l)); })
         p.arcs.forEach(a => { planPaths.push(createArcPath(a.c, a.r, 0, 360)); })
       });
 
     }
 
-    postcards.drawSingle(draw, width, height);
+    postcards.drawQuad(draw, width, height);
 
-    return renderGroups([planPaths, otherPaths], {
+    return renderGroups([planPaths, hatchPaths], {
       context, width, height, units
     });
   };
