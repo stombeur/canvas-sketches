@@ -35,6 +35,8 @@ const sketch = ({ width, height }) => {
     //rooms.push(rooms[5].extrude(4, 30));
     
     
+    rooms[1].addWindow(1);
+    
     rooms[5].addStairs(4, 2, 15);
     rooms[4].addColumnade(1, 3, 5, 1);
 
@@ -43,20 +45,20 @@ const sketch = ({ width, height }) => {
     // let l4 = new polyline([[0, height/3],[0, height],[width, height],[width,height/2]]);
     // let l5 = new polyline([[0, height/3],[0, 0],[width, 0],[width,height/2]]);
 
-    let lines = [];
+    // let lines = [];
 
-    let roomRegion = room.toClipRegion(rooms);
-    let bb = boundingbox.from([[0, 0],[width, 0],[width, height],[0,height]]);
-    let region2 = roomRegion.splitVertically([[width/2.4, 0],[width/2, height]], bb, [5, -2]);
-    let region3 = region2.splitHorizontally([[0, height/2],[width, height/3]], bb, [2, 5]);
-    let region4 = region3.splitVertically([[width/4, 0],[width, height]], bb, [5, -2]);
+    // let roomRegion = room.toClipRegion(rooms);
+    // let bb = boundingbox.from([[0, 0],[width, 0],[width, height],[0,height]]);
+    // let region2 = roomRegion.splitVertically([[width/2.4, 0],[width/2, height]], bb, [5, -2]);
+    // let region3 = region2.splitHorizontally([[0, height/2],[width, height/3]], bb, [2, 5]);
+    // let region4 = region3.splitVertically([[width/4, 0],[width, height]], bb, [5, -2]);
 
-    region4.toLines().forEach(l => {
-      lines.push(l);
-    })
+    // region4.toLines().forEach(l => {
+    //   lines.push(l);
+    // })
 
-    let h = hatch.inside(room.linkroomlines(rooms).points, 10, 2);
-    lines.push(...h);
+    // let h = hatch.inside(room.linkroomlines(rooms).points, 10, 2);
+    // lines.push(...h);
 
     // let poly1 = l2.toClipRegion();
     // let poly3 = l3.toClipRegion();
@@ -106,13 +108,13 @@ const sketch = ({ width, height }) => {
 
 
 
-    lines.forEach(l => {
-      paths.push(createLinePath(l));
-    })
+    // lines.forEach(l => {
+    //   paths.push(createLinePath(l));
+    // })
     rooms.forEach(r => {
       if (!r) { return; }
       r.drawPlan(l => {
-        //paths.push(createLinePath(l));
+        paths.push(createLinePath(l));
       });
       r.drawLines(l => {
         paths.push(createLinePath(l));

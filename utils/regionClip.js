@@ -2,7 +2,11 @@ import { polyline } from './polyline';
 
 const polybool = require('polybooljs');
 
-export class clipregion { 
+export class clipregion {
+    
+    constructor(points) {
+        if (points) {this.regions.push(points);}
+    }
 
     addRegion(region) {
         this.regions.push(region);
@@ -13,6 +17,30 @@ export class clipregion {
 
     diff(regions) {
         let difference = polybool.difference(this, regions);
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+        return result;
+    }
+
+    intersect(regions) {
+        let difference = polybool.intersect(this, regions);
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+        return result;
+    }
+
+    xor(regions) {
+        let difference = polybool.xor(this, regions);
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+        return result;
+    }
+
+    diffRev(regions) {
+        let difference = polybool.differenceRev(this, regions);
         let result = new clipregion();
         result.regions = difference.regions;
         result.inverted = difference.inverted;

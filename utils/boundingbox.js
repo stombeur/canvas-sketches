@@ -1,3 +1,6 @@
+import { polyline } from "./polyline";
+import {clipregion} from './regionClip';
+
 export class boundingbox {
     constructor() {
 
@@ -15,10 +18,21 @@ export class boundingbox {
     lines = [];
     center = [];
 
-    static from(polyline, padding = 0) {
+    toClipRegion() {
+        let r = new clipregion();
+        let p = [];
+        p.push(...this.points);
+        p.push(this.points[0]);
+        r.addRegion(p);
+        return r;
+    }
+
+    static from(pline, padding = 0) {
         let bb = new boundingbox();
 
-        polyline.map(p => {
+        if (pline instanceof polyline) { pline = pline.points; }
+
+        pline.map(p => {
             bb.left = Math.min(p[0], bb.left);
             bb.top = Math.min(p[1], bb.top);
             bb.right = Math.max(p[0], bb.right);

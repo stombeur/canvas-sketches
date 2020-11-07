@@ -38,23 +38,28 @@ export class room {
         clonedRoom.extrudedSides = roomToCopy.extrudedSides.slice();
         clonedRoom.decoratedSides = roomToCopy.decoratedSides.slice();
         clonedRoom.center = roomToCopy.center.slice();
+        clonedRoom.name = roomToCopy.name;
 
         clonedRoom.columns = roomToCopy.columns ? JSON.parse(JSON.stringify(roomToCopy.columns)) : null;
         clonedRoom.stairs = roomToCopy.stairs ? JSON.parse(JSON.stringify(roomToCopy.stairs)) : null;
+        clonedRoom.windows = roomToCopy.windows ? JSON.parse(JSON.stringify(roomToCopy.windows)) : null;
 
         return clonedRoom;
     }
 
+    name = "";
     points = [];
     extrudedSides = [];
     decoratedSides = [];
+    windowedSides = [];
     unit = 0;
     stairs;
     columns;
+    windows;
     center = [];
 
     extrudableSides() {
-        return [1,2,3,4].filter(x => !this.extrudedSides.includes(x));
+        return [1,2,3,4].filter(x => !this.extrudedSides.includes(x) && !this.windowedSides.includes(x));
     }
 
     plan() {
@@ -72,6 +77,7 @@ export class room {
         let l = [];
 
         if (this.stairs) { l.push(...this.stairs); }
+        if (this.windows) { l.push(...this.windows); }
 
         return l;
     }
@@ -366,9 +372,74 @@ export class room {
         }
     }
 
+    addWindow(sideNr, steps = 4, indent = false) {
+        
+        if (this.windowedSides.includes(sideNr)) { return; }
+        if (!this.windows) { this.windows = [];}
+
+        this.windowedSides.push(sideNr);
+
+        let startline = new polyline(this.getSide(sideNr)).copy();
+
+        let thickness = this.unit / 10;
+        let increment = thickness / steps;
+
+        let vectorstart = [0,0];
+        let vectorstep = [0,0];
+
+        switch(sideNr) {
+            case 1:
+                vectorstart = [-(thickness/2), 0];
+                vectorstep = [increment, 0];
+                if (indent) {
+                    startline.points[0][1] -= thickness/2;
+                    startline.points[1][1] += thickness/2;
+                }
+                break;
+            case 2:
+                vectorstart = [0,-(thickness/2)];
+                vectorstep = [0, increment];
+                if (indent) {
+                    startline.points[0][0] += thickness/2;
+                    startline.points[1][0] -= thickness/2;
+                }
+                break;
+            case 3:
+                vectorstart = [-(thickness/2), 0];
+                vectorstep = [increment, 0];
+                if (indent) {
+                    startline.points[0][1] += thickness/2;
+                    startline.points[1][0] -= thickness/2;
+                }
+                break;
+            case 4:
+                vectorstart = [0, -(thickness/2)];
+                vectorstep = [0, increment];
+                if (indent) {
+                    startline.points[0][0] -= thickness/2;
+                    startline.points[1][0] += thickness/2;
+                }
+                break;
+        }
+        startline = startline.move(vectorstart);
+        this.windows.push(startline.points);
+
+        let endline;
+        for (let i = 1; i < steps; i++) {
+            endline = startline.copy();
+            let v = [vectorstep[0]*i, vectorstep[1]*i];
+            endline.move(v);
+            this.windows.push(endline.points);
+        }
+
+        this.windows.push([startline.points[0],endline.points[0]]);
+        this.windows.push([startline.points[1],endline.points[1]]);
+    }
+
     move(vector) {
         if (this.points) { this.points = poly.movePoly(this.points, vector); }
         if (this.stairs) {this.stairs = this.stairs.map(s => poly.movePoly(s, vector)); }
+        if (this.windows) {this.windows = this.windows.map(w => poly.movePoly(w, vector)); }
         if (this.columns) {this.columns.forEach(col => {
             col.c = poly.movePoint(col.c, vector);
         });}

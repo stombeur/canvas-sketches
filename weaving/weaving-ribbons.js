@@ -30,8 +30,10 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
 
     if (y >= bounds.bottom) {return result;}
 
-    let topLine = [[-10, bounds.top], [100, bounds.top]];
-    let bottomLine = [[-10, bounds.bottom], [100, bounds.bottom]];
+    let topLine = [[bounds.left-100, bounds.top], [bounds.right+100, bounds.top]];
+    let bottomLine = [[bounds.left-100, bounds.bottom], [bounds.right+100, bounds.bottom]];
+    let leftline = [[bounds.left, bounds.top-100], [bounds.left, bounds.bottom+100]];
+    let rightline = [[bounds.right, bounds.top-100], [bounds.right, bounds.bottom+100]];
 
     for (let i = 0; i < nrOfLines; i++) {
         y = start.y + i * spacing;
@@ -43,6 +45,8 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
         let line = [a, b];
         line = clipLine(topLine, line, true);
         line = clipLine(bottomLine, line, false);
+         line = clipLine(leftline, line, true);
+         line = clipLine(rightline, line, false);
         ribbonLines.push(line);
 
     }
@@ -140,7 +144,7 @@ const sketch = ({ width, height }) => {
         }
         let ribbons = [];
         
-        let horMargin = w / 60;
+        let horMargin = 0.1;
         let vertMargin = horMargin;
         let drawingHeight = h - (vertMargin * 2);
         let drawingWidth = w - (horMargin * 2);
@@ -148,9 +152,9 @@ const sketch = ({ width, height }) => {
         let posXRight = drawingWidth + horMargin  + origin[0];
         let posY = vertMargin - drawingWidth + origin[1];
         
-        let nrOfLines = 8;
+        let nrOfLines = 6;
 
-        let ribbonWidth = w / 17;
+        let ribbonWidth = w / 12;
         let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth, 2));
         let ribbonLength = Math.sqrt(2 * Math.pow(drawingWidth, 2));
 
@@ -158,9 +162,8 @@ const sketch = ({ width, height }) => {
         let slotsLeft = utils.shuffle([...Array(nrOfRibbons).keys()]);
         let slotsRight = utils.shuffle([...Array(nrOfRibbons).keys()]);
 
-        let bounds = { left: posXLeft, top: vertMargin+origin[1], right: posXRight, bottom: vertMargin + drawingHeight +origin[1] };
-
-        let i = Math.floor(nrOfRibbons * utils.range(0.44, 0.63));
+        let bounds = { left: posXLeft - (ribbonWidth*10), top: vertMargin+origin[1]-(ribbonWidth*10), right: posXRight+(ribbonWidth*10), bottom: vertMargin + drawingHeight +origin[1]+(ribbonWidth*10) };
+        let i = Math.floor(nrOfRibbons * utils.range(0.54, 0.63));
         for (let slot = 0; slot <= i; slot++) {
 
             let positionLeft = slotsLeft[slot];
@@ -194,9 +197,11 @@ const sketch = ({ width, height }) => {
         let insidepaths1 = [];  
         let insidepaths2 = [];  
 
+        let margin = 6;
+
         const draw = (origin, w, h, opts) => {
             let lines = opts.alllines[opts.index-1];
-            let bb = { xmin: 4 + origin[0], ymin: 4 + origin[1], xmax: w - 4 + origin[0], ymax: h - 4 + origin[1] };
+            let bb = { xmin: margin + origin[0], ymin: margin + origin[1], xmax: w - margin + origin[0], ymax: h - margin + origin[1] };
 
             lines.outsidelines.forEach(l => {
                 let clippedLine = poly.clipLineToBB(l, bb);
@@ -217,7 +222,7 @@ const sketch = ({ width, height }) => {
                 }
             });
 
-            let box = new polyline([[origin[0]+4,origin[1]+4],[origin[0]+4, origin[1]+h-4],[origin[0]+w-4, origin[1]+h-4],[origin[0]+w-4, origin[1]+4]]);
+            let box = new polyline([[origin[0]+margin,origin[1]+margin],[origin[0]+margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+margin]]);
             box.tolines().forEach(l => {
                 outsidepaths.push(createLinePath(l));
             });

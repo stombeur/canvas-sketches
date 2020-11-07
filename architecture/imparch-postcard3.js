@@ -9,6 +9,7 @@ const poly = require('../utils/poly');
 const polybool = require('polybooljs');
 import { polyline } from "../utils/polyline";
 import { boundingbox } from '../utils/boundingbox';
+import { clipregion } from '../utils/regionClip';
 const postcards = require('../utils/postcards');
 
 random.setSeed(random.getRandomSeed());
@@ -144,6 +145,19 @@ const sketch = ({ width, height }) => {
       hatches.push(...x);
     })
 
+    /*
+    //debugger
+    let bbL = boundingbox.from(room.linkroomlines(roomsL), w/20);
+    //let bbL2 = boundingbox.from(room.linkroomlines(roomsL), w/10);
+    let backRegionL = bbL.toClipRegion();
+    backRegionL.inverted = true;
+    backRegionL = backRegionL.intersect(originalRegionL);
+    backRegionL.regions.forEach(rr => {
+      let x = hatch.inside(rr, -2, h/50);
+      hatches.push(...x);
+    });
+    //lines.push(...bbL.lines);
+*/
 
     // draw right side exploded
     let vr = poly.createVector(boundingbox.from(room.linkroomlines(roomsR).points).center, boundsR.center); //center in bounds

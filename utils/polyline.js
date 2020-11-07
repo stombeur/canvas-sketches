@@ -28,6 +28,20 @@ export class polyline {
         return this;
     }
 
+    static copy(original) {
+        let newline = new polyline();
+        original.points.forEach(p => newline.add([p[0], p[1]]));
+        return newline;
+    }
+
+    get lastPoint() {
+        return this.points[this.points.length-1];
+    }
+
+    copy() {
+        return polyline.copy(this);
+    }
+
     tolines() {
         let result = [];
 
@@ -49,6 +63,10 @@ export class polyline {
         return a;
     }
 
+    angle() {
+        return polyline.angle(this);
+    }
+
     toClipRegion() {
         let r = new clipregion();
         r.addRegion(this.points);
@@ -60,6 +78,17 @@ export class polyline {
         const avgy = (this.points.reduce((a,b) => a + b[1], 0) / this.points.length) || 0;
         return [avgx, avgy];
     }
+
+    // shorter(end, distance) {
+    //     let line = end ? [this.points[this.points.length-2], this.lastPoint] : [this.points[0], this.points[1]];
+    //     if (end) {
+    //         let ints = poly.findCircleLineIntersectionsP(distance/2, this.lastPoint, line);
+            
+    //     }
+    //     else {
+
+    //     }
+    // }
 
     // sortPointsCW() {
     //     this.points.sort((a,b)=>a.y - b.y);
