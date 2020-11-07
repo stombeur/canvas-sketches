@@ -140,6 +140,7 @@ const sketch = ({ width, height }) => {
         let result = {
             insidelinesleft:  [],
             insidelinesright:  [],
+            insidelinescolor: [],
             outsidelines: []
         }
         let ribbons = [];
@@ -174,7 +175,7 @@ const sketch = ({ width, height }) => {
 
             let r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
             result.outsidelines.push(...r1.outsidelines);
-            result.insidelinesleft.push(...r1.insidelines);
+            slot ===1 ? result.insidelinescolor.push(...r1.insidelines) : result.insidelinesleft.push(...r1.insidelines);
 
             let positionRight = slotsRight[slot];
             y = posY + (ribbonWidthAngle * positionRight);
@@ -183,7 +184,7 @@ const sketch = ({ width, height }) => {
 
             let r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons)
             result.outsidelines.push(...r2.outsidelines);
-            result.insidelinesright.push(...r2.insidelines);
+            slot ===1 ? result.insidelinescolor.push(...r2.insidelines) : result.insidelinesright.push(...r2.insidelines);
         }
         alllines.push(result);
     }
@@ -196,6 +197,7 @@ const sketch = ({ width, height }) => {
         let outsidepaths = [];  
         let insidepaths1 = [];  
         let insidepaths2 = [];  
+        let insidepathscolor = [];
 
         let margin = 6;
 
@@ -221,6 +223,12 @@ const sketch = ({ width, height }) => {
                     insidepaths2.push(createLinePath(clippedLine));
                 }
             });
+            lines.insidelinescolor.forEach(l => {
+                let clippedLine = poly.clipLineToBB(l, bb);
+                if (clippedLine && clippedLine[0]) {
+                    insidepathscolor.push(createLinePath(clippedLine));
+                }
+            });
 
             let box = new polyline([[origin[0]+margin,origin[1]+margin],[origin[0]+margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+margin]]);
             box.tolines().forEach(l => {
@@ -230,7 +238,7 @@ const sketch = ({ width, height }) => {
 
         postcards.drawQuad(draw, width, height, {alllines});
 
-        return renderGroups([outsidepaths, insidepaths1, insidepaths2], {
+        return renderGroups([outsidepaths, insidepaths1, insidepaths2, insidepathscolor], {
         context, width, height, units
         });
     };
