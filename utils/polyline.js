@@ -1,6 +1,6 @@
 import { clip } from "../utils/poly";
 import { point } from "./point";
-import { clipregion } from "./regionClip";
+import { clipregion } from "./clipregion";
 const poly = require('../utils/poly');
 
 export class polyline {

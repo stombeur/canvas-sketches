@@ -1,6 +1,6 @@
 import { boundingbox } from '../utils/boundingbox';
 import { polyline } from '../utils/polyline';
-import { clipregion } from '../utils/regionClip';
+import { clipregion } from '../utils/clipregion';
 
 const poly = require('../utils/poly');
 

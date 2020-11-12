@@ -1,5 +1,5 @@
 import { polyline } from "./polyline";
-import {clipregion} from './regionClip';
+import {clipregion} from './clipregion';
 
 export class boundingbox {
     constructor() {
@@ -20,8 +20,9 @@ export class boundingbox {
 
     toClipRegion() {
         let r = new clipregion();
-        let p = [];
-        p.push(...this.points);
+        let p = [...this.points];
+        p.reverse();
+        // p.push(...this.points);
         p.push(this.points[0]);
         r.addRegion(p);
         return r;

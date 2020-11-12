@@ -9,7 +9,7 @@ const poly = require('../utils/poly');
 const polybool = require('polybooljs');
 import { polyline } from "../utils/polyline";
 import { boundingbox } from '../utils/boundingbox';
-import { clipregion } from '../utils/regionClip';
+import { clipregion } from '../utils/clipregion';
 const postcards = require('../utils/postcards');
 
 random.setSeed(random.getRandomSeed());
@@ -76,7 +76,7 @@ const pushOutwards = (r, l, d) => {
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newColumns = r.columns.map(x => {return {r:x.r, c:poly.movePoint(x.c, v)}});
     r.columns = newColumns;
-    console.log("columns", r.name, "left:"+left, v, cs, lx);
+    //console.log("columns", r.name, "left:"+left, v, cs, lx);
   }
   if (r.stairs) {
     //center for all stairs
@@ -89,7 +89,7 @@ const pushOutwards = (r, l, d) => {
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newStairs = r.stairs.map(s => new polyline(s).move(v).points);
     r.stairs = newStairs;
-    console.log("stairs", r.name, "left:"+left, v, cs, lx);
+    //console.log("stairs", r.name, "left:"+left, v, cs, lx);
 
   }
   if (r.windows) {
@@ -103,7 +103,7 @@ const pushOutwards = (r, l, d) => {
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newWindows = r.windows.map(w => new polyline(w).move(v).points);
     r.windows = newWindows;
-    console.log("windows", r.name, "left:"+left, v, cs, lx);
+    //console.log("windows", r.name, "left:"+left, v, cs, lx);
 
   }
 
@@ -145,19 +145,22 @@ const sketch = ({ width, height }) => {
       hatches.push(...x);
     })
 
-    /*
+    
     //debugger
-    let bbL = boundingbox.from(room.linkroomlines(roomsL), w/20);
-    //let bbL2 = boundingbox.from(room.linkroomlines(roomsL), w/10);
-    let backRegionL = bbL.toClipRegion();
+    //let bbL = boundingbox.from(room.linkroomlines(roomsL), w/20);
+    // let backRegionL = bbL.toClipRegion();
+    let backRegionL = new clipregion([[0,0],[w/4,0],[w/4,h/1.2],[0,h/1.2]]);
+    backRegionL.addRegion([[w/4+0.2,0],[w/2,0],[w/2,h/1.2],[w/4+0.2,h/1.2]])
+    let smaller = new clipregion([[w/8,h/4],[7*w/8,h/4],[w/2,0], [w/2, h/2],[w/2,h],[0,h]]);
     backRegionL.inverted = true;
-    backRegionL = backRegionL.intersect(originalRegionL);
-    backRegionL.regions.forEach(rr => {
+    let rrr = backRegionL.union(originalRegionL);
+    console.log({rrr})
+    rrr.regions.forEach(rr => {
       let x = hatch.inside(rr, -2, h/50);
       hatches.push(...x);
     });
     //lines.push(...bbL.lines);
-*/
+
 
     // draw right side exploded
     let vr = poly.createVector(boundingbox.from(room.linkroomlines(roomsR).points).center, boundsR.center); //center in bounds
