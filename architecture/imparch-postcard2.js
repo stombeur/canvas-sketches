@@ -36,7 +36,7 @@ const drawPlan = (center, width) => {
     if (random.value() > 0.7) { r.addWindow(random.pick([1,2,3,4])); }
     let s = random.pick(r.extrudableSides());
     let d = random.pick([unit/2, unit, unit*2]);
-    let a = random.value() > 0.2 ? random.range(10, 30) : 0;
+    let a = random.value() > 0.5 ? random.range(10, 30) : 0;
     let stairUnit = unit / 10;
     if (random.value() > 0.7) { r.addStairs(random.pick([1,2,3,4]), stairUnit*1.5, random.pick([stairUnit*4, stairUnit*6, stairUnit*15])); }
     let columnunit = unit / 4;
@@ -75,7 +75,7 @@ const pushOutwards = (r, l, d) => {
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newColumns = r.columns.map(x => {return {r:x.r, c:poly.movePoint(x.c, v)}});
     r.columns = newColumns;
-    console.log("columns", r.name, "left:"+left, v, cs, lx);
+    //console.log("columns", r.name, "left:"+left, v, cs, lx);
   }
   if (r.stairs) {
     //center for all stairs
@@ -88,22 +88,21 @@ const pushOutwards = (r, l, d) => {
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newStairs = r.stairs.map(s => new polyline(s).move(v).points);
     r.stairs = newStairs;
-    console.log("stairs", r.name, "left:"+left, v, cs, lx);
+    //console.log("stairs", r.name, "left:"+left, v, cs, lx);
 
   }
   if (r.windows) {
     //center of room
     r.center;
-    const avgx = r.center[0] || 0;
-    const avgy = r.center[1] || 0;
+    const avgx = r.center[0]*1.2 || 0;
+    const avgy = r.center[1]*1.2 || 0;
     let cs = [avgx, avgy];
     let lx = (cs[1] - n) / m;
     let left = (lx > cs[0]);
     let v = left ? [vd[0], - vd[1]] : [-vd[0], vd[1]];
     let newWindows = r.windows.map(w => new polyline(w).move(v).points);
     r.windows = newWindows;
-    console.log("windows", r.name, "left:"+left, v, cs, lx);
-
+    //console.log("windows", r.name, "left:"+left, v, cs, lx);
   }
 
 }
@@ -181,7 +180,7 @@ const sketch = ({ width, height }) => {
     plans.push({lines, hatches, arcs});
   }
 
-  postcards.drawSingle(prepare, width, height);
+  postcards.drawQuad(prepare, width, height);
   
   return ({ context, width, height, units }) => {
     
@@ -197,7 +196,7 @@ const sketch = ({ width, height }) => {
 
     }
 
-    postcards.drawSingle(draw, width, height);
+    postcards.drawQuad(draw, width, height);
 
     return renderGroups([planPaths, hatchPaths], {
       context, width, height, units

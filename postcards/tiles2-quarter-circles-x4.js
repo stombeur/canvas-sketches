@@ -55,6 +55,8 @@ const createGrid = (columns, rows, w, h, marginX) => {
         // 0 1
         // 3 2
         case 0:
+          o[r][c].draw12 = false;
+          o[r][c].draw23 = false;
           if (r > 0 && (o[r - 1][c].corner === 2 || o[r - 1][c].corner === 3)) {
             o[r][c].draw01 = false;
           }
@@ -63,6 +65,8 @@ const createGrid = (columns, rows, w, h, marginX) => {
           }
           break;
         case 1:
+          o[r][c].draw30 = false;
+          o[r][c].draw23 = false;
           if (r > 0 && (o[r - 1][c].corner === 2 || o[r - 1][c].corner === 3)) {
             o[r][c].draw01 = false;
           }
@@ -74,6 +78,8 @@ const createGrid = (columns, rows, w, h, marginX) => {
           }
           break;
         case 2:
+          o[r][c].draw01 = false;
+          o[r][c].draw30 = false;
           if (
             c < columns - 1 &&
             (o[r][c + 1].corner === 0 || o[r][c + 1].corner === 3)
@@ -88,6 +94,8 @@ const createGrid = (columns, rows, w, h, marginX) => {
           }
           break;
         case 3:
+          o[r][c].draw01 = false;
+          o[r][c].draw12= false;
           if (r < rows - 1 && (o[r + 1][c].corner === 0 || o[r + 1][c].corner === 1)) {
             o[r][c].draw23 = false;
           }
@@ -240,7 +248,33 @@ const sketch = ({ width, height }) => {
       this.paths = [];
       const margin = w * 0.15;
       //const countY = Math.floor(countX / w * h);
+      let nrOfLines = 2000;
+
+
       let grid = createGrid(countX, countY, w, h, margin);
+      let tempgrid = grid;
+
+      let limit = 14;
+      let maxIterations = 10000;
+      while(nrOfLines>= limit && maxIterations > 0) {
+        
+        nrOfLines = 0;
+        for (let row = 0; row < countY; row++) {
+          for (let column = 0; column < countX; column++) {
+            if (tempgrid[row][column].draw01) { nrOfLines++; }
+            if (tempgrid[row][column].draw12) { nrOfLines++; }
+            if (tempgrid[row][column].draw23) { nrOfLines++; }
+            if (tempgrid[row][column].draw30) { nrOfLines++; }
+          }
+        }
+  
+       //console.log(nrOfLines)
+       if (nrOfLines >= limit) { tempgrid = createGrid(countX, countY, w, h, margin); }
+       if (nrOfLines <= limit) { grid = tempgrid; }
+       maxIterations--;
+      }
+      
+      console.log({maxIterations, nrOfLines})
 
       let side = (w - (margin*2)) / countX;
       

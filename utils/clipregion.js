@@ -15,8 +15,16 @@ export class clipregion {
     regions = [];
     inverted = false;
 
-    diff(regions) {
-        let difference = polybool.difference(this, regions);
+    diff(other) {
+        let difference = polybool.difference(this, other);
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+        return result;
+    }
+
+    union(other) {
+        let difference = polybool.union(this, other);
         let result = new clipregion();
         result.regions = difference.regions;
         result.inverted = difference.inverted;
