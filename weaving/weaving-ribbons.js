@@ -30,10 +30,10 @@ const createRibbon = (start, bounds, ribbonLength, ribbonWidth, angle, nrOfLines
 
     if (y >= bounds.bottom) {return result;}
 
-    let topLine = [[bounds.left-100, bounds.top], [bounds.right+100, bounds.top]];
-    let bottomLine = [[bounds.left-100, bounds.bottom], [bounds.right+100, bounds.bottom]];
-    let leftline = [[bounds.left, bounds.top-100], [bounds.left, bounds.bottom+100]];
-    let rightline = [[bounds.right, bounds.top-100], [bounds.right, bounds.bottom+100]];
+    let topLine = [[bounds.left-10, bounds.top], [bounds.right+10, bounds.top]];
+    let bottomLine = [[bounds.left-10, bounds.bottom], [bounds.right+10, bounds.bottom]];
+    let leftline = [[bounds.left, bounds.top-10], [bounds.left, bounds.bottom+10]];
+    let rightline = [[bounds.right, bounds.top-10], [bounds.right, bounds.bottom+10]];
 
     for (let i = 0; i < nrOfLines; i++) {
         y = start.y + i * spacing;
@@ -153,7 +153,7 @@ const sketch = ({ width, height }) => {
         let posXRight = drawingWidth + horMargin  + origin[0];
         let posY = vertMargin - drawingWidth + origin[1];
         
-        let nrOfLines = 6;
+        let nrOfLines = 10;
 
         let ribbonWidth = w / 12;
         let ribbonWidthAngle = Math.sqrt(2 * Math.pow(ribbonWidth, 2));
@@ -163,8 +163,10 @@ const sketch = ({ width, height }) => {
         let slotsLeft = utils.shuffle([...Array(nrOfRibbons).keys()]);
         let slotsRight = utils.shuffle([...Array(nrOfRibbons).keys()]);
 
-        let bounds = { left: posXLeft - (ribbonWidth*10), top: vertMargin+origin[1]-(ribbonWidth*10), right: posXRight+(ribbonWidth*10), bottom: vertMargin + drawingHeight +origin[1]+(ribbonWidth*10) };
+        let bounds = { left: posXLeft - ribbonWidth, top: vertMargin+origin[1]-ribbonWidth, right: posXRight+ribbonWidth, bottom: vertMargin + drawingHeight +origin[1]+ribbonWidth };
         let i = Math.floor(nrOfRibbons * utils.range(0.54, 0.63));
+        let leftcolor =2;
+        let rightcolor = 2;
         for (let slot = 0; slot <= i; slot++) {
 
             let positionLeft = slotsLeft[slot];
@@ -175,7 +177,8 @@ const sketch = ({ width, height }) => {
 
             let r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
             result.outsidelines.push(...r1.outsidelines);
-            slot ===1 ? result.insidelinescolor.push(...r1.insidelines) : result.insidelinesleft.push(...r1.insidelines);
+            if (leftcolor>0 && y > vertMargin && y < h-vertMargin) {  result.insidelinescolor.push(...r1.insidelines); leftcolor--; }
+            else { result.insidelinesleft.push(...r1.insidelines); }
 
             let positionRight = slotsRight[slot];
             y = posY + (ribbonWidthAngle * positionRight);
@@ -184,7 +187,9 @@ const sketch = ({ width, height }) => {
 
             let r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons)
             result.outsidelines.push(...r2.outsidelines);
-            slot ===1 ? result.insidelinescolor.push(...r2.insidelines) : result.insidelinesright.push(...r2.insidelines);
+            if (rightcolor>0 && y > vertMargin && y < h-vertMargin) {  result.insidelinescolor.push(...r2.insidelines); rightcolor--; }
+            else { result.insidelinesright.push(...r2.insidelines); }
+           
         }
         alllines.push(result);
     }
@@ -198,6 +203,7 @@ const sketch = ({ width, height }) => {
         let insidepaths1 = [];  
         let insidepaths2 = [];  
         let insidepathscolor = [];
+        let borderpaths = [];
 
         let margin = 6;
 
@@ -232,13 +238,13 @@ const sketch = ({ width, height }) => {
 
             let box = new polyline([[origin[0]+margin,origin[1]+margin],[origin[0]+margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+h-margin],[origin[0]+w-margin, origin[1]+margin]]);
             box.tolines().forEach(l => {
-                outsidepaths.push(createLinePath(l));
+                borderpaths.push(createLinePath(l));
             });
         }
 
         postcards.drawQuad(draw, width, height, {alllines});
 
-        return renderGroups([outsidepaths, insidepaths1, insidepaths2, insidepathscolor], {
+        return renderGroups([borderpaths, outsidepaths, insidepaths1, insidepaths2, insidepathscolor], {
         context, width, height, units
         });
     };
