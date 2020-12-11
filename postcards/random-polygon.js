@@ -1,11 +1,12 @@
 
 const canvasSketch = require('canvas-sketch');
-const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderPaths, createPath, renderGroups } = require('canvas-sketch-util/penplot');
 const postcards = require('../utils/postcards');
 const random = require('canvas-sketch-util/random');
 const poly = require('../utils/poly');
 
-let drawLines = [];
+let drawLayer1 = [];
+let drawLayer2 = [];
 
 const settings = {
   dimensions: 'A4',//[ 2048, 2048 ]
@@ -69,8 +70,8 @@ const sketch = ({ width, height }) => {
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
-    const draw = (origin, w, h) => {
-      this.paths = [];
+    const draw = (origin, w, h, opts) => {
+      //this.paths = [];
       const margin = w * 0.15;
       let center = postcards.reorigin([w/2, h/2], origin);
 
@@ -114,7 +115,7 @@ const sketch = ({ width, height }) => {
     
           }
           isConvex = poly.isPolygonConvex(points);
-          if (isConvex) { drawLines.push(...templines)}
+          if (isConvex) { opts.layer.push(...templines)}
         }
       }
 
@@ -123,25 +124,42 @@ const sketch = ({ width, height }) => {
 
     }
 
-    //postcards.drawOct(draw, width, height);
+    
 
-    let rows = 8;
-    let columns = 10;
-    let margin = 8;
+    const drawRows = (origin, width, height, opts) => {
+      let [startX, startY] = postcards.reorigin([0,0], origin);
+      console.log(startX, startY)
+      let ww = width - (margin*2);
+      let hh = height - (margin*2);
+  
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
+          let x = startX + ww/columns*c + margin;
+          let y = startY + hh/rows*r + margin;
+          for (let rep = 0; rep < reps; rep++) {
+            draw([x,y], ww/columns, hh/rows, opts);
+          }
 
-    let ww = width - (margin*2);
-    let hh = height - (margin*2);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < columns; c++) {
-        let x = ww/columns*c + margin;
-        let y = hh/rows*r + margin;
-        draw([x,y], ww/columns, hh/rows);
+        }
+        
       }
-      
     }
 
-    return renderPaths(drawLines, {
+    let rows = 6;
+    let columns = 7;
+    let margin = 4;
+    let reps = 4;
+
+    postcards.drawQuad(drawRows, width, height, { layer: drawLayer1});
+
+    rows = 1;
+    columns = 1;
+    margin = 20;
+    reps = 6;
+
+    postcards.drawQuad(drawRows, width, height, { layer: drawLayer2});
+
+    return renderGroups([drawLayer1, drawLayer2], {
       context, width, height, units
     });
   };
