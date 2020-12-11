@@ -5,10 +5,14 @@ const postcards = require('../utils/postcards');
 const random = require('canvas-sketch-util/random');
 const poly = require('../utils/poly');
 
+random.setSeed(random.getRandomSeed());
+console.log(`seed: ${random.getSeed()}`);
+
 let drawLayer1 = [];
 let drawLayer2 = [];
 
 const settings = {
+  suffix: random.getSeed(),
   dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'landscape',
   pixelsPerInch: 300,
@@ -128,7 +132,7 @@ const sketch = ({ width, height }) => {
 
     const drawRows = (origin, width, height, opts) => {
       let [startX, startY] = postcards.reorigin([0,0], origin);
-      console.log(startX, startY)
+
       let ww = width - (margin*2);
       let hh = height - (margin*2);
   
