@@ -14,6 +14,15 @@ const reorigin = (point, origin) => {
     else return t;
   }
 
+  const drawDouble = (f, width, height, opt = null) => {
+    let opt2 = {index:0}
+
+    opt2.index = 1;
+    f([0,0], width, height/2, {...opt, ...opt2});
+    opt2.index = 2;
+    f([0,height/2], width, height/2, {...opt, ...opt2});
+  }
+
   const drawQuad = (f, width, height, opt = null) => {
     let opt2 = {index:0}
 
@@ -126,6 +135,7 @@ const reorigin = (point, origin) => {
 
 module.exports.reorigin = reorigin;
 module.exports.drawSingle = drawSingle;
+module.exports.drawDouble = drawDouble;
 module.exports.drawQuad = drawQuad;
 module.exports.drawOct = drawOct;
 module.exports.drawQuadCutLines = drawQuadCutLines;

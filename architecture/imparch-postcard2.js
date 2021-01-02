@@ -114,6 +114,7 @@ const sketch = ({ width, height }) => {
   let plans = [];
 
   const prepare = (origin, w, h) => {
+    //plans = [];
     let boundsL = boundingbox.from([origin, postcards.reorigin([w/2, 0], origin), postcards.reorigin([w/2, h], origin), postcards.reorigin([0, h], origin)]);
     let roomsL = drawPlan(boundsL.center, w/2);
     let boundsR = boundingbox.from([postcards.reorigin([w/2, 0], origin), postcards.reorigin([w, 0], origin), postcards.reorigin([w, h], origin), postcards.reorigin([w/2, h], origin)]);

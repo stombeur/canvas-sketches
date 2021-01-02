@@ -142,9 +142,8 @@ const sketch = ({ width, height }) => {
     
     const prepare = (origin, w, h, opts) => {
         let result = {
-            insidelinesleft:  [],
-            insidelinesright:  [],
-            insidelinescolor: [],
+            lines:  [],
+            colorlines: [],
             outsidelines: []
         }
         let ribbons = [];
@@ -179,34 +178,47 @@ const sketch = ({ width, height }) => {
             let x = posXLeft;//ltr ? posXLeft : posXRight;
             let angle = 45;//ltr ? 45 : 135;
 
-            let r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
-            result.outsidelines.push(...r1.outsidelines);
-            if (leftcolor>0 && y > vertMargin && y < h-vertMargin) {  result.insidelinescolor.push(...r1.insidelines); leftcolor--; }
-            else { result.insidelinesleft.push(...r1.insidelines); }
+            let r1 = null; 
+            
+            if (leftcolor>0 && y > vertMargin && y < h-vertMargin) {  
+                r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines*1.5, positionLeft, ribbons);
+                result.colorlines.push(...r1.insidelines); 
+                result.colorlines.push(...r1.outsidelines);
+                leftcolor--; }
+            else { 
+                r1 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionLeft, ribbons);
+                result.lines.push(...r1.insidelines); 
+                result.lines.push(...r1.outsidelines);
+            }
 
             let positionRight = slotsRight[slot];
             y = posY + (ribbonWidthAngle * positionRight);
             x = posXRight;
             angle = 135;
 
-            let r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons)
-            result.outsidelines.push(...r2.outsidelines);
-            if (rightcolor>0 && y > vertMargin && y < h-vertMargin) {  result.insidelinescolor.push(...r2.insidelines); rightcolor--; }
-            else { result.insidelinesright.push(...r2.insidelines); }
+            let r2 = null;
+            if (rightcolor>0 && y > vertMargin && y < h-vertMargin) {  
+                r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines*1.5, positionRight, ribbons);
+                result.colorlines.push(...r2.insidelines); 
+                result.colorlines.push(...r2.outsidelines);
+                rightcolor--; }
+            else { 
+                r2 = createRibbon(new point(x, y), bounds, ribbonLength, ribbonWidthAngle, angle, nrOfLines, positionRight, ribbons);
+                result.lines.push(...r2.insidelines); 
+                result.lines.push(...r2.outsidelines);
+            }
            
         }
         alllines.push(result);
     }
 
-    postcards.drawSingle(prepare, width, height);
+    postcards.drawQuad(prepare, width, height);
     //debugger;
 
     return ({ context, width, height, units }) => {
         // do drawing stuff here
-        let outsidepaths = [];  
-        let insidepaths1 = [];  
-        let insidepaths2 = [];  
-        let insidepathscolor = [];
+        let paths = [];  
+        let pathscolor = [];  
         let borderpaths = [];
 
         let margin = 6;
@@ -215,28 +227,16 @@ const sketch = ({ width, height }) => {
             let lines = opts.alllines[opts.index-1];
             let bb = { xmin: margin + origin[0], ymin: margin + origin[1], xmax: w - margin + origin[0], ymax: h - margin + origin[1] };
 
-            lines.outsidelines.forEach(l => {
+            lines.lines.forEach(l => {
                 let clippedLine = poly.clipLineToBB(l, bb);
                 if (clippedLine && clippedLine[0]) {
-                    outsidepaths.push(createLinePath(clippedLine));
+                    paths.push(createLinePath(clippedLine));
                 }
             });
-            lines.insidelinesleft.forEach(l => {
+            lines.colorlines.forEach(l => {
                 let clippedLine = poly.clipLineToBB(l, bb);
                 if (clippedLine && clippedLine[0]) {
-                    insidepaths1.push(createLinePath(clippedLine));
-                }
-            });
-            lines.insidelinesright.forEach(l => {
-                let clippedLine = poly.clipLineToBB(l, bb);
-                if (clippedLine && clippedLine[0]) {
-                    insidepaths2.push(createLinePath(clippedLine));
-                }
-            });
-            lines.insidelinescolor.forEach(l => {
-                let clippedLine = poly.clipLineToBB(l, bb);
-                if (clippedLine && clippedLine[0]) {
-                    insidepathscolor.push(createLinePath(clippedLine));
+                    pathscolor.push(createLinePath(clippedLine));
                 }
             });
 
@@ -246,9 +246,9 @@ const sketch = ({ width, height }) => {
             });
         }
 
-        postcards.drawSingle(draw, width, height, {alllines});
+        postcards.drawQuad(draw, width, height, {alllines});
 
-        return renderGroups([borderpaths, outsidepaths, insidepaths1, insidepaths2, insidepathscolor], {
+        return renderGroups([paths, pathscolor, borderpaths], {
         context, width, height, units
         });
     };

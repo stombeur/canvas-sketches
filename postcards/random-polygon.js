@@ -63,7 +63,8 @@ const drawLineOnCanvas = (ctx, line) => {
 const sketch = ({ width, height }) => {
   return ({ context, width, height, units }) => {
 
-    drawLines = [];
+    drawLayer1 = [];
+    drawLayer2 = [];
 
     // binnen cirkel blijven
     // aantal segmenten random onder en bovengrens
