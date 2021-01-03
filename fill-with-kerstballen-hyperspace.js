@@ -84,7 +84,73 @@ const drawKerstbal = (circle) => {
   return kerstbal;
 }
 
-const drawSnowflake = (circle) => {
+const drawSnowflake = (circle, nrOfArms) => {
+  let radius = circle.r *0.9;
+  let center = circle.c;
+
+  //let nrOfArms = 7;
+  let angle = 360 / nrOfArms;
+  let division = [5/nrOfArms*6, 3/nrOfArms*2, 3];
+
+  let segment = [];
+  /*
+    line = segment
+    division = 0
+
+    while division < division.length
+      add line to array
+      walk line division times 
+        add new line, mirror along line
+        if division+1 < division.length
+          do again
+  */
+  
+
+  const doIt = (line, divIndex) => {
+    
+    let divs = division[divIndex];
+    // draw new arm and mirror
+    let vector = poly.createVector(line[0], line[1]);
+    let l = random.range(0.3,0.35);
+    for (let i = 1; i <= divs; i++) {
+      let d = i*(1/(divs+1));
+      let vector1 = [vector[0]*d, vector[1]*d];
+      let vector2 = [vector[0]*(d+l), vector[1]*(d+l)];
+      let angle = random.boolean() ? 45 : 135;
+      let arm = [poly.movePoint(line[0], vector1), poly.movePoint(line[0], vector2)];
+      let arm1 = [arm[0], poly.rotatePoint(arm[1], arm[0], -angle)];
+      let arm2 = [arm[0], poly.rotatePoint(arm[1], arm[0], angle)];
+      segment.push(new polyline(arm1));
+      segment.push(new polyline(arm2));
+  
+      if (divIndex+1<division.length) {
+        doIt(arm1, divIndex+1);
+        doIt(arm2, divIndex+1);
+      }
+    }
+
+  }
+
+  let line = [center, [center[0], center[1] - radius]];
+  segment.push(new polyline(line));
+  let divIndex = 0;
+  doIt(line, 0);
+
+  let lines = [];
+
+  for (let j = 1; j <= 360/angle; j++) {
+    segment.forEach(s => {
+      lines.push(s.rotate(center, angle * j));
+    });
+   
+  }
+
+  let snowflake = lines.map(l => drawLine(l.points));
+
+  return snowflake;
+}
+
+const drawSnowflakeOld = (circle) => {
   let radius = circle.r;
   let center = circle.c;
 
@@ -255,7 +321,7 @@ const sketch = ({ width, height }) => {
       let rmin = rmax / 2;
       let steps = 100;
       let triesBeforeNextStep = 1000;
-      if (type === "few") { steps = 4; triesBeforeNextStep = 1;}
+      if (type === "few") { steps = 3; triesBeforeNextStep = 1;}
       if (type === "more") { steps = 4; triesBeforeNextStep = 10;}
 
       let rcurrent = rmax;
@@ -307,7 +373,7 @@ const sketch = ({ width, height }) => {
       // let center = postcards.reorigin([w/2, h/2], origin);
 
       circles.forEach(circle => {
-        let lines = drawSnowflake({c:circle.c,r:circle.r,m:circle.r*2*0.15});
+        let lines = drawSnowflake({c:circle.c,r:circle.r,m:circle.r*2*0.15}, random.pick([5,7,9]));
         if (random.boolean()) { paths1.push(lines); }
         else { paths2.push(lines);}
       });
