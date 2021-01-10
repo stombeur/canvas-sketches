@@ -90,7 +90,7 @@ const drawSnowflake = (circle, nrOfArms) => {
 
   //let nrOfArms = 7;
   let angle = 360 / nrOfArms;
-  let division = [5/nrOfArms*6, 3/nrOfArms*2, 3];
+  let division = [5/nrOfArms*5, 3/nrOfArms*2, 3];
 
   let segment = [];
   /*
@@ -373,7 +373,7 @@ const sketch = ({ width, height }) => {
       // let center = postcards.reorigin([w/2, h/2], origin);
 
       circles.forEach(circle => {
-        let lines = drawSnowflake({c:circle.c,r:circle.r,m:circle.r*2*0.15}, random.pick([5,7,9]));
+        let lines = drawSnowflake({c:circle.c,r:circle.r,m:circle.r*2*0.15}, random.pick([5,7,7,9,9]));
         if (random.boolean()) { paths1.push(lines); }
         else { paths2.push(lines);}
       });
