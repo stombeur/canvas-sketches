@@ -61,7 +61,7 @@ const sketch = ({ width, height }) => {
           }
         }
 
-        let eye = new ln.Vector(0, 32, 24);
+        let eye = new ln.Vector(0.3333, 32, 24);
         let center = new ln.Vector(0, 0, 0);
         let lnpaths = scene.render(eye, center, up, ww, hh, 50, 0.1, 100, 0.1);
         //console.log(lnpaths)
