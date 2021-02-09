@@ -2,7 +2,7 @@ const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
 const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
-const { createArcPath } = require('../utils/paths.js');
+const { createArcPath, createLinePath } = require('../utils/paths.js');
 const poly = require('../utils/poly.js');
 const postcards = require('../utils/postcards');
 
@@ -45,7 +45,7 @@ const sketch = ({ width, height }) => {
   
 
   return ({ context, width, height, units }) => {
-    const count = 10;
+    const count = 45;
     paths = [];
 
     const drawLineOnCanvas = (ctx, line) => {    
@@ -54,13 +54,13 @@ const sketch = ({ width, height }) => {
     }
 
     const drawArcOnCanvas = (ctx, cx, cy, radius, sAngle, eAngle) => {    
-      ctx.arc(cx, cy, radius, (Math.PI / 180) *  sAngle, (Math.PI / 180) *  eAngle);
+      ctx.arc(cx, cy, radius, sAngle, eAngle);
     }
 
     const rotateArc = (arc, center, rot) => {
-      let [[x1,y1],r,s,e] = arc;
+      let [x1,y1,r,s,e] = arc;
       let [rotx1,roty1] = poly.rotatePoint([x1,y1], center, rot);
-      return [[rotx1,roty1],r,s+rot,e+rot];
+      return [rotx1,roty1,r,s+rot,e+rot];
     }
 
     const triangle = (x,y, rotation) => {
@@ -70,8 +70,8 @@ const sketch = ({ width, height }) => {
 
             return {line1:[[x-w1/2,y-h/2],[x-w2/2,y+h/2]],
               line2:[[x+w2/2,y+h/2],[x+w1/2,y-h/2]],
-              arc1:[[x,y-h/2],w1/2,180,0],
-              arc2:[[x,y+h/2],w2/2,0,180]};
+              arc1:[x,y-h/2,w1/2,180,0],
+              arc2:[x,y+h/2,w2/2,0,180]};
     }
 
     const draw = (origin, w, h) => {
@@ -82,6 +82,34 @@ const sketch = ({ width, height }) => {
       let points = createGrid(count, w, h).filter(() => {
         return Math.random() > 0.81;
       });
+
+      let center = postcards.reorigin([w/2, h/2], origin);
+
+      const weewee = (size, center, paths, rotation = 0) => {
+        let t1 = [[center[0]-size*2, center[1]-size*2], size, 0, 360];
+        let t2 = [[center[0]+size*2, center[1]-size*2], size, 0, 360];
+        let e = [[center[0], center[1]+size*2], size, 0, 180];
+        let l1 = [[center[0]-size, center[1]-size*2],[center[0]-size, center[1]+size*2]];
+        let l2 = [[center[0]+size, center[1]-size*2],[center[0]+size, center[1]+size*2]];
+
+        if (rotation !== 0) {
+          let c11 = poly.rotatePoint(t1[0], center, rotation);
+          t1[0] = c11;
+          let c22 = poly.rotatePoint(t2[0], center, rotation);
+          t2[0] = c22;
+          let ee = poly.rotatePoint(e[0], center, rotation);
+          e = [ee, e[1], e[2] + rotation, e[3] + rotation];
+          l1 = poly.rotatePolygon(l1, center, rotation);
+          l2 = poly.rotatePolygon(l2, center, rotation);
+        }
+  
+        paths.push(createArcPath(...t1));
+        paths.push(createArcPath(...t2));
+        paths.push(createArcPath(...e));
+        paths.push(createLinePath(l1));
+        paths.push(createLinePath(l2));
+      }
+
   
       points.forEach(data => {
         const {
@@ -94,16 +122,8 @@ const sketch = ({ width, height }) => {
         const y0 = lerp(margin, h - margin, position[1]);
         const [x,y] = postcards.reorigin([x0,y0], origin);
   
-        const t = triangle(x,y,rotation);
+        weewee(Math.abs(rotation)*2, [x,y], paths, Math.abs(rotation)*30);
   
-        paths.push(createPath(ctx => {
-          drawLineOnCanvas(ctx, poly.rotatePolygon(t.line1, [x,y], radius*w*10));
-          drawLineOnCanvas(ctx, poly.rotatePolygon(t.line2, [x,y], radius*w*10));
-        }));
-
-        paths.push(createArcPath(...rotateArc(t.arc1, [x,y], radius*w*10)));
-        paths.push(createArcPath(...rotateArc(t.arc2, [x,y], radius*w*10)));
-
       });
 
     }
