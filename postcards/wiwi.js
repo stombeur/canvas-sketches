@@ -45,7 +45,7 @@ const sketch = ({ width, height }) => {
   
 
   return ({ context, width, height, units }) => {
-    const count = 45;
+    const count = 40;
     paths = [];
 
     const drawLineOnCanvas = (ctx, line) => {    
@@ -80,7 +80,7 @@ const sketch = ({ width, height }) => {
       random.setSeed(random.getRandomSeed());
 
       let points = createGrid(count, w, h).filter(() => {
-        return Math.random() > 0.81;
+        return Math.random() > 0;
       });
 
       let center = postcards.reorigin([w/2, h/2], origin);
@@ -122,7 +122,14 @@ const sketch = ({ width, height }) => {
         const y0 = lerp(margin, h - margin, position[1]);
         const [x,y] = postcards.reorigin([x0,y0], origin);
   
-        weewee(Math.abs(rotation)*2, [x,y], paths, Math.abs(rotation)*30);
+        let a = [0, 45, 90, 135, 180, 225, 270, 315];//[0, 90, 180, 270];
+        let r = random.pick(a);
+        let f = Math.ceil(rotation * a.length);
+        r = a[f];
+        let www = (w - (margin*2)) / count / 7;
+        console.log(www)
+        weewee(www, [x,y], paths, r);
+        //weewee(Math.abs(rotation)*2.5, [x,y], paths, Math.abs(rotation)*60);
   
       });
 
