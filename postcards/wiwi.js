@@ -18,11 +18,10 @@ const settings = {
 
 let paths = [];
 
-const createGrid = (count, width, height) => {
+const createGrid = (countX, countY) => {
   const points = [];
 
-  const countX = count;
-  const countY = Math.floor(countX / width * height);
+  let a = [0, 45, 90, 135, 180, 225, 270, 315];//[0, 90, 180, 270];
 
   for (let x = 0; x < countX; x++) {
     for (let y = 0; y < countY; y++) {
@@ -31,10 +30,17 @@ const createGrid = (count, width, height) => {
       const position = [ u, v ];
       const noise = random.noise2D(u,v);
       const radius = Math.abs(noise) * 0.030;
+      const rotation = random.noise2D(u+2,v);
+      
+        
+        let f = Math.ceil(rotation * a.length);
+        let r = a[f];
+       
 
       points.push({ radius: Math.abs(radius),
                     position,
-                    rotation: random.noise2D(u+2,v)
+                    rotation,
+                    rotationFixed: r
                   });
     }
   }
@@ -42,10 +48,24 @@ const createGrid = (count, width, height) => {
 };
 
 const sketch = ({ width, height }) => {
+  const count = 17;
+  const countY = Math.floor(count / width * height);
+
+  // let points = createGrid(count, countY).filter(() => {
+  //   return Math.random() > 0;
+  // });
+  let p = [];
+
+  for (let i = 0; i < 8; i++) {
+    random.setSeed(random.getRandomSeed());
+    p.push(createGrid(count, countY).filter(() => {
+      return Math.random() > 0;
+    }));
+  }
   
 
   return ({ context, width, height, units }) => {
-    const count = 40;
+    
     paths = [];
 
     const drawLineOnCanvas = (ctx, line) => {    
@@ -74,14 +94,12 @@ const sketch = ({ width, height }) => {
               arc2:[x,y+h/2,w2/2,0,180]};
     }
 
-    const draw = (origin, w, h) => {
-      const margin = w * 0.20;
+    const draw = (origin, w, h, opts) => {
+      const margin = w * 0.10;
       
-      random.setSeed(random.getRandomSeed());
+      points = p[opts.index]
 
-      let points = createGrid(count, w, h).filter(() => {
-        return Math.random() > 0;
-      });
+      
 
       let center = postcards.reorigin([w/2, h/2], origin);
 
@@ -115,20 +133,16 @@ const sketch = ({ width, height }) => {
         const {
           position,
           radius,
-          rotation
+          rotation,
+          rotationFixed
         } = data;
 
         const x0 = lerp(margin, w - margin, position[0]);
         const y0 = lerp(margin, h - margin, position[1]);
         const [x,y] = postcards.reorigin([x0,y0], origin);
   
-        let a = [0, 45, 90, 135, 180, 225, 270, 315];//[0, 90, 180, 270];
-        let r = random.pick(a);
-        let f = Math.ceil(rotation * a.length);
-        r = a[f];
         let www = (w - (margin*2)) / count / 7;
-        console.log(www)
-        weewee(www, [x,y], paths, r);
+        weewee(www, [x,y], paths, rotationFixed);
         //weewee(Math.abs(rotation)*2.5, [x,y], paths, Math.abs(rotation)*60);
   
       });

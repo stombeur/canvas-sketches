@@ -20,6 +20,7 @@ const sketch = ({ width, height }) => {
       postcards.drawQuadCutLines(ctx, width, height);
     });
 
+
     return renderPaths([[cutLinesPath]], {
       context, width, height, units
     });

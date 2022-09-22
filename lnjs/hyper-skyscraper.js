@@ -66,7 +66,8 @@ const sketch = ({ width, height }) => {
     const draw = (origin, w, h, opts) => {
       random.setSeed(randos[opts.index-1])
       let size = 8;
-      let countX = size, countY = size, countZ = size;
+      let countX = size, countY = size;
+      let countZ = size*1.7;
       let points = createGrid(countX, countY, countZ);
 
         const scene = new ln.Scene();
@@ -81,12 +82,14 @@ const sketch = ({ width, height }) => {
           for (let v = 0; v < countY; v++) {
             for (let w= 0; w < countZ; w++) {
               let noisex = points[u][v][w].noise1;
+              let defaultsize = Math.min(ww, hh) / countY /10;
+              let noise_size = Math.abs(Math.min(defaultsize, points[u][v].noise * 1.7 * defaultsize));
               let noisey = points[u][v][w].noise2;
               let noisez = points[u][v][w].noise3;
               let x = u - (countX/2);
               let y = v - (countY/2);
               let z = w - (countZ/2);
-              let p = 0.3;
+              let p = Math.min(ww, hh) / countY / 140;
               let max = p*1.1;
               let fx = Math.max(max, p+noisex);
               let fy = Math.max(max, p+noisey);
@@ -119,7 +122,7 @@ const sketch = ({ width, height }) => {
         //   }
         // }
 
-        let eye = new ln.Vector(6, 16, 10);
+        let eye = new ln.Vector(10, 17, 10);
         let center = new ln.Vector(0, 0, 0);
         let lnpaths = scene.render(eye, center, up, ww, hh, 50, 0.1, 100, 0.1);
         //console.log(lnpaths)
@@ -147,7 +150,7 @@ const sketch = ({ width, height }) => {
     
 
 
-    postcards.drawQuad(draw, width, height);
+    postcards.drawSingle(draw, width, height);
    
     
 

@@ -14,7 +14,7 @@ const paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: [297, 150], //'A3',//[ 2048, 2048 ]
+  dimensions: 'A3',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -50,15 +50,17 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const noise = random.noise2D(u,v) * 0.97; //random.gaussian(0.5, 0.1);//
+        const noise = random.noise2D(u,v) * 0.85; //random.gaussian(0.5, 0.1);//
         const positionSkewed = skew(position, noise,  noise / countX, noise / countY);
         points.push({
-          position: positionSkewed,
+          position,
+          positionSkewed,
           noise
         });
       }
       grid.push(points);
     }
+    console.log(grid)
     return grid;
   };
 
@@ -66,7 +68,9 @@ const sketch = ({ width, height }) => {
 
   return ({ context, width, height, units }) => {
     this.paths = [];
-    const margin = 20; //width * 0.175;
+    const margin = width * 0.175;
+    let unitX = (width - (2 * margin)) /countX;
+    let offsetX = unitX / 2; 
 
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
@@ -85,34 +89,45 @@ const sketch = ({ width, height }) => {
 
     for (let row = 0; row < grid.length; row++) {
       const isLastRow = row === grid.length - 1;
+      const isFirstRow = row === 0;
+      let even = row % 2 === 0;
+      ox = even ? 0 : offsetX;
+      oxNot = !even ? 0 : offsetX;
+      console.log(ox)
+
       for (let column = 0; column < grid[row].length; column++) {
+
+        // if first row, draw only bottom triangles
+        // if last row, draw only top triangles
+        // top triangle odd = point[n] and point[n+1] this row + point[n+1] row above
+        // top triangle even = point[n] and point[n+1] this row + point[n] row above
+
         const isLastColumn = column === grid[row].length - 1;
         const position = grid[row][column].position;
-        const x = lerp(margin, width - margin, position[0]);
-        const y = lerp(margin, height - margin, position[1]);
-        
-        let lineRight = null, 
-            lineDown = null;
-        
+        const p1 = [lerp(margin, width - margin, position[0]) + ox, lerp(margin, height - margin, position[1])];
+        let lines = [];
+
         if (!isLastColumn) {
-          const pointRight = grid[row][column+1].position;
-          const x2 = lerp(margin, width - margin, pointRight[0]);
-          const y2 = lerp(margin, height - margin, pointRight[1]);
-          lineRight = [[x,y],[x2,y2]];
+          let p2 = [lerp(margin, width - margin, grid[row][column+1].position[0]) + ox, lerp(margin, height - margin, grid[row][column+1].position[1])];
+          lines.push([p1,p2]);
+          let otherCol = even ? column : column + 1;
+          if (!isFirstRow) {
+            // draw top triangles
+            let p3 = [lerp(margin, width - margin, grid[row-1][otherCol].position[0]) + oxNot, lerp(margin, height - margin, grid[row-1][otherCol].position[1])];
+            lines.push([p2, p3]);
+            lines.push([p3, p1]);
+          }
+  
+          if (!isLastRow) {
+            // draw bottom triangles
+            let p4 = [lerp(margin, width - margin, grid[row+1][otherCol].position[0]) + oxNot, lerp(margin, height - margin, grid[row+1][otherCol].position[1])];
+            lines.push([p2, p4]);
+            lines.push([p4, p1]);
+          }
         }
-
-        if (!isLastRow) {
-          const pointDown = grid[row+1][column].position;
-          const x2 = lerp(margin, width - margin, pointDown[0]);
-          const y2 = lerp(margin, height - margin, pointDown[1]);
-          lineDown = [[x,y],[x2,y2]];
-        }
-
-        //console.log({lineRight, lineDown})
-
+        
         const path = createPath(ctx => {
-          if (lineRight) { drawLineOnCanvas(ctx, lineRight); }
-          if (lineDown) { drawLineOnCanvas(ctx, lineDown); }
+          lines.forEach(l => drawLineOnCanvas(ctx, l));
         });
         
   

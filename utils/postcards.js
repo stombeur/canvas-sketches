@@ -35,6 +35,34 @@ const reorigin = (point, origin) => {
     opt2.index = 4;
     f([width/2,height/2], width/2, height/2, {...opt, ...opt2});
   }
+
+  const drawFourColumnsTwoRowsPortrait = (f, width, height, opt = null) => {
+    let opt2 = {index:0}
+
+    for (let r = 0; r <= 1; r++) {
+      for (let c = 0; c <= 3; c++) {
+        let posX = c * (width / 4);
+        let posY = r * (height / 2);
+        
+        f([posX,posY], width/4, height/2, {...opt, ...opt2});
+        opt2.index++;
+      }
+    }
+  }
+
+  const drawTwoColumnsFourRowsLandscape = (f, width, height, opt = null) => {
+    let opt2 = {index:0}
+
+    for (let r = 0; r <= 3; r++) {
+      for (let c = 0; c <= 1; c++) {
+        let posX = c * (width / 2);
+        let posY = r * (height / 4);
+        
+        f([posX,posY], width/2, height/4, {...opt, ...opt2});
+        opt2.index++;
+      }
+    }
+  }
   
   const drawQuadQuad = (f, width, height, opt = null) => {
     drawOffsetQuad(f, width/2, height/2, [0,0], opt);
@@ -142,3 +170,5 @@ module.exports.drawQuadCutLines = drawQuadCutLines;
 module.exports.drawQuadAddressLines = drawQuadAddressLines;
 module.exports.drawOffsetQuad = drawOffsetQuad;
 module.exports.drawQuadQuad = drawQuadQuad;
+module.exports.drawFourColumnsTwoRowsPortrait = drawFourColumnsTwoRowsPortrait;
+module.exports.drawTwoColumnsFourRowsLandscape = drawTwoColumnsFourRowsLandscape;

@@ -75,7 +75,7 @@ const sketch = ({ width, height }) => {
       lines.push(...h)
 
       let roomRegion = room.toClipRegion(rooms);
-      let bb2 = boundingbox.from([[elementW*c, elementH*r],[elementW*(r+1), elementH*r],[elementW*(r+1), elementH*(r+1)],[elementW*r,elementWH*(r+1)]]);
+      let bb2 = boundingbox.from([[elementW*c, elementH*r],[elementW*(r+1), elementH*r],[elementW*(r+1), elementH*(r+1)],[elementW*r,elementH*(r+1)]]);
       let region2 = roomRegion.splitVertically([[width/2.4, 0],[width/2, height]], bb2, [5, -2]);
       let region3 = region2.splitHorizontally([[0, height/2],[width, height/3]], bb2, [2, 5]);
       let region4 = region3.splitVertically([[width/4, 0],[width, height]], bb2, [5, -2]);

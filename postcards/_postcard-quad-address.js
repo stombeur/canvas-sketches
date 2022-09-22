@@ -1,6 +1,7 @@
 
 const canvasSketch = require('canvas-sketch');
 const { renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { createLinePath } = require('../utils/paths');
 const postcards = require('../utils/postcards');
 
 
@@ -20,7 +21,10 @@ const sketch = ({ width, height }) => {
       postcards.drawQuadAddressLines(ctx, width, height);
     });
 
-    return renderPaths([[addressPath]], {
+    let originPath = createLinePath([[0,0], [0,1]])
+    let endPath = createLinePath([[width,height], [width,height-1]])
+
+    return renderPaths([[addressPath, endPath, originPath]], {
       context, width, height, units
     });
   };
