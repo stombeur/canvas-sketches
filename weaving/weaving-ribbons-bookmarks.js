@@ -246,7 +246,7 @@ const sketch = ({ width, height }) => {
             });
         }
 
-        postcards.drawQuad(draw, width, height, {alllines});
+        postcards.drawColumnsRowsPortrait(draw, width, height,2, 2, {alllines});
 
         return renderGroups([paths, pathscolor, borderpaths], {
         context, width, height, units

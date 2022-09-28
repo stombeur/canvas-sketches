@@ -8,26 +8,23 @@ const { createArcPath, createLinePath } = require('../utils/paths.js');
 const poly = require('../utils/poly.js');
 const postcards = require('../utils/postcards');
 const rnd2 = require('../utils/random');
-
-random.setSeed(random.getRandomSeed());
-console.log(`seed: ${random.getSeed()}`);
-// 469789
-// 219376
   
 let paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: [196, 271],//'A4',//[ 2048, 2048 ]
+  dimensions: [273, 202],//'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
 };
 
-
+const postcardGrid = { columns: 6, rows: 2};
 
 const createGrid = (columns, rows, w, h, marginX) => {
+  random.setSeed(random.getRandomSeed());
+
   let o = [];
   let side = (w - (marginX*2))/columns;
   let marginY = (h - (side*rows))/2;
@@ -37,7 +34,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
       let corner = random.rangeFloor(0,4);//rnd2.getRandomInt(4, 0);//Math.floor(random.noise2D(c,r) * (4 - 0) + 0);
-      let lines = random.value() < 0.08;
+      let lines = random.value() < 0.07;
       const position = [ start[0] + c*side, start[1]+r*side ];
 
       //console.log(corner);
@@ -113,30 +110,8 @@ const createGrid = (columns, rows, w, h, marginX) => {
     }
   }
 
-  return o;
+  return {seed: random.getSeed(), grid: o};
 }
-
-const drawLineOnCanvas = (ctx, line) => {
-  let x1 = line[0].x  || line[0][0],
-      x2 = line[1].x || line[1][0],
-      y1 = line[0].y || line[0][1],
-      y2 = line[1].y || line[1][1];
-
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-}
-
-const drawArcOnCanvas = (ctx, cx, cy, radius, sAngle, eAngle) => {
-  //ctx.beginPath();
-  ctx.arc(
-    cx,
-    cy,
-    radius,
-    (Math.PI / 180) * sAngle,
-    (Math.PI / 180) * eAngle
-  );
-  //ctx.stroke();
-};
 
 const drawTile = (x, y, side, rnd, padding = 0) => {
 
@@ -238,9 +213,8 @@ const drawTile = (x, y, side, rnd, padding = 0) => {
     let endAngle = startAngle + 90;
 
   for (let s = 1; s <= divide; s++) {
-    result.push(createPath(ctx => {
-      drawArcOnCanvas(ctx, cx, cy, s * step, startAngle, endAngle);     
-    }));
+    createArcPath([cx, cy], s * step, startAngle, endAngle);
+    result.push(createArcPath([cx, cy], s * step, startAngle, endAngle));
                                             
   }
 
@@ -249,9 +223,7 @@ const drawTile = (x, y, side, rnd, padding = 0) => {
     let i = a.intersects([{r: radius, c: {x: cx, y:cy}}])
     
     if (!i || i.length === 0) {
-        result.push(createPath(ctx => {
-          drawArcOnCanvas(ctx, ocx, ocy, s * step, ostartAngle, ostartAngle+90);     
-        }));  
+        result.push(createArcPath( [ocx, ocy], s * step, ostartAngle, ostartAngle+90));     
     }
     else {
     i.forEach(element => {
@@ -269,47 +241,27 @@ const drawTile = (x, y, side, rnd, padding = 0) => {
 };
 
 const sketch = ({ width, height }) => {
-  console.log(width, height)
-  const countX = 5;
-  const countY = 15;
+  const cardWidth = width / postcardGrid.columns;
+  const cardHeight = height / postcardGrid.rows;
+  //tile grid
+  const countX = 4;
+  const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
+  const margin = cardWidth * 0.033;
+
+  const grids = [];
+  for (let i = 0; i < postcardGrid.columns*postcardGrid.rows; i++) {
+      grids.push(createGrid(countX, countY, cardWidth, cardHeight, margin))
+  }
 
   return ({ context, width, height, units }) => {
     paths = [];
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
-    const draw = (origin, w, h) => {
+    const draw = (origin, w, h, opts) => {
       this.paths = [];
-      console.log(w, width)
-      
-      //const countY = Math.floor(countX / w * h);
-      let nrOfLines = 2000;
-      const margin = w * 0.05;
 
-      let grid = createGrid(countX, countY, w, h, margin);
-      let tempgrid = grid;
-
-      let limit = 14;
-      let maxIterations = 10000;
-      while(nrOfLines>= limit && maxIterations > 0) {
-        
-        nrOfLines = 0;
-        for (let row = 0; row < countY; row++) {
-          for (let column = 0; column < countX; column++) {
-            if (tempgrid[row][column].draw01) { nrOfLines++; }
-            if (tempgrid[row][column].draw12) { nrOfLines++; }
-            if (tempgrid[row][column].draw23) { nrOfLines++; }
-            if (tempgrid[row][column].draw30) { nrOfLines++; }
-          }
-        }
-  
-       //console.log(nrOfLines)
-       if (nrOfLines >= limit) { tempgrid = createGrid(countX, countY, w, h, margin); }
-       if (nrOfLines <= limit) { grid = tempgrid; }
-       maxIterations--;
-      }
-      
-      console.log({maxIterations, nrOfLines})
+      let grid = grids[opts.index].grid;
 
       let side = (w - (margin*2)) / countX;
       
@@ -318,16 +270,7 @@ const sketch = ({ width, height }) => {
           const position = grid[row][column].position;
           const tile = {border, draw01, draw12,draw23,draw30} = grid[row][column];
 
-          const x0 = position[0]; //lerp(margin, w - margin, position[0]);
-          const y0 = position[1]; //lerp(margin, h - margin, position[1]);
-
-          const [x,y] = postcards.reorigin([x0,y0], origin);
-          //console.log([x0, y0], [x,y])
-
-
-          // paths.push(createPath(ctx => {
-          //   drawArcOnCanvas(ctx, x, y, 2, 0, 360);     
-          // }));
+          const [x,y] = postcards.reorigin([position[0],position[1]], origin);
 
           path = drawTile(x,y,side, tile, 0);
           
@@ -336,7 +279,7 @@ const sketch = ({ width, height }) => {
       }
     }
 
-    postcards.drawFourColumnsTwoRowsPortrait(draw, width, height);
+    postcards.drawColumnsRowsPortrait(draw, width, height, postcardGrid.columns, postcardGrid.rows);
 
     return renderPaths(paths, {
       context, width, height, units
