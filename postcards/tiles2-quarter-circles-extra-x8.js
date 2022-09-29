@@ -13,7 +13,7 @@ let paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: [273, 202],//'A4',//[ 2048, 2048 ]
+  dimensions: 'A4',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
