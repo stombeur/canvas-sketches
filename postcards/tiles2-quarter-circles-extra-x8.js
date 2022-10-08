@@ -20,7 +20,7 @@ const settings = {
   units: 'mm',
 };
 
-const postcardGrid = { columns: 6, rows: 2};
+const postcardGrid = { columns: 1, rows: 1};
 
 const createGrid = (columns, rows, w, h, marginX) => {
   random.setSeed(random.getRandomSeed());
@@ -244,9 +244,9 @@ const sketch = ({ width, height }) => {
   const cardWidth = width / postcardGrid.columns;
   const cardHeight = height / postcardGrid.rows;
   //tile grid
-  const countX = 4;
+  const countX = 19;
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
-  const margin = cardWidth * 0.033;
+  const margin = cardWidth * 0.013;
 
   const grids = [];
   for (let i = 0; i < postcardGrid.columns*postcardGrid.rows; i++) {
@@ -280,6 +280,7 @@ const sketch = ({ width, height }) => {
     }
 
     postcards.drawColumnsRowsPortrait(draw, width, height, postcardGrid.columns, postcardGrid.rows);
+    //postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {
       context, width, height, units
