@@ -17,7 +17,7 @@ let paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: "A4", //[ 2048, 2048 ]
+  dimensions: [ 210, 315 ],
   orientation: "portrait",
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -26,12 +26,12 @@ const settings = {
 
 const postcardGrid = { columns: 1, rows: 1 };
 const config = {
-  divide: 12,
-  countX: 12,
+  divide: 64,
+  countX: 2,
   lines: 0.05,
-  mini: 0.12,
+  mini: 0.44,
   margin: 0.01,
-  minilevels: 2,
+  minilevels:4,
 }
 
 const createGrid = (columns, rows, w, h, marginX) => {
@@ -220,17 +220,17 @@ const drawTile = (x, y, side, rnd, mini = {}, padding = 0) => {
 
   let radius = mini.side ?? side - padding * 2;
   let divide = mini.divide ?? config.divide;
-  let step = radius / divide;
+  let step =  radius / divide;
 
   if (rnd.mini) {
     let miniLevel = mini?.level ?? 1;
-    let miniRnd =  {...rnd, mini: miniLevel < config.minilevels && random.value() < (config.mini*2), lines: false};
-    let miniNext = {side: side/2, radius:radius/2, divide: Math.floor(divide/2), level: miniLevel+1};
+    let miniRnd =  {...rnd, mini: miniLevel < config.minilevels && random.value() < (config.mini*2), lines: random.value() < config.lines};
+    let miniNext = {side: side/2, radius:side/2, divide: (side/2/step), level: miniLevel+1};
 
-    let r1 = drawTile(x, y, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini*2) }, miniNext, padding);
-    let r2 = drawTile(x + side/2, y, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini*2) }, miniNext, padding);
-    let r3 = drawTile(x, y+ side/2, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini*2) }, miniNext, padding);
-    let r4 = drawTile(x+ side/2, y+ side/2, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini*2) }, miniNext, padding);
+    let r1 = drawTile(x, y, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini), lines: random.value() < config.lines }, miniNext, padding);
+    let r2 = drawTile(x + side/2, y, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini), lines: random.value() < config.lines }, miniNext, padding);
+    let r3 = drawTile(x, y+ side/2, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini), lines: random.value() < config.lines }, miniNext, padding);
+    let r4 = drawTile(x+ side/2, y+ side/2, side/2, {...miniRnd, corner: random.rangeFloor(0, 4), mini: miniLevel < config.minilevels && random.value() < (config.mini), lines: random.value() < config.lines }, miniNext, padding);
 
     result.push(...r1, ...r2, ...r3, ...r4);
 
