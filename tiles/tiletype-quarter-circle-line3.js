@@ -11,28 +11,28 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
     let corner = rnd.corner;
     let  [zeroCorner, oneCorner, twoCorner, threeCorner] = corners(x, y, side, padding);
     let sAngle = startAngle(corner);
+    let oAngle = startAngleOpposing(corner);
   
     let c = zeroCorner;
-    let lc = oneCorner;
-    let linev = [[x,y], [x+side, y]];
-    let lineh = [[x,y], [x+side, y]];
+    let oc = twoCorner;
+    let line = [[x+side, y],[x,y]];
   
     
     switch (corner) {
       case 1:
         c = oneCorner;
-        lc = twoCorner;
-        linev = [[x,y],[x+side, y]];
+        oc = threeCorner;
+        line = [[x,y],[x+side, y]];
         break;
       case 2:
         c = twoCorner;
-        lc = threeCorner;
-        linev = [[x+side, y],[x,y]];
+        oc = zeroCorner;
+        line = [[x,y],[x+side, y]];
         break;
       case 3:
         c = threeCorner;
-        lc = zeroCorner;
-        linev = [[x+side, y],[x,y]];
+        oc = oneCorner;
+        line = [[x+side, y],[x,y]];
         break;
       default:
         break;
@@ -42,7 +42,6 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
   
     let radius = side;
     let step = radius / divide;
-    let centeroftile = [x + side/2, y + side/2];
   
   
     // starting point circles
@@ -50,28 +49,31 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
     result.push(createArcPath(c, s * step, sAngle, sAngle+90));                                       
     }
 
+    let l =  [[x,y],[x+side, y]];
+    let inham = step*2;
+    let l2 = [[x,y],[x+inham, y]];
 
-    for (let s = 1; s <= divide; s++) {
-        if (corner === 0 && s === 0) continue;
-        if (corner === 1 && s !== 5) continue;
-        if (corner === 2 && s === 0) continue;
-        if (corner === 3 && s === 0) continue;
+    for (let s = 0; s <= divide ; s++) {
+      l = [[x,y + step * s],[x+side, y + step* s]];
+      l2 = [[x, y+ step * s],[x+inham, y + step * s] ];
+      let int = poly.findCircleLineIntersectionsP(side, oneCorner, l); 
+      let il = [l[0], int[1] ?? l[1]];
 
+      let int2 = poly.findCircleLineIntersectionsP(side, twoCorner, l2); 
+      let il2 = [l2[0], int2[1] ?? l2[1]];
+      let lenil2 = Math.abs(il2[0][0] - il2[1].x);
+      if (lenil2 > inham) {
+        il2 = [l2[0], l2[1]];
+      }
 
-        let int = poly.findCircleLineIntersectionsP(side, lc, linev);   
-        let newlinev = [linev[0], int[0]];
+      let angle = (corner - 1 ) * 90
+      let rl = poly.rotatePolygon(il, [x+side/2, y+side/2], angle)
+      let rl2 = poly.rotatePolygon(il2, [x+side/2, y+side/2], (corner +2) * 90)
 
-        if(corner === 0) {let p = int[1] ?? linev[1]; newlinev = [linev[0], p];}
-        if(corner === 2) {let p = int[0] ?? linev[1]; newlinev = [linev[0], p];}
-
-        if(corner === 3) {let p = int[0] ?? linev[1]; newlinev = [linev[0], p];}
-        if(corner === 1) {let p = int[1] ?? linev[1]; newlinev = [linev[0], p];}
-  
-
-        let rlinev = poly.rotatePolygon(newlinev, centeroftile, -90);
-        result.push(createLinePath(rlinev));
-
-        linev = [[linev[0][0], linev[0][1] + step],[linev[1][0], linev[1][1] + step]];
+      if (s !== divide && s!== divide-1) {
+        result.push(createLinePath(rl));
+      }
+      result.push(createLinePath(rl2));
     }
 
     return result;

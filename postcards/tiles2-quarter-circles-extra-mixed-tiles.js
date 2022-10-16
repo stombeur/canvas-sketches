@@ -45,7 +45,12 @@ const createGrid = (columns, rows, w, h, marginX) => {
   for (let i = 0; i < 2; i++) {
     weightedArray.push(drawQCLTile1);
   }
-
+  for (let i = 0; i < 2; i++) {
+    weightedArray.push(drawLineTile);
+  }
+  for (let i = 0; i < 2; i++) {
+    weightedArray.push(drawQCLTile3);
+  }
   
   for (let r = 0; r < rows; r++) {
     o[r] = [];
@@ -53,7 +58,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
       let corner = random.rangeFloor(0,4);//rnd2.getRandomInt(4, 0);//Math.floor(random.noise2D(c,r) * (4 - 0) + 0);
       let lines = random.value() < 0.07;
       const position = [ start[0] + c*side, start[1]+r*side ];
-      const drawTile = drawQCLTile1; //random.pick(weightedArray);
+      const drawTile = random.pick(weightedArray);
 
       //console.log(corner);
       o[r].push({
@@ -71,7 +76,7 @@ const sketch = ({ width, height }) => {
   const cardWidth = width / postcardGrid.columns;
   const cardHeight = height / postcardGrid.rows;
   //tile grid
-  const countX = 1;
+  const countX = 15;
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
   const margin = cardWidth * 0.013;
 

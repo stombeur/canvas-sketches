@@ -49,15 +49,18 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
     result.push(createArcPath(c, s * step, sAngle, sAngle+90));                                       
     }
 
-    // oppisite point circles
-    for (let s = 0; s <= divide; s++) {
-        let int = poly.findCircleLineIntersectionsP(side, c, line);   
-        //result.push(createLinePath(line));
-        
-        if(corner === 0 || corner === 3) {let p = int[0] ?? line[1]; result.push(createLinePath([line[0], p]));}
-        if(corner === 1 || corner === 2) {let p = int[1] ?? line[1]; result.push(createLinePath([line[0], p]));}
+    // do everything with one corner arc
+    let l =  [[x,y],[x+side, y]];
 
-        line = [[line[0][0], line[0][1] + step],[line[1][0], line[1][1] + step]];
+    for (let s = 0; s <= divide ; s++) {
+      l = [[x,y + step * s],[x+side, y + step* s]];
+      let int = poly.findCircleLineIntersectionsP(side, oneCorner, l); 
+      let il = [l[0], int[1] ?? l[1]];
+
+      let angle = (corner - 1 ) * 90
+      let rl = poly.rotatePolygon(il, [x+side/2, y+side/2], angle)
+
+      result.push(createLinePath(rl));
     }
 
     return result;

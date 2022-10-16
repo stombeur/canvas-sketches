@@ -10,29 +10,21 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
 
     let corner = rnd.corner;
     let  [zeroCorner, oneCorner, twoCorner, threeCorner] = corners(x, y, side, padding);
-    let sAngle = startAngle(corner);
-    let oAngle = startAngleOpposing(corner);
+    let sAngle = startAngleOpposing(corner);
+
   
     let c = zeroCorner;
-    let lc = oneCorner;
-    let line = [[x,y], [x+side, y]];
   
     
     switch (corner) {
       case 1:
         c = oneCorner;
-        lc = twoCorner;
-        line = [[x,y],[x+side, y]];
         break;
       case 2:
         c = twoCorner;
-        lc = threeCorner;
-        line = [[x+side, y],[x,y]];
         break;
       case 3:
         c = threeCorner;
-        lc = zeroCorner;
-        line = [[x+side, y],[x,y]];
         break;
       default:
         break;
@@ -42,29 +34,25 @@ export const drawTile = (x, y, side, rnd, divide, padding = 0) => {
   
     let radius = side;
     let step = radius / divide;
-    let centeroftile = [x + side/2, y + side/2];
   
   
     // starting point circles
     for (let s = 1; s <= divide; s++) {
-    result.push(createArcPath(c, s * step, sAngle, sAngle+90));                                       
+    result.push(createArcPath(c, s * step, sAngle+180, sAngle+270));                                       
     }
 
-    for (let s = 0; s <= divide; s++) {
-        let int = poly.findCircleLineIntersectionsP(side, lc, line);   
-        let newline = [line[0], int[0]];
+    // do everything with one corner arc
+    let l =  [[x,y],[x+side, y]];
 
-        if(corner === 0) {let p = int[1] ?? line[1]; newline = [line[0], p];}
-        if(corner === 2) {let p = int[0] ?? line[1]; newline = [line[0], p];}
+    for (let s = 0; s <= divide ; s++) {
+      l = [[x,y + step * s],[x+side, y + step* s]];
+      let int = poly.findCircleLineIntersectionsP(side, twoCorner, l); 
+      let il = [l[0], int[1] ?? l[1]];
 
-        if(corner === 3) {let p = int[0] ?? line[1]; newline = [line[0], p];}
-        if(corner === 1) {let p = int[1] ?? line[1]; newline = [line[0], p];}
-  
+      let angle = (corner -2 ) * 90
+      let rl = poly.rotatePolygon(il, [x+side/2, y+side/2], angle)
 
-        let rline = poly.rotatePolygon(newline, centeroftile, -90);
-        result.push(createLinePath(rline));
-
-        line = [[line[0][0], line[0][1] + step],[line[1][0], line[1][1] + step]];
+      result.push(createLinePath(rl));
     }
 
     return result;
