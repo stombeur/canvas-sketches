@@ -47,13 +47,16 @@ export class arc {
     // }
 
     intersect(circle) {//x1,y1,r1, x2,y2,r2) {
-        //if (!circle.c.x) {circle.c = {x: circle.c[0], y: circle.c[1]}};
+        if (!circle.c.x) {
+            circle.c = {x: circle.c[0], y: circle.c[1]}
+        };
         let [x1, y1, r1] = [this.c.x, this.c.y, this.r]
         let [x2, y2, r2] = [circle.c.x, circle.c.y, circle.r]
 
         var centerdx = x1 - x2;
         var centerdy = y1 - y2;
-        var R = Math.sqrt(centerdx * centerdx + centerdy * centerdy);
+        var R = Math.sqrt(centerdx * centerdx + centerdy * centerdy); // distance between centers
+        
         if (!(Math.abs(r1 - r2) <= R && R <= r1 + r2)) { // no intersection
           return []; // empty list of results
         }

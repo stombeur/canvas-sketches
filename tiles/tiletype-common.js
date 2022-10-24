@@ -7,6 +7,14 @@ export const corners = (x, y, side, padding) => {
     return [zeroCorner, oneCorner, twoCorner, threeCorner];
 }
 
+export const startAngles = () => {
+    let result = [];
+    for (let i = 0; i < 4; i++) {
+        result.push(i * 90);
+    }
+    return result;
+}
+
 export const startAngle = (corner) => {
    return corner * 90;
 }

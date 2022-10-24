@@ -13,6 +13,7 @@ const { drawTile:drawLineTile } = require('../tiles/tiletype-lines.js');
 const { drawTile:drawQCLTile1 } = require('../tiles/tiletype-quarter-circle-line1.js');
 const { drawTile:drawQCLTile2 } = require('../tiles/tiletype-quarter-circle-line2.js');
 const { drawTile:drawQCLTile3 } = require('../tiles/tiletype-quarter-circle-line3.js');
+const { drawTile:draw4QCTile } = require('../tiles/tiletype-four-quarter-circles');
   
 let paths = [];
 
@@ -45,11 +46,14 @@ const createGrid = (columns, rows, w, h, marginX) => {
   for (let i = 0; i < 2; i++) {
     weightedArray.push(drawQCLTile1);
   }
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 7; i++) {
     weightedArray.push(drawLineTile);
   }
   for (let i = 0; i < 2; i++) {
     weightedArray.push(drawQCLTile3);
+  }
+  for (let i = 0; i < 2; i++) {
+    weightedArray.push(draw4QCTile);
   }
   
   for (let r = 0; r < rows; r++) {
@@ -76,7 +80,7 @@ const sketch = ({ width, height }) => {
   const cardWidth = width / postcardGrid.columns;
   const cardHeight = height / postcardGrid.rows;
   //tile grid
-  const countX = 15;
+  const countX = 12;
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
   const margin = cardWidth * 0.013;
 
