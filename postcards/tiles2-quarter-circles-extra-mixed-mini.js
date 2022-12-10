@@ -17,22 +17,28 @@ const { drawTile:draw4QCTile } = require('../tiles/tiletype-four-quarter-circles
   
 let paths = [];
 
+let seed = random.getRandomSeed();
+
 const settings = {
-  suffix: random.getSeed(),
+  seed: seed,
   dimensions: 'A3',//[ 2048, 2048 ]
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  divide: 17,
+  divide: 16,
   countX: 10,
-  tiles: [[draw2QCTile, 13],[drawLineTile, 1], [draw4QCTile, 0], [drawQCLTile1, 0], [drawQCLTile2, 0], [drawQCLTile3, 7]],
+  tiles: [[draw2QCTile, 31],[drawLineTile, 2], [draw4QCTile, 0], [drawQCLTile1, 0], [drawQCLTile2, 0], [drawQCLTile3, 4]],
+  mini: 0.25,
+  // minilevels:2,
+  prefix: 'tiles2-quarter-circles-extra-mixed-mini',
+  suffix: seed,
 };
 
 const postcardGrid = { columns: 1, rows: 1};
 
 const createGrid = (columns, rows, w, h, marginX) => {
-  random.setSeed(random.getRandomSeed());
+  random.setSeed(seed);
 
   let o = [];
   let side = (w - (marginX*2))/columns;
@@ -50,15 +56,19 @@ const createGrid = (columns, rows, w, h, marginX) => {
     o[r] = [];
     for (let c = 0; c < columns; c++) {
       let corner = random.rangeFloor(0,4);//rnd2.getRandomInt(4, 0);//Math.floor(random.noise2D(c,r) * (4 - 0) + 0);
-      let lines = random.value() < 0.07;
       const position = [ start[0] + c*side, start[1]+r*side ];
       const drawTile = random.pick(weightedArray);
+      const mini = random.value() < settings.mini;
+      const miniDrawTiles = [[random.pick(weightedArray), random.rangeFloor(0,4)], [random.pick(weightedArray), random.rangeFloor(0,4)], 
+                              [random.pick(weightedArray), random.rangeFloor(0,4)],[random.pick(weightedArray), random.rangeFloor(0,4)]];
 
       //console.log(corner);
       o[r].push({
         position,
         corner, 
-        drawTile
+        drawTile,
+        mini,
+        miniDrawTiles,
       });
     }
   }
@@ -93,12 +103,25 @@ const sketch = ({ width, height }) => {
       
       for (let row = 0; row < countY; row++) {
         for (let column = 0; column < countX; column++) {
-          const position = grid[row][column].position;
-          const rnd = grid[row][column];
-          const drawTile = grid[row][column].drawTile;
-          const [x,y] = postcards.reorigin([position[0],position[1]], origin);
+          const element = grid[row][column];
+          const position = element.position;
           
-          paths.push(...drawTile(x, y, side, rnd, settings.divide));
+          const drawTile = element.drawTile;
+          const [x,y] = postcards.reorigin([position[0],position[1]], origin);
+
+          if (element.mini) {
+
+            let r1 = element.miniDrawTiles[0][0](x, y, side/2, {corner: element.miniDrawTiles[0][1]}, settings.divide/2);
+            let r2 = element.miniDrawTiles[1][0](x + side/2, y, side/2, {corner: element.miniDrawTiles[1][1]}, settings.divide/2);
+            let r3 = element.miniDrawTiles[2][0](x, y+ side/2, side/2, {corner: element.miniDrawTiles[2][1]}, settings.divide/2);
+            let r4 = element.miniDrawTiles[3][0](x+ side/2, y+ side/2, side/2, {corner: element.miniDrawTiles[3][1]}, settings.divide/2);
+        
+            paths.push(...r1, ...r2, ...r3, ...r4);
+        
+          }
+          else {
+            paths.push(...drawTile(x, y, side, element, settings.divide));
+          }
         }
       }
     }

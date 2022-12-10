@@ -18,9 +18,11 @@ const settings = {
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
+  divide: 11,
+  columns: 1, 
+  rows: 1,
+  countX: 17,
 };
-
-const postcardGrid = { columns: 1, rows: 1};
 
 const createGrid = (columns, rows, w, h, marginX) => {
   random.setSeed(random.getRandomSeed());
@@ -196,7 +198,7 @@ const drawTile = (x, y, side, rnd, padding = 0) => {
 
   
   let radius = side - padding * 2;
-  let divide = 7;
+  let divide = settings.divide;
   let step = radius / divide;
 
   if (rnd.lines) {
@@ -241,15 +243,15 @@ const drawTile = (x, y, side, rnd, padding = 0) => {
 };
 
 const sketch = ({ width, height }) => {
-  const cardWidth = width / postcardGrid.columns;
-  const cardHeight = height / postcardGrid.rows;
+  const cardWidth = width / settings.columns;
+  const cardHeight = height / settings.rows;
   //tile grid
-  const countX = 19;
+  const countX = settings.countX;
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
   const margin = cardWidth * 0.013;
 
   const grids = [];
-  for (let i = 0; i < postcardGrid.columns*postcardGrid.rows; i++) {
+  for (let i = 0; i < settings.columns*settings.rows; i++) {
       grids.push(createGrid(countX, countY, cardWidth, cardHeight, margin))
   }
 
@@ -279,7 +281,7 @@ const sketch = ({ width, height }) => {
       }
     }
 
-    postcards.drawColumnsRowsPortrait(draw, width, height, postcardGrid.columns, postcardGrid.rows);
+    postcards.drawColumnsRowsPortrait(draw, width, height, settings.columns, settings.rows);
     //postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {

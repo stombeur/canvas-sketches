@@ -17,7 +17,7 @@ let paths = [];
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: [ 210, 315 ],
+  dimensions: 'A3', //[ 210, 315 ],
   orientation: "portrait",
   pixelsPerInch: 300,
   //scaleToView: true,
@@ -26,12 +26,12 @@ const settings = {
 
 const postcardGrid = { columns: 1, rows: 1 };
 const config = {
-  divide: 64,
-  countX: 2,
+  divide:32,
+  countX: 12,
   lines: 0.05,
-  mini: 0.44,
+  mini: 0,
   margin: 0.01,
-  minilevels:4,
+  minilevels:2,
 }
 
 const createGrid = (columns, rows, w, h, marginX) => {
