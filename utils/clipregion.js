@@ -118,9 +118,23 @@ export class clipregion {
 
         if (pline1 && pline2) {
             let region1 = pline1.toClipRegion();
+            let centroid1 = pline1.centroid();
+            let sp1 = polyline.getSpPoint(centroid1, line[0], line[1]);
+            let d1 = sp1.distanceTo(centroid1);
+            let v1 = [moveMultiplier*(centroid1.x - sp1.x)/d1 , moveMultiplier*(centroid1.y-sp1.y)/d1];
+            
             let region2 = pline2.toClipRegion();
-            let result1 = this.diff(region2).move([-pv[0], -pv[1]]);
-            let result2 = this.diff(region1).move([pv[0], pv[1]]);
+            let centroid2 = pline2.centroid();
+            let sp2 = polyline.getSpPoint(centroid2, line[0], line[1]);
+            let d2 = sp2.distanceTo(centroid2);
+            let v2 = [moveMultiplier*(centroid2.x-sp2.x)/d2 , moveMultiplier*(centroid2.y-sp2.y)/d2];
+
+
+            
+            // let result1 = this.diff(region2).move([-pv[0], -pv[1]]);
+            // let result2 = this.diff(region1).move([pv[0], pv[1]]);
+            let result1 = this.diff(region1).move(v1);
+            let result2 = this.diff(region2).move(v2);
     
             //return result1.add(result2);
             return clipregion.join(result1, result2);

@@ -111,8 +111,8 @@ const randomLine2 = (origin, width, height) => {
 const drawCross = (w, coords, width, height, nroflines = 4) => {   
     let result = [];
 
-    let sc = new SymmetricCross(coords[0], coords[1], w, w/6);
-   // let sc = new House(coords[0], coords[1], w, w); 
+   // let sc = new SymmetricCross(coords[0], coords[1], w, w/6);
+    let sc = new House(coords[0], coords[1], w, w); 
    
     
     sc.toLines().forEach(l => {
@@ -126,7 +126,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
 
    // let bb = boundingbox.from([[5,5],[width, 5],[width-5, height-5],[5, height-5]]);
 
-  let lines = Array.from(Array(12)).map(x => randomLine(bb_zero, w+pad*2, w+pad*2));
+  let lines = Array.from(Array(15)).map(x => randomLine(bb_zero, w+pad*2, w+pad*2));
   //  let lines = [
   //   [[0,50],[width, height]],
   
@@ -141,7 +141,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
 
     let sc_clip_split = sc_clip;
     lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l, bb, 3);
+      sc_clip_split = sc_clip_split.split(l, bb,3);
     });
 
     sc_clip_split.toLines().forEach(l => {
@@ -149,7 +149,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
     });
 
     
-    let hatchregions = sc.toClipRegion().subtract(sc_clip_split);
+    let hatchregions = sc.toClipRegion().move([3,3]).subtract(sc_clip_split);
 
     //let hatchregions = sc_clip_split;
     let regionPolylines = hatchregions.regions.map(r => new polyline(r));
