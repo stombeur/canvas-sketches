@@ -98,6 +98,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
       const mini = random.value() < settings.mini;
       const miniDrawTiles = [[random.pick(weightedArray), random.rangeFloor(0,4)], [random.pick(weightedArray), random.rangeFloor(0,4)], 
                               [random.pick(weightedArray), random.rangeFloor(0,4)],[random.pick(weightedArray), random.rangeFloor(0,4)]];
+      const miniBlanks = random.value();
 
       //console.log(corner);
       o[r].push({
@@ -106,6 +107,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
         drawTile,
         mini,
         miniDrawTiles,
+        miniBlanks,
       });
     }
   }
@@ -162,7 +164,7 @@ const sketch = ({ width, height }) => {
                 r2 = [];
               }
               else {
-              if (random.value() < 0.5) {
+              if (element.miniBlanks < 0.5) {
                 r1 = [];
                 r4 = [];
               }

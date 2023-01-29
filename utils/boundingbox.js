@@ -1,4 +1,5 @@
 import { polyline } from "./polyline";
+import { point } from "./point";
 import {clipregion} from './clipregion';
 
 export class boundingbox {
@@ -28,7 +29,13 @@ export class boundingbox {
         return r;
     }
 
+    toPolyline() {
+        return new polyline(this.points);
+    }
+
     static from(pline, padding = 0) {
+        if (pline instanceof polyline) { pline = pline.points; }
+        
         let bb = new boundingbox();
 
         if (pline instanceof polyline) { pline = pline.points; }
@@ -68,5 +75,62 @@ export class boundingbox {
         ];
         
         return bb;
+    }
+
+    bisect(line) {
+        let topLine = this.lines[0];
+        let rightLine = this.lines[1];
+        let bottomLine = this.lines[2];
+        let leftLine = this.lines[3];
+
+        let intersectTop = polyline.findIntersection(topLine, line);
+        if (intersectTop && !intersectTop.isBetween(this.points[0], this.points[1])) intersectTop = undefined;
+
+        let intersectRight = polyline.findIntersection(rightLine, line);
+        if (intersectRight && !intersectRight.isBetween(this.points[1], this.points[2])) intersectRight = undefined;
+
+        let intersectBottom = polyline.findIntersection(bottomLine, line);
+        if (intersectBottom && !intersectBottom.isBetween(this.points[3], this.points[2])) intersectBottom = undefined;
+        
+        let intersectLeft = polyline.findIntersection(leftLine, line);
+        if (intersectLeft && !intersectLeft.isBetween(this.points[0], this.points[3])) intersectLeft = undefined;
+
+        let nrOfIntersections = [!!intersectTop, !!intersectRight, !!intersectBottom, !!intersectLeft].reduce((a,c) => a+c, 0);
+
+        if (nrOfIntersections < 2) return [this.toPolyline()];
+
+        if (intersectTop) {
+            if(intersectLeft) {
+                return [new polyline([ this.points[0], intersectTop, intersectLeft]),
+                        new polyline([intersectTop, this.points[1], this.points[2], this.points[3], intersectLeft])];
+            }
+            if(intersectBottom) {
+                return [new polyline([ this.points[0], intersectTop, intersectBottom, this.points[3]]),
+                        new polyline([  intersectTop, this.points[1], this.points[2], intersectBottom])];
+            }
+            if(intersectRight) {
+                return [new polyline([this.points[0], intersectTop, intersectRight, this.points[2], this.points[3]]),
+                        new polyline([intersectTop, this.points[1], intersectRight])];
+            }
+            return [this.toPolyline()];
+        }
+        if (intersectBottom) {
+            if(intersectLeft) {
+                return [new polyline([intersectLeft, intersectBottom, this.points[3]]),
+                        new polyline([intersectLeft, this.points[0], this.points[1], this.points[2], intersectBottom])];
+            }
+            if(intersectRight) {
+                return [new polyline([this.points[0], this.points[1], intersectRight, intersectBottom, this.points[3]]),
+                        new polyline([intersectRight, this.points[2], intersectBottom])];
+            }
+            return [this.toPolyline()];
+        }
+        if (intersectLeft) {
+            if(intersectRight) {
+                return [new polyline([this.points[0], this.points[1], intersectRight, intersectLeft]), 
+                        new polyline([intersectLeft, intersectRight, this.points[2], this.points[3]])];
+            }
+            return [this.toPolyline()];
+        }
     }
 }

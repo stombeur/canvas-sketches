@@ -1,3 +1,4 @@
+import { boundingbox } from './boundingbox';
 import { polyline } from './polyline';
 
 const polybool = require('polybooljs');
@@ -23,37 +24,59 @@ export class clipregion {
         return result;
     }
 
-    union(other) {
-        let difference = polybool.union(this, other);
+    subtract(other) {
+        let originalInverted = this.inverted;
+
+        //this.inverted = true;
+        let difference = polybool.difference(this, other);
+
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+
+        this.inverted = originalInverted;
+        return result;
+    }
+
+    add(other) {
+        let union = polybool.union(this, other);
+        let result = new clipregion();
+        result.regions = union.regions;
+        result.inverted = union.inverted;
+        return result;
+    }
+
+    // union(other) {
+    //     let difference = polybool.union(this, other);
+    //     let result = new clipregion();
+    //     result.regions = difference.regions;
+    //     result.inverted = difference.inverted;
+    //     return result;
+    // }
+
+    intersect(other) {
+        let difference = polybool.intersect(this, other);
         let result = new clipregion();
         result.regions = difference.regions;
         result.inverted = difference.inverted;
         return result;
     }
 
-    intersect(regions) {
-        let difference = polybool.intersect(this, regions);
-        let result = new clipregion();
-        result.regions = difference.regions;
-        result.inverted = difference.inverted;
-        return result;
-    }
+    // xor(regions) {
+    //     let difference = polybool.xor(this, regions);
+    //     let result = new clipregion();
+    //     result.regions = difference.regions;
+    //     result.inverted = difference.inverted;
+    //     return result;
+    // }
 
-    xor(regions) {
-        let difference = polybool.xor(this, regions);
-        let result = new clipregion();
-        result.regions = difference.regions;
-        result.inverted = difference.inverted;
-        return result;
-    }
-
-    diffRev(regions) {
-        let difference = polybool.differenceRev(this, regions);
-        let result = new clipregion();
-        result.regions = difference.regions;
-        result.inverted = difference.inverted;
-        return result;
-    }
+    // diffRev(regions) {
+    //     let difference = polybool.differenceRev(this, regions);
+    //     let result = new clipregion();
+    //     result.regions = difference.regions;
+    //     result.inverted = difference.inverted;
+    //     return result;
+    // }
 
     move(vector) {
         this.regions = this.regions.map(r => new polyline(r).move(vector).points);
@@ -86,9 +109,31 @@ export class clipregion {
         return clipregion.join(resultLeft, resultRight);
     }
 
+    split(line, bbox, moveMultiplier=1) {
+        
+        let pv = polyline.perpendicularVector(line);
+        pv = [pv[0]*moveMultiplier, pv[1]*moveMultiplier];
+       
+        let [pline1, pline2] = bbox.bisect(line);
+
+        if (pline1 && pline2) {
+            let region1 = pline1.toClipRegion();
+            let region2 = pline2.toClipRegion();
+            let result1 = this.diff(region2).move([-pv[0], -pv[1]]);
+            let result2 = this.diff(region1).move([pv[0], pv[1]]);
+    
+            //return result1.add(result2);
+            return clipregion.join(result1, result2);
+           // return result1.add(result2);
+        }
+        else {
+            return this;
+        }   
+    }
+
     toLines() {
         let lines = [];
-        let result = [...lines.concat(...this.regions.map(r => new polyline(r).tolines()))];
+        let result = [...lines.concat(...this.regions.map(r => new polyline(r).toLines()))];
         return result;
     }
 }

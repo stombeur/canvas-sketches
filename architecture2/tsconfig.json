@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "ES5",  
+      "types": [
+        "node"
+      ],
+      "module": "commonjs",
+      "baseUrl": ".",
+      "listFiles": true,
+      "traceResolution": false
+    },
+    "files": ["src/sketch.ts"]
+    //"include": ["src/**/*"]
+    
+  }

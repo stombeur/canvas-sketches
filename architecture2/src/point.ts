@@ -1,23 +1,24 @@
-export class point extends Array {
-    constructor(...items) {
+
+ export class point extends Array<number> {
+    constructor(...items: number[]) {
         if (items.length < 2) { super(2); }
         else { super(...items); }
     }
     
-    get x() {
+    get x(): number {
         return this[0];
     }
-    get y() {
+    get y(): number {
         return this[1];
     }
-    set x(value) {
+    set x(value: number) {
         this[0] = value;
     }
-    set y(value) {
+    set y(value: number) {
         this[1] = value;
     }
 
-    rotate(center, angle) {
+    rotate(center: point, angle: number) {
         if (angle === 0) return this;
       
         if (!center) { throw Error('center is null'); }
@@ -34,19 +35,4 @@ export class point extends Array {
       
         return new point(nx, ny);
       };
-    
-    copy(moveX = 0, moveY = 0) {
-        return new point(this[0] + moveX, this[1] + moveY);
-    }
-
-    isBetween(a, b) {
-        if (!a.x) { a = new point(a[0], a[1]); }
-        if (!b.x) { b = new point(b[0], b[1]); }
-      
-        return ((a.x <= this.x && this.x <= b.x) || (a.x >= this.x && this.x >= b.x)) && ((a.y <= this.y && this.y <= b.y) || (a.y >= this.y && this.y >= b.y));
-      }
-    
-    distanceTo(other) {
-        return Math.hypot(other.x-this.x, other.y-this.y);
-    }
 }
