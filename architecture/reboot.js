@@ -112,7 +112,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
     let result = [];
 
    // let sc = new SymmetricCross(coords[0], coords[1], w, w/6);
-    let sc = new House(coords[0], coords[1], w, w); 
+    let sc = new House(coords[0], coords[1], w, w*3); 
    
     
     sc.toLines().forEach(l => {
@@ -126,7 +126,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
 
    // let bb = boundingbox.from([[5,5],[width, 5],[width-5, height-5],[5, height-5]]);
 
-  let lines = Array.from(Array(15)).map(x => randomLine(bb_zero, w+pad*2, w+pad*2));
+  let lines = Array.from(Array(15)).map(x => randomLine(bb_zero, w+pad*2, w*3+pad*2));
   //  let lines = [
   //   [[0,50],[width, height]],
   
@@ -141,7 +141,7 @@ const drawCross = (w, coords, width, height, nroflines = 4) => {
 
     let sc_clip_split = sc_clip;
     lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l, bb,3);
+      sc_clip_split = sc_clip_split.split(l, bb, width/60);
     });
 
     sc_clip_split.toLines().forEach(l => {
@@ -202,13 +202,13 @@ const sketch = ({ width, height }) => {
     const draw = (origin, w, h, opts) => {
         let nroflines = (opts.index+1)*1;
         let localOrigin = postcards.reorigin([0, 0], origin);
-        let crossOrigin = new point(...localOrigin).copy(w/4, (h - w/2)/2);
+        let crossOrigin = new point(...localOrigin).copy(w/4, h/10);
 
 
         paths.push(... drawCross(w/2, crossOrigin, w, h, nroflines));
     }
 
-    postcards.drawColumnsRowsPortrait(draw, width, height, 1, 1);
+    postcards.drawColumnsRowsPortrait(draw, width, height, 4, 2);
     //postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {
