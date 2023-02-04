@@ -23,15 +23,15 @@ export class hatch {
         
         if (my.overlapsWith(otherBorders[i]).isinside) { 
           bordersInside.push(otherBorders[i]);
-          console.log('other border is inside this')
+          //console.log('other border is inside this')
         }
       }
       if (isinsideotherline) {
-        console.log("not drawing hatch, fully inside other region");
+        //console.log("not drawing hatch, fully inside other region");
         return;
       }
     }
-    console.log(bordersInside);
+    //console.log(bordersInside);
 
     let result = [];
 

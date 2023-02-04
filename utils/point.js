@@ -1,4 +1,5 @@
 export class point extends Array {
+    epsilon = 0.000001;
     constructor(...items) {
         if (items.length < 2) { super(2); }
         else { super(...items); }
@@ -43,7 +44,11 @@ export class point extends Array {
         if (!a.x) { a = new point(a[0], a[1]); }
         if (!b.x) { b = new point(b[0], b[1]); }
       
-        return ((a.x <= this.x && this.x <= b.x) || (a.x >= this.x && this.x >= b.x)) && ((a.y <= this.y && this.y <= b.y) || (a.y >= this.y && this.y >= b.y));
+        
+        return ((a.x <= this.x + this.epsilon && this.x <= b.x + this.epsilon) || (a.x + this.epsilon >= this.x && this.x + this.epsilon >= b.x)) 
+        && ((a.y <= this.y +this.epsilon && this.y <= b.y + this.epsilon) || (a.y + this.epsilon >= this.y && this.y + this.epsilon >= b.y));
+
+        //return ((a.x <= this.x && this.x <= b.x) || (a.x >= this.x && this.x >= b.x)) && ((a.y <= this.y && this.y <= b.y) || (a.y >= this.y && this.y >= b.y));
       }
     
     distanceTo(other) {

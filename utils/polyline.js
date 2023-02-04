@@ -134,7 +134,7 @@ export class polyline {
 
   static perpendicularVector(line) {
     let pl = new polyline(line);
-    console.log(polyline.angle(line));
+    //console.log(polyline.angle(line));
     let vl = [line[1][0] - line[0][0], line[1][1] - line[0][1]];
     let d = pl.points[0].distanceTo(pl.points[1]);
     let rl = pl.rotate(line[0], -90).toLines()[0];

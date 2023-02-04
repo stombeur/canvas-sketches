@@ -33,6 +33,15 @@ export class boundingbox {
         return new polyline(this.points);
     }
 
+    static fromWH(center, width, height, padding = 0) {
+        const pline = new polyline([[center[0]-width/2,center[1]-height/2],
+        [center[0]+width/2,center[1]-height/2],
+        [center[0]+width/2,center[1]+height/2],
+        [center[0]-width/2,center[1]+height/2],]);
+
+        return boundingbox.from(pline, padding);
+    }
+
     static from(pline, padding = 0) {
         if (pline instanceof polyline) { pline = pline.points; }
         
