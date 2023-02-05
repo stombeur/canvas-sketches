@@ -64,6 +64,35 @@ const reorigin = (point, origin) => {
     }
   }
 
+  const prepareColumnsRowsPortrait = (width, height, columns = 2, rows = 2) => {
+    // return a list of { origin, width, height, index }
+    let index = 0;
+    let result = [];
+
+    for (let r = 0; r <= (rows-1); r++) {
+      for (let c = 0; c <= (columns-1); c++) {
+        
+        let posX = c * (width / columns);
+        let posY = r * (height / rows);
+        
+       // f([posX,posY], width/columns, height/rows, {...opt, ...opt2});
+
+        result.push(
+          {
+            index,
+            origin: [posX,posY],
+            width: width / columns,
+            height: height / rows,
+          }
+        );
+
+        index++;
+      }
+    }
+
+    return result;
+  }
+
   const drawColumnsRowsPortrait = (f, width, height, columns = 2, rows = 2, opt = null) => {
     let opt2 = {index:0}
 
@@ -204,3 +233,4 @@ module.exports.drawFourColumnsTwoRowsPortrait = drawFourColumnsTwoRowsPortrait;
 module.exports.drawTwoColumnsFourRowsLandscape = drawTwoColumnsFourRowsLandscape;
 module.exports.drawSixColumnsTwoRowsPortrait = drawSixColumnsTwoRowsPortrait;
 module.exports.drawColumnsRowsPortrait = drawColumnsRowsPortrait;
+module.exports.prepareColumnsRowsPortrait = prepareColumnsRowsPortrait;

@@ -21,6 +21,8 @@ const settings = {
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
+  postcardrows: 2,
+  postcardcolumns: 2,
 };
 
 let paths = [];
@@ -68,7 +70,7 @@ const randomLine = (origin, width, height) => {
 
 
 
-const drawShape = (coords, width, height, nroflines = 4) => {   
+const drawShape = (coords, width, height, card) => {   
     let result = [];
     let center = [coords[0]+width/2, coords[1]+ height/2];
     let w = width/2;
@@ -106,16 +108,15 @@ const drawShape = (coords, width, height, nroflines = 4) => {
      //result.push(createLinePath(l));
     })
 
-    let pad = 15;
-    let bb =  sc.bb(pad);//boundingbox.fromWH(center, width, height);//
+    let bb =  card.lines_bb; //boundingbox.fromWH(center, width*9.5/10, height*9.5/10);
+
+    let lines = card.lines;//Array.from(Array(nroflines)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
+    //let spreads = [width/75, width/75, width/75, width/75, width/75, width/50, width/50, width/30];
+
     let sc_clip = sc.toClipRegion();
-    let bb_zero = [bb.left, bb.top];
-
-  let lines = Array.from(Array(nroflines)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
-
     let sc_clip_split = sc_clip;
     lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l, bb, width/75);
+      sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
     });
 
     sc_clip_split.toLines().forEach(l => {
@@ -168,22 +169,31 @@ const drawShape = (coords, width, height, nroflines = 4) => {
 }
 
 const sketch = ({ width, height }) => {
-  
+    let nroflines = 10;
+    
+    let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
+    cards.forEach(card => {
+        let spreads = [card.width/75, card.width/75, card.width/75, card.width/75, card.width/75, card.width/50, card.width/50, card.width/30];
+        let center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
+        card.lines_bb = boundingbox.fromWH(center, card.width*9.5/10, card.height*9.5/10);
+        card.lines = Array.from(Array(nroflines)).map(x => { return {line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)}});
+    })
 
+    
   return ({ context, width, height, units }) => {
     paths = [];
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
     const draw = (origin, w, h, opts) => {
-        let nroflines = (opts.index+1)*1;
         let localOrigin = postcards.reorigin([0, 0], origin);
 
+        let card = cards.find(c => c.index === opts.index);
 
-        paths.push(... drawShape(localOrigin, w, h, 30));
+        paths.push(... drawShape(localOrigin, w, h, card));
     }
 
-    postcards.drawColumnsRowsPortrait(draw, width, height, 2, 2);
+    postcards.drawColumnsRowsPortrait(draw, width, height, settings.postcardcolumns, settings.postcardrows);
     //postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {

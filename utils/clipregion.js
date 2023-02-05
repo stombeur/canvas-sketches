@@ -150,5 +150,14 @@ export class clipregion {
         let result = [...lines.concat(...this.regions.map(r => new polyline(r).toLines()))];
         return result;
     }
+
+    deepCopy() {
+        let result = new clipregion();
+        result.inverted = this.inverted;
+
+        result.regions = this.regions.map(r => structuredClone(r));
+
+        return result;
+    }
 }
 
