@@ -54,4 +54,13 @@ export class point extends Array {
     distanceTo(other) {
         return Math.hypot(other.x-this.x, other.y-this.y);
     }
+
+    static distanceBetween (p1, p2) {
+
+        if (!p1.x) { p1 = point(p1[0], p1[1]); }
+        if (!p2.x) { p2 = point(p2[0], p2[1]); }
+      
+        let dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
+        return dist;
+      }
 }
