@@ -142,7 +142,8 @@ export class polyline {
     return v;
   }
 
-  
+
+ // get perpendicular point from C -> AB
  static getSpPoint(A,B,C){
     if (!A.x) A = new point(...A);
     if (!B.x) B = new point(...B);

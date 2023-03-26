@@ -29,7 +29,7 @@ const sketch = ({ width, height }) => {
 
     //paths.push(createQuadraticBezierPath(s, e, c1))
 
-    let p = findTangentialControlPoint(c2, e, 0.4);
+    let p = findTangentialControlPoint(c2, e, 0.8);
     console.log(p)
     paths.push(createLinePath([c2, p]))
 

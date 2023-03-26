@@ -1,4 +1,5 @@
 const poly = require('./poly');
+const { createLinePath } = require('./paths.js');
 
 const reorigin = (point, origin) => {
     x = point.x || point[0];
@@ -107,6 +108,20 @@ const reorigin = (point, origin) => {
     }
   }
 
+  const drawColumnsRowsLandscape = (f, width, height,  columns = 2, rows = 2, opt = null) => {
+    let opt2 = {index:0}
+
+    for (let r = 0; r <= (rows-1); r++) {
+      for (let c = 0; c <= (columns-1); c++) {
+        let posX = c * (width / columns);
+        let posY = r * (height / rows);
+        
+        f([posX,posY], width/columns, height/rows, {...opt, ...opt2});
+        opt2.index++;
+      }
+    }
+  }
+
   const drawTwoColumnsFourRowsLandscape = (f, width, height, opt = null) => {
     let opt2 = {index:0}
 
@@ -180,6 +195,52 @@ const reorigin = (point, origin) => {
     ctx.lineTo(...l2[1]);
   }
 
+  const drawCutlines = (width, height, rows, columns) => {
+    let l = width / 100;
+    let paths = [];
+
+    // add corners first
+    paths.push(createLinePath([[0,0],[0, l]]));
+    paths.push(createLinePath([[0,0],[l, 0]]));
+
+    paths.push(createLinePath([[width,0],[width, l]]));
+    paths.push(createLinePath([[width,0],[width-l, 0]]));
+
+    paths.push(createLinePath([[0,height],[0, height-l]]));
+    paths.push(createLinePath([[0,height],[l, height]]));
+
+    paths.push(createLinePath([[width,height],[width, height-l]]));
+    paths.push(createLinePath([[width,height],[width-l, height]]));
+
+    //left
+    let h = height/rows;
+    for (let i = 1; i < rows; i++) {
+      paths.push(createLinePath([[0,h*i],[l, h*i]]));
+      paths.push(createLinePath([[0,h*i - l],[0, h*i + l]]));
+    }
+
+    //right
+    for (let i = 1; i < rows; i++) {
+      paths.push(createLinePath([[width,h*i],[width-l, h*i]]));
+      paths.push(createLinePath([[width,h*i - l],[width, h*i + l]]));
+    }
+
+    //top
+    let w = width/columns;
+    for (let i = 1; i < columns; i++) {
+      paths.push(createLinePath([[w*i, 0],[w*i, l]]));
+      paths.push(createLinePath([[w*i - l,0],[w*i + l, 0]]));
+    }
+
+    //bottom
+    for (let i = 1; i < columns; i++) {
+      paths.push(createLinePath([[w*i, height],[w*i, height - l]]));
+      paths.push(createLinePath([[w*i - l,height],[w*i + l, height]]));
+    }
+
+    return paths;
+  }
+
   const drawQuadAddressLines = (ctx, width, height) => {
     // hor lijn dwars = 4/7
     // adreslijnen = 3/5 van deel 3/7
@@ -234,3 +295,5 @@ module.exports.drawTwoColumnsFourRowsLandscape = drawTwoColumnsFourRowsLandscape
 module.exports.drawSixColumnsTwoRowsPortrait = drawSixColumnsTwoRowsPortrait;
 module.exports.drawColumnsRowsPortrait = drawColumnsRowsPortrait;
 module.exports.prepareColumnsRowsPortrait = prepareColumnsRowsPortrait;
+module.exports.drawColumnsRowsLandscape = drawColumnsRowsLandscape;
+module.exports.drawCutlines = drawCutlines;

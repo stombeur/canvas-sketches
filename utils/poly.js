@@ -524,6 +524,17 @@ const findCircleLineIntersectionsP = (r, c, line) => {
             .map(xInt => {return point(xInt[0], (m*xInt + n))});
 }
 
+const findCircleLineIntersections2 = (r, c, line) => {
+  let h = c.x || c[0],
+      k = c.y || c[1],
+      eq = lineEquationFromPoints(line[0], line[1]),
+      m = eq.m,
+      n = eq.n;
+
+  return findCircleLineIntersections(r,h,k,m,n)
+            .map(xInt => {return [xInt[0], (m*xInt + n)]});
+}
+
 
 const findCircleLineIntersectionsWithY = (r, h, k, m, n) => {
   let x = findCircleLineIntersections(r, h, k, m, n);
@@ -897,6 +908,21 @@ const intersection = (x0, y0, r0, x1, y1, r1) => {
   return [xi, xi_prime, yi, yi_prime];
 }
 
+//calculate the angle between three points
+function calculateAngle(ax, ay, bx, by, cx, cy) {
+  const angleA = Math.atan2(ay - cy, ax - cx);
+  const angleB = Math.atan2(by - cy, bx - cx);
+  let angle = angleB - angleA;
+  // if (angle >= Math.PI) {
+  //   return angle - 2 * Math.PI;
+  // } else if (angle < -Math.PI) {
+  //   return angle + 2 * Math.PI;
+  // }
+
+  if (angle < 0) angle = angle + 2 * Math.PI;
+  return angle;
+}
+
 let poly = init;
 module.exports = poly;
 module.exports.default = poly;
@@ -924,6 +950,7 @@ poly.createSquarePolygon = createSquarePolygon;
 poly.lineEquationFromPoints = lineEquationFromPoints;
 poly.findCircleLineIntersections = findCircleLineIntersections;
 poly.findCircleLineIntersectionsP = findCircleLineIntersectionsP;
+poly.findCircleLineIntersections2 = findCircleLineIntersections2;
 poly.findCircleLineIntersectionsWithY = findCircleLineIntersectionsWithY;
 poly.hatchCircle = hatchCircle;
 poly.hatchDonut = hatchDonut;
@@ -944,3 +971,4 @@ poly.movePoint = movePoint;
 poly.movePoly = movePoly;
 poly.createVector = createVector;
 poly.intersection = intersection;
+poly.calculateAngle = calculateAngle;

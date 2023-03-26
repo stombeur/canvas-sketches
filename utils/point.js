@@ -40,6 +40,11 @@ export class point extends Array {
         return new point(this[0] + moveX, this[1] + moveY);
     }
 
+    move(moveX = 0, moveY = 0) {
+        this[0] = this[0] + moveX;
+        this[1] = this[1] + moveY;
+    }
+
     isBetween(a, b) {
         if (!a.x) { a = new point(a[0], a[1]); }
         if (!b.x) { b = new point(b[0], b[1]); }

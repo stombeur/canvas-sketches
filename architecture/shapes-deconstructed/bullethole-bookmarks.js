@@ -23,7 +23,7 @@ const settings = {
   //scaleToView: true,
   units: 'mm',
   postcardrows: 2,
-  postcardcolumns: 2,
+  postcardcolumns: 4,
 };
 
 let paths1 = [];
@@ -96,9 +96,9 @@ const randomLine = (origin, width, height) => {
 
 
 const drawShape = (width, height, card, pathsNormal, pathsThin) => {   
-    let rect_height = height*3/20;
+    let rect_height = height*2.9/20;
     let offset = width/100;
-    let rect_width = width*3.5/5;
+    let rect_width = width*2/5;
 
     let p_center = new point(... card.center);
     let rect0 = new polyline(boundingbox.fromWH(p_center.copy(-offset, -rect_height*2.5 + 10), rect_width, rect_height).points).rotate(p_center, -3);
@@ -127,13 +127,20 @@ const drawShape = (width, height, card, pathsNormal, pathsThin) => {
     let linehole = [[-width,bulletholecenter[1]],[width*2, bulletholecenter[1]]];
 
 
+
+    
+
+    //  sc_clip_split = sc_clip_split.split(linehole, card.lines_bb, 5);
+    // sc_clip_split = sc_clip_split.subtract(new clipregion(bulletholeOutside));
+    // sc_clip_split.addRegion(bulletholeInside);
+
+
     for (let i = 1; i < card.hole.nroflines; i++) {
       let a = i * card.hole.angles[i];
       let l = linehole.map(p => {
         return new point(...p).rotate(bulletholecenter, a);
        });
        sc_clip_split = sc_clip_split.split(l, card.lines_bb, card.hole.spreads[i]);
-       //first split, we use the holes
        if (i === 1) {
         sc_clip_split = sc_clip_split.subtract(new clipregion(bulletholeOutside));
         sc_clip_split.addRegion(bulletholeInside);
@@ -144,15 +151,15 @@ const drawShape = (width, height, card, pathsNormal, pathsThin) => {
       sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
     });
 
-    // clip everything outside the page (but take 1pct for postcards)
-    sc_clip_split = boundingbox.fromWH(p_center, width*0.99, height*0.99)
-    .toClipRegion()
-    .intersect(sc_clip_split)
+    
+
+    sc_clip_split = boundingbox.fromWH(p_center, width, height)
+                                .toClipRegion()
+                                .intersect(sc_clip_split)
 
     sc_clip_split.toLines().forEach(l => {
-    pathsThin.push(createLinePath(l));
+      pathsThin.push(createLinePath(l));
     });
-
     
     let hatchregions = original.move([3,3]).subtract(sc_clip_split);
     for (let i = 0; i < hatchregions.regions.length; i++) {
@@ -164,17 +171,19 @@ const drawShape = (width, height, card, pathsNormal, pathsThin) => {
         pathsNormal.push(createLinePath(l));
       });
     }
+
+    
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 16;
+    let nroflines = 12;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
-        let spreads = [card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30];
+        let spreads = [card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30,card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30,card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30,card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30];
 
         card.center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
-        card.lines_bb = boundingbox.fromWH(card.center, card.width*1.2, card.height*1.2);
+        card.lines_bb = boundingbox.fromWH(card.center, card.width*1.5, card.height*1.5);
         card.lines = Array.from(Array(nroflines)).map(x => { return {
           line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), 
           spread: random.pick(spreads)

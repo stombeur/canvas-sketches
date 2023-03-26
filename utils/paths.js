@@ -53,7 +53,7 @@ export const createArcPath = (center, radius, sAngle, eAngle) => {
   export const findTangentialControlPoint = (control, end, factor) => {
     let d = poly.distanceBetween(control, end);
     let controlMirror = poly.rotatePoint(control, end, 180);
-    let control2 = poly.findCircleLineIntersectionsP(Math.abs(d*factor), end, [control, controlMirror]);
+    let control2 = poly.findCircleLineIntersections2(Math.abs(d*factor), end, [control, controlMirror]);
 
     if (factor > 0) {
       if (poly.distanceBetween(control, control2[0]) > d) return control2[0];
