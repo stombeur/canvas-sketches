@@ -43,6 +43,57 @@ export class Shape {
     }
 }
 
+export class TurtleShape extends Shape {
+    static Left = 'L';
+    static Right = 'R';
+    static Down = 'D';
+    static Up = 'U'
+
+    constructor(start, step, path) {
+        super(...TurtleShape.WalkPath(start, step, path));
+    }
+
+    static WalkPath(start, step, path) {
+        let points = [];
+        let first = new point(start[0], start[1]);
+        let next = first.copy();
+        points.push(next);
+
+        for (let i = 0; i < path.length; i++) {
+            const element = path[i];
+            
+            switch (element) {
+                case TurtleShape.Right:
+                    next = next.copy(step, 0);
+                    break;
+                case TurtleShape.Left:
+                    next = next.copy(-step, 0);
+                    break;
+                case TurtleShape.Down:
+                    next = next.copy(0, step);
+                    break;
+                case TurtleShape.Up:
+                    next = next.copy(0, -step);
+                    break;
+                default:
+                    break;
+            }
+            
+            points.push(next);
+
+        }
+
+        let bb = boundingbox.from(new polyline(points));
+        let moveleft = bb.width/2;
+        let moveup = bb.height/2;
+
+        points.forEach(p => p.move(-moveleft, -moveup));
+        return points;
+    }
+
+}
+
+
 export class CompositeShape {
     regions = [];
 
@@ -71,6 +122,51 @@ export class CompositeShape {
 
 
 }
+
+export class FloodfillShape extends CompositeShape {
+    constructor(grid, elementHeight, elementWidth, center) {
+        super();
+        FloodfillShape.createRegions(grid, elementHeight, elementWidth, center).map(r => this.addRegion(r))
+    }
+
+    static createRegions(grid, elementHeight, elementWidth, center) {
+
+        let rows = grid.length;
+        let columns = grid[0].length;
+        let xoffset = center[0] - (elementWidth * columns)/2 , yoffset = center[1] - (elementHeight * rows)/2;
+
+        let regions = [];
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < columns; c++) {
+                if (grid[r][c] < 1) continue;
+                let y = yoffset + r * elementHeight;
+                let x = xoffset + c * elementWidth;
+
+                let points = [];
+                let next = new point(x, y); points.push(next);
+                next = next.copy(elementWidth, 0); points.push(next);
+                next = next.copy(0, elementHeight); points.push(next);
+                next = next.copy(-elementWidth, 0); points.push(next);
+                //next = next.copy(0, -elementHeight); points.push(next);
+
+
+
+                regions.push(points)
+            }         
+        }
+
+        let c = new clipregion(regions[0]);
+        for (let r = 1; r < regions.length; r++) {
+            let d = new clipregion(regions[r]);
+            c = c.add(d);
+        }
+
+        return c.regions;
+    }
+
+}
+
 
 export class SymmetricCross extends Shape {
     constructor(x, y, width, shortSide = width/3) {

@@ -6,7 +6,7 @@ const poly = require("../utils/poly");
 export class polyline {
   constructor(points = null) {
     if (points && Array.isArray(points)) {
-      this.points = points.map((p) => new point(p[0], p[1]));
+      this.points = points.map((p) => p.x ? p : new point(p[0], p[1]));
       //this.points = points.map(p => structuredClone(p))
     }
   }

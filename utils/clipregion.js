@@ -1,5 +1,7 @@
 import { boundingbox } from './boundingbox';
 import { polyline } from './polyline';
+import { point } from "./point";
+
 
 const polybool = require('polybooljs');
 
@@ -81,6 +83,16 @@ export class clipregion {
     move(vector) {
         this.regions = this.regions.map(r => new polyline(r).move(vector).points);
         return this;
+    }
+
+    copy(vector) {
+        
+        let cl = new clipregion()
+        this.regions.forEach(r => {
+            let newr = r.map(p => p.copy(...vector))
+            cl.addRegion(newr)
+        })
+        return cl;
     }
 
     static join(... clipRegions){

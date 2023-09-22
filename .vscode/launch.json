@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "msedge",
+            "name": "http://192.168.123.31:9966/",
+            "request": "launch",
+            "url": "http://192.168.123.31:9966/"
+        }
+    ]
+}
