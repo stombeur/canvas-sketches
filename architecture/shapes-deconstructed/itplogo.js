@@ -18,12 +18,12 @@ import { DoubleCross, DoubleCrossBorder, HH, ITPLogo, RectangularBorder } from '
 const settings = {
   suffix: random.getSeed(),
   dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'portrait',
+  orientation: 'landscape',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  postcardrows: 2,
-  postcardcolumns: 2,
+  postcardrows: 3,
+  postcardcolumns: 6,
 };
 
 let paths1 = [];
@@ -158,7 +158,7 @@ const drawShape = (coords, width, height, card, thinLines, thickLines) => {
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 18; 
+    let nroflines = 10; 
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {

@@ -238,13 +238,14 @@ const reorigin = (point, origin) => {
       paths.push(createLinePath([[w*i - l,height],[w*i + l, height]]));
     }
 
-    //center
+    // crosses
     for (let i = 1; i < columns; i++) {
       for (let j = 1; j < rows; j++) {
-        paths.push(createLinePath([[(w*i)-l,h*j],[(w*i)+l, h*j]]));
-        paths.push(createLinePath([[w*i,h*j - l],[w*i, h*j + l]]));
+        paths.push(createLinePath([[w*i, h*j +l],[w*i, h*j - l]]));
+        paths.push(createLinePath([[w*i - l,h*j],[w*i + l, h*j]]));
       }
     }
+
 
     return paths;
   }
