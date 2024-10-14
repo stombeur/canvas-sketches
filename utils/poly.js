@@ -513,6 +513,53 @@ const lineEquationFromPoints = (p1, p2) => {
   return {m,n};
 }
 
+const splitLine = (p1, p2, divideBy) => {
+  if (!p1.x) { p1 = point(p1[0], p1[1]); }
+  if (!p2.x) { p2 = point(p2[0], p2[1]); }
+  let {m,n} = lineEquationFromPoints(p1, p2);
+
+  let delta_x = p2.x - p1.x;
+  let delta_y = p2.y - p1.y;
+
+  let y_fixed = delta_y === 0;
+  let x_fixed = delta_x === 0;
+
+  let result = [p1];
+
+  // horizontal line
+  if (y_fixed) {
+    let step = delta_x / divideBy;
+    for (let i = 1; i < divideBy; i++) {
+      let i_x = p1.x + step * i;
+      let i_y = p1.y;
+      result.push(point(i_x, i_y));
+    }
+  }
+  // vertical line
+  else if (x_fixed) {
+    let step = delta_y / divideBy;
+    for (let i = 1; i < divideBy; i++) {
+      let i_x = p1.x;
+      let i_y = p1.y + step * i
+      result.push(point(i_x, i_y));
+    }
+  }
+  // normal case
+  else {
+    let step = delta_x / divideBy;
+    for (let i = 1; i < divideBy; i++) {
+      let i_x = p1.x + step * i;
+      let i_y = m * i_x + n;
+      result.push(point(i_x, i_y));
+    }
+  }
+
+
+  result.push(p2);
+
+  return result;
+}
+
 const findCircleLineIntersectionsP = (r, c, line) => {
   let h = c.x || c[0],
       k = c.y || c[1],
@@ -972,3 +1019,4 @@ poly.movePoly = movePoly;
 poly.createVector = createVector;
 poly.intersection = intersection;
 poly.calculateAngle = calculateAngle;
+poly.splitLine = splitLine;

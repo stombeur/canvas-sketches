@@ -3,6 +3,7 @@ const { corners, startAngle, startAngleOpposing } = require('./tiletype-common.j
 const { arc } = require('../utils/arc.js');
 
 export const drawTile = (x, y, side, corner, divide, padding, cutends = false, specialcorner = false) => {
+  console.log('specialcorner - cutends', specialcorner, cutends)
     // corner
     // 0 1
     // 3 2
@@ -48,10 +49,10 @@ export const drawTile = (x, y, side, corner, divide, padding, cutends = false, s
     // starting point circles
     for (let s = 0; s <= divide; s++) {
         if (specialcorner && s === divide) {
-          result.push(createArcPath(center, (s * step) +step, sAngle+8, sAngle+172));
+          result.push(createArcPath(center, (s * step) +step, sAngle+22, sAngle+160));
         }
         else if (cutends && s === divide) {
-          result.push(createArcPath(center, (s * step) +step, sAngle+25, sAngle+155));
+          result.push(createArcPath(center, (s * step) +step, sAngle+40, sAngle+140));
         }
         else {
           result.push(createArcPath(center, (s * step) +step, sAngle, sAngle+180));

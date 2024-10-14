@@ -42,6 +42,18 @@ export class boundingbox {
         return boundingbox.from(pline, padding);
     }
 
+    union(otherbb, padding) {
+         let left = Math.min(this.left, otherbb.left);
+         let top = Math.min(this.top, otherbb.top);
+         let right = Math.max(this.right, otherbb.right);
+         let bottom = Math.max(this.bottom, otherbb.bottom);
+
+        let bb = boundingbox.from([[left, top], [right, top], [right, bottom], [left, bottom]], padding);
+
+        return bb;
+
+    }
+
     static from(pline, padding = 0) {
         if (pline instanceof polyline) { pline = pline.points; }
         

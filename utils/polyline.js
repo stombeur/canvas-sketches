@@ -17,6 +17,10 @@ export class polyline {
     this.points.push(point);
   }
 
+  addAtStart(point) {
+    this.points.splice(0, 0, point);
+  }
+
   rotate(center, angle) {
     let rotatedPoints = this.points.map((p) => {
       let pp = new point(...p);

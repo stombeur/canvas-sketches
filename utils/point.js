@@ -45,6 +45,10 @@ export class point extends Array {
         this[1] = this[1] + moveY;
     }
 
+    equals(other) {
+        return this.isBetween(other, other);
+    }
+
     isBetween(a, b) {
         if (!a.x) { a = new point(a[0], a[1]); }
         if (!b.x) { b = new point(b[0], b[1]); }
@@ -62,10 +66,12 @@ export class point extends Array {
 
     static distanceBetween (p1, p2) {
 
-        if (!p1.x) { p1 = point(p1[0], p1[1]); }
-        if (!p2.x) { p2 = point(p2[0], p2[1]); }
+        if (!p1.x) { p1 = new point(p1[0], p1[1]); }
+        if (!p2.x) { p2 = new point(p2[0], p2[1]); }
       
         let dist = Math.hypot(p2.x-p1.x, p2.y-p1.y);
         return dist;
       }
+
+      
 }

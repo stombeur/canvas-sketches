@@ -607,3 +607,60 @@ export class ITPLogo extends CompositeShape {
 
 
 }
+
+export class ChristmasTree extends CompositeShape {
+    constructor(center, width, height) {
+        super();
+        ChristmasTree.createRegions(center, width, height).map(r => this.addRegion(r))
+    }
+
+    static createRegions(center, width, height) {
+        let regions = [];
+              
+        let points = [];
+        let p = new point(center[0], center[1] - height/2); // top of the tree, middle
+        points.push(p);
+        
+        let trunk_width = height * 1/10;
+        let trunk_height = height * 1/8;
+        let w = width/2 + trunk_width/2;
+        
+        let j = w/6;
+        let d = j * 1/3;
+        
+
+        // sawtooth down right
+        p = p.copy(w/3 +d, height * 5/6 * 1/3); points.push(p);
+        p = p.copy(-j, 0); points.push(p);
+        p = p.copy(w/3 +d, height * 5/6 * 1/3); points.push(p);
+        p = p.copy(-j, 0); points.push(p);
+        p = p.copy(w/3 +d, height * 5/6 * 1/3); points.push(p);
+
+        // go back to the middle, 1/2 of width - 1/12 of height
+        p = p.copy(-width/2 + trunk_width/2, 0); points.push(p);
+
+        //
+        // go down 1/6 of height
+        p = p.copy(0, trunk_height); points.push(p);
+        // go left 1/6 of height
+        p = p.copy(-trunk_width, 0); points.push(p);
+        // go up 1/6 of height
+        p = p.copy(0, -trunk_height); points.push(p);
+
+        // go left to 0
+        p = p.copy(-width/2 + trunk_width/2, 0); points.push(p);
+
+        p = p.copy(w/3 +d, -height * 5/6 * 1/3); points.push(p);
+        p = p.copy(-j, 0); points.push(p);
+        p = p.copy(w/3 +d, -height * 5/6 * 1/3); points.push(p);
+        p = p.copy(-j, 0); points.push(p);
+
+
+        regions.push(points);
+
+
+        return regions;
+    }
+
+
+}

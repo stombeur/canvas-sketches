@@ -6,15 +6,15 @@ const { arc } = require('../utils/arc.js');
 const { createArcPath, createLinePath } = require('../utils/paths.js');
 //const palettes = require('nice-color-palettes');
 const poly = require('../utils/poly.js');
-const postcards = require('../utils/postcards');
-const rnd2 = require('../utils/random');
+const postcards = require('../utils/postcards.js');
+const rnd2 = require('../utils/random.js');
 const { drawTile:draw2QCTile } = require('../tiles/tiletype-two-quarter-circles.js');
 const { drawTile:drawLineTile } = require('../tiles/tiletype-lines.js');
 const { drawTile:drawQCLTile1 } = require('../tiles/tiletype-quarter-circle-line1.js');
 const { drawTile:drawQCLTile2 } = require('../tiles/tiletype-quarter-circle-line2.js');
 const { drawTile:drawQCLTile3 } = require('../tiles/tiletype-quarter-circle-line3.js');
-const { drawTile:draw4QCTile } = require('../tiles/tiletype-four-quarter-circles');
-const { drawTile:drawSideSemiCircle } = require('../tiles/tiletype-side-semicircle.js');
+const { drawTile:draw4QCTile } = require('../tiles/tiletype-four-quarter-circles.js');
+const { drawTile:drawSideSemiCircle } = require('../tiles/tiletype-side-semicircle-bookmarks.js');
 const { drawTile:drawCorner } = require('../tiles/tiletype-side-corner.js');
   
 let paths = [];
@@ -24,14 +24,14 @@ console.log(`seed: ${random.getSeed()}`)
 
 const settings = {
   suffix: `.seed-${random.getSeed()}`,
-  dimensions: 'A4',//[ 2048, 2048 ]
+  dimensions: [ 370, 700 ],
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  divide: 7,
+  divide: 3,
   countX: 5,
-  tiles: [[draw2QCTile, 13],[drawLineTile, 4], [draw4QCTile, 0], [drawQCLTile1, 0], [drawQCLTile2, 0], [drawQCLTile3, 7]],
+  tiles: [[draw2QCTile, 13],[drawLineTile, 0], [draw4QCTile, 0], [drawQCLTile1, 0], [drawQCLTile2, 0], [drawQCLTile3, 0]],
 };
 
 const postcardGrid = { columns: 1, rows: 1};
@@ -65,7 +65,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
       });
     }
   }
-
+  // draw left and right borders
   for (let r = 1; r < rows-1; r++) {
     let left = o[r][0];
     let right = o[r][columns-1];
@@ -74,6 +74,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
     right.drawTile = (x, y, side, rnd, divide, padding) => drawSideSemiCircle(x, y, side, 3, divide, padding, r !== 1 && r !== rows-2, r === rows-2);
   }
 
+  // drawtop and bottom borders
   for (let c = 1; c < columns-1; c++) {
     let top = o[0][c];
     let bottom = o[rows-1][c];

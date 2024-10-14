@@ -12,7 +12,9 @@ export class clipregion {
     }
 
     addRegion(region) {
-        this.regions.push(region);
+        // deep copy region array of arrays
+        let regionCopy = JSON.parse(JSON.stringify(region));
+        this.regions.push(regionCopy);
     }
 
     regions = [];
@@ -48,13 +50,13 @@ export class clipregion {
         return result;
     }
 
-    // union(other) {
-    //     let difference = polybool.union(this, other);
-    //     let result = new clipregion();
-    //     result.regions = difference.regions;
-    //     result.inverted = difference.inverted;
-    //     return result;
-    // }
+    union(other) {
+        let difference = polybool.union(this, other);
+        let result = new clipregion();
+        result.regions = difference.regions;
+        result.inverted = difference.inverted;
+        return result;
+    }
 
     intersect(other) {
         let difference = polybool.intersect(this, other);
@@ -89,7 +91,7 @@ export class clipregion {
         
         let cl = new clipregion()
         this.regions.forEach(r => {
-            let newr = r.map(p => p.copy(...vector))
+            let newr = r.map(p => new point(...p).copy(...vector));
             cl.addRegion(newr)
         })
         return cl;
@@ -170,6 +172,14 @@ export class clipregion {
         result.regions = this.regions.map(r => structuredClone(r));
 
         return result;
+    }
+
+    bb(padding = 0) {
+        return boundingbox.from(this.regions.flat(), padding);
+    }
+
+    toPoints() {
+        return this.regions.flat();
     }
 }
 
