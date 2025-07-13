@@ -162,8 +162,8 @@ const drawShape = (coords, width, height, card, thinLines, thickLines, shapegrid
 const sketch = ({ width, height }) => {
     let nroflines = 10; 
 
-    let rows = 4;
-    let columns = 4;
+    let rows = 16;
+    let columns = 16;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {

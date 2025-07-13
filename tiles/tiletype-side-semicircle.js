@@ -48,10 +48,10 @@ export const drawTile = (x, y, side, corner, divide, padding, cutends = false, s
     // starting point circles
     for (let s = 0; s <= divide; s++) {
         if (specialcorner && s === divide) {
-          result.push(createArcPath(center, (s * step) +step, sAngle+8, sAngle+172));
+          result.push(createArcPath(center, (s * step) +step, sAngle+12, sAngle+168));
         }
         else if (cutends && s === divide) {
-          result.push(createArcPath(center, (s * step) +step, sAngle+25, sAngle+155));
+          result.push(createArcPath(center, (s * step) +step, sAngle+29, sAngle+151));
         }
         else {
           result.push(createArcPath(center, (s * step) +step, sAngle, sAngle+180));

@@ -258,6 +258,7 @@ export class DoubleCross extends Shape {
     static calculatePoints(center, width, height, thickness = width/2) {
         let points = [];
         let start = new point(center[0] - thickness/2, center[1]);
+        let w = width;
 
         /* start (anti-clockwise)
                     + +
@@ -308,13 +309,13 @@ export class DoubleCross extends Shape {
         next = next.copy(0, -thickness * 2);
         points.push(next);
 
-        next = next.copy(-thickness/2 + width/1.8, 0);
+        next = next.copy(-thickness/2 + w, 0);
         points.push(next);
 
         next = next.copy(0, -thickness);
         points.push(next);
 
-        next = next.copy(thickness/2 - width/1.8, 0);
+        next = next.copy(thickness/2 - w, 0);
         points.push(next);
 
         next = next.copy(0, -thickness*4);
@@ -326,13 +327,13 @@ export class DoubleCross extends Shape {
         next = next.copy(0, thickness*4);
         points.push(next);
 
-        next = next.copy(thickness/2 - width/1.8, 0);
+        next = next.copy(thickness/2 - w, 0);
         points.push(next);
 
         next = next.copy(0, thickness);
         points.push(next);
 
-        next = next.copy(-thickness/2 + width/1.8, 0);
+        next = next.copy(-thickness/2 + w, 0);
         points.push(next);
 
         next = next.copy(0, thickness);
@@ -663,4 +664,47 @@ export class ChristmasTree extends CompositeShape {
     }
 
 
+    
+}
+
+export class GradientLines extends CompositeShape {
+    constructor(center, width, height, steps = 20) {
+        super();
+        GradientLines.createRegions(center, width, height, steps).map(r => this.addRegion(r))
+    }
+
+    static createRegions(center, width, height, steps) {
+        let regions = [];
+    
+        let partwidths = [];
+        let lastpartwidth = width / (steps *(steps+1)/2) /2;
+
+        let gap = lastpartwidth*steps;
+
+        for (let i = 0; i < steps; i++) {
+            let partwidth = lastpartwidth * (steps - i);
+            partwidths.push(partwidth);
+        }
+
+        let position = center[0] - width/2;
+
+        partwidths.forEach((partwidth, i) => { 
+            let points = [];
+            
+            let p = new point(position, center[1] - height/2);
+            points.push(p);
+            p = p.copy(partwidth, 0);
+            points.push(p);
+            p = p.copy(0, height);
+            points.push(p);
+            p = p.copy(-partwidth, 0);
+            points.push(p);
+
+            regions.push(points);
+
+            position += partwidth + gap;
+        });
+
+        return regions;
+    }
 }

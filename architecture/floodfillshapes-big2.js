@@ -1,19 +1,20 @@
 const canvasSketch = require('canvas-sketch');
 const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
-const { arc } = require('../../utils/arc.js');
-const { createLinePath } = require('../../utils/paths.js');
+const { arc } = require('../utils/arc.js');
+const { createLinePath } = require('../utils/paths.js');
 //const palettes = require('nice-color-palettes');
-const poly = require('../../utils/poly.js');
-const postcards = require('../../utils/postcards');
-const rnd2 = require('../../utils/random');
-const { point } = require('../../utils/point');
-const { polyline } = require('../../utils/polyline.js');
+const poly = require('../utils/poly.js');
+const postcards = require('../utils/postcards.js');
+const rnd2 = require('../utils/random.js');
+const { point } = require('../utils/point.js');
+const { polyline } = require('../utils/polyline.js');
 import { boundingBox } from '@lnjs/core/lib/path';
-import { boundingbox } from '../../utils/boundingbox';
-import { clipregion } from '../../utils/clipregion';
-import { hatch } from '../../utils/hatch';
-import { DoubleCross, DoubleCrossBorder, RectangularBorder } from '../shape';
+import { boundingbox } from '../utils/boundingbox.js';
+import { clipregion } from '../utils/clipregion.js';
+import { hatch } from '../utils/hatch.js';
+import { DoubleCross, DoubleCrossBorder, FloodfillShape, HH, ITPLogo, RectangularBorder, TurtleShape } from './shape.js';
+const floodfill = require('../utils/floodfill.js');
 
 const settings = {
   suffix: random.getSeed(),
@@ -95,23 +96,23 @@ const randomLine = (origin, width, height) => {
 
 
 
-const drawShape = (coords, width, height, card, thinLines, thickLines) => {   
+const drawShape = (coords, width, height, card, thinLines, thickLines, shapegrid, split = false) => {   
     let center = [coords[0]+width/2, coords[1]+ height/2];
-    let w = width/2;
-    let h = height/2;
+    let p_center = new point(... center);
 
-    let sc = new DoubleCross(center, w, height/1.5, width / 12); 
+    let elementSize = Math.min(width, height) / Math.max(card.rows, card.columns);
 
+    let sc = new FloodfillShape(shapegrid, elementSize, elementSize, center);
+    let sc_clip = sc.toClipRegion().copy([0,0]);
+    let sc_clip_split = sc_clip;
 
-      let bulletholecenter = card.center;
+    if (split) {
+      let bulletholecenter = card.center; //[card.center[0]+width/2, card.center[1]];
 
       let bullethole = randomHoles(bulletholecenter, width/20, card);
       let bulletholeOutside = bullethole[0];
       let bulletholeInside = bullethole[1];
       let linehole = [[-width,bulletholecenter[1]],[width*2, bulletholecenter[1]]];
-
-      let sc_clip = sc.toClipRegion();
-      let sc_clip_split = sc_clip;
 
       for (let i = 1; i < card.hole.nroflines; i++) {
         let a = i * card.hole.angles[i];
@@ -121,7 +122,7 @@ const drawShape = (coords, width, height, card, thinLines, thickLines) => {
          sc_clip_split = sc_clip_split.split(l, card.lines_bb, card.hole.spreads[i]);
          if (i === 1) {
           sc_clip_split = sc_clip_split.subtract(new clipregion(bulletholeOutside));
-          sc_clip_split.addRegion(bulletholeInside);
+          //sc_clip_split.addRegion(bulletholeInside);
          }
       }
 
@@ -132,33 +133,44 @@ const drawShape = (coords, width, height, card, thinLines, thickLines) => {
       sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
     });
 
+    sc_clip_split = boundingbox.fromWH(p_center, width*2, height)
+                                .toClipRegion()
+                                .intersect(sc_clip_split)
+
     sc_clip_split.toLines().forEach(l => {
         thickLines.push(createLinePath(l));
     });
+  }
 
+  sc_clip_split.toLines().forEach(l => {
+    thickLines.push(createLinePath(l));
+  });
+
+  let hatchregions = sc.toClipRegion().copy([2,2]).subtract(sc_clip_split);
+
+  for (let i = 0; i < hatchregions.regions.length; i++) {
+    const region = hatchregions.regions[i];
+    const otherRegions = hatchregions.regions.slice();
+    otherRegions.splice(i,1);
     
-    let hatchregions = sc.toClipRegion().move([3,3]).subtract(sc_clip_split);
-
-    for (let i = 0; i < hatchregions.regions.length; i++) {
-      const region = hatchregions.regions[i];
-      const otherRegions = hatchregions.regions.slice();
-      otherRegions.splice(i,1);
-      
-      hatch.inside(region, 30, 0.6, otherRegions)?.forEach(l => {
-        thinLines.push(createLinePath(l));
-      });
-    }
+    hatch.inside(region, 30, card.hatchDistance, otherRegions)?.forEach(l => {
+      thinLines.push(createLinePath(l));
+    });
+  }
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 6; 
+    let nroflines = 10; 
+
+    let rows = 16;
+    let columns = 16;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
-        let spreads = [card.width/75, card.width/75, card.width/75, card.width/75, card.width/75, card.width/50, card.width/50, card.width/30];
+        let spreads = [2,2,3,2,4,2,5,2];
         let center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
         card.center = center;
-        card.lines_bb = boundingbox.fromWH(center, card.width*9.5/10, card.height*9.5/10);
+        card.lines_bb = boundingbox.fromWH(card.center, card.width*1.5, card.height*1.5);
         card.lines = Array.from(Array(nroflines)).map(x => { return {line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)}});
         let nrofsides = random.pick([8,9,10,11]);
         let nroflines_ = Math.floor(nroflines/0.8);
@@ -168,8 +180,14 @@ const sketch = ({ width, height }) => {
           angles: Array.from(Array(nroflines_)).map(i => random.value()*60),
           spreads:  Array.from(Array(nroflines_)).map(i => random.value()*card.width/20),
         }
+        card.hatchDistance = 1;
+        card.rows = 11;
+        card.columns = 9;
+        card.grid = floodfill(rows, columns, {noise2d: false, iterations: 10, removeZeroAdjacents: true, weights: { count2s: 10, countMores: -20, countAdjacent: 20, count0s: -5, count1s: -5 }});
+        console.log(' flood fill ok ')
       })
 
+      
     
   return ({ context, width, height, units }) => {
     paths1 = [];
@@ -178,16 +196,35 @@ const sketch = ({ width, height }) => {
     context.fillRect(0, 0, width, height);
 
     const draw = (origin, w, h, opts) => {
-        let localOrigin = postcards.reorigin([0, 0], origin);
+      let card = cards.find(c => c.index === opts.index);
 
-        let card = cards.find(c => c.index === opts.index);
-        drawShape(localOrigin, w, h, card, paths1, paths2);
+      let shapegrid = [];
+      for (let r = 0; r < card.rows; r++) {
+          let row = [];
+          for (let c = 0; c < card.columns; c++) {
+              row.push(card.grid[r][c][0]);
+          }
+          shapegrid.push(row);
+      }
+
+      // draw single non-split
+      drawShape(origin, w, h, card, paths1, paths2, shapegrid);
+
+      // // draw original left
+      // let localOrigin = postcards.reorigin([0, 0], origin);
+      // drawShape(localOrigin, w/2, h, card, paths1, paths2, shapegrid);
+
+      // // draw split rigth
+      // let localOrigin2 = postcards.reorigin([w/2, 0], origin);
+      // drawShape(localOrigin2, w/2, h, card, paths1, paths2, shapegrid, true);     
     }
 
-    postcards.drawColumnsRowsPortrait(draw, width, height, settings.postcardcolumns, settings.postcardrows);
+    postcards.drawColumnsRowsLandscape(draw, width, height, settings.postcardcolumns, settings.postcardrows);
+    let paths3 = postcards.drawCutlines(width, height, settings.postcardrows, settings.postcardcolumns);
 
-    return renderGroups([paths1, paths2], {
-      context, width, height, units, groupnames: ['thin', 'normal']
+
+    return renderGroups([paths1, paths2, paths3], {
+      context, width, height, units, groupnames: ['thin', 'normal', 'cutlines']
     });
   };
 };

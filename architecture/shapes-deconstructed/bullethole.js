@@ -22,8 +22,8 @@ const settings = {
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  postcardrows: 2,
-  postcardcolumns: 2,
+  postcardrows: 1,
+  postcardcolumns: 1,
 };
 
 let paths1 = [];
@@ -97,7 +97,7 @@ const randomLine = (origin, width, height) => {
 
 const drawShape = (width, height, card, pathsNormal, pathsThin) => {   
     let rect_height = height*3/20;
-    let offset = width/100;
+    let offset = width/120;
     let rect_width = width*3.5/5;
 
     let p_center = new point(... card.center);
@@ -167,11 +167,11 @@ const drawShape = (width, height, card, pathsNormal, pathsThin) => {
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 16;
+    let nroflines = 12;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
-        let spreads = [card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30];
+        let spreads = [card.width/100,card.width/150,card.width/100,card.width/150,card.width/100,card.width/150,card.width/100,card.width/150];//[card.width/75, card.width/74, card.width/75, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30];
 
         card.center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
         card.lines_bb = boundingbox.fromWH(card.center, card.width*1.2, card.height*1.2);

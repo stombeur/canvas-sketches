@@ -1,5 +1,6 @@
 const poly = require('./poly');
 const { createLinePath } = require('./paths.js');
+const { random } = require('canvas-sketch-util');
 
 const reorigin = (point, origin) => {
     x = point.x || point[0];
@@ -80,6 +81,7 @@ const reorigin = (point, origin) => {
 
         result.push(
           {
+            seed: random.getRandomSeed(),
             index,
             origin: [posX,posY],
             width: width / columns,
@@ -120,6 +122,30 @@ const reorigin = (point, origin) => {
         opt2.index++;
       }
     }
+  }
+
+  const addSeedText = (width, height, columns = 2, rows = 2, opt = null) => {
+    console.log(width, height, columns, rows, opt);
+    opt = {fontsize: 3,...opt};
+    let i = 0;
+    let result = [];
+    for (let r = 0; r <= (rows-1); r++) {
+      for (let c = 0; c <= (columns-1); c++) {
+        let posX = c * (width / columns);
+        let posY = (r+1) * (height / rows);
+
+        let seed = opt.seeds[i];
+        
+        result.push({
+          pos: [posX,posY],
+          text: "" + seed,
+          fontsize: opt.fontsize,
+        });
+        i++;
+      }
+    }
+
+    return result;
   }
 
   const drawTwoColumnsFourRowsLandscape = (f, width, height, opt = null) => {
@@ -306,3 +332,4 @@ module.exports.drawColumnsRowsPortrait = drawColumnsRowsPortrait;
 module.exports.prepareColumnsRowsPortrait = prepareColumnsRowsPortrait;
 module.exports.drawColumnsRowsLandscape = drawColumnsRowsLandscape;
 module.exports.drawCutlines = drawCutlines;
+module.exports.addSeedText = addSeedText;

@@ -14,7 +14,7 @@ import { boundingbox } from '../utils/boundingbox';
 import { clipregion } from '../utils/clipregion';
 import { hatch } from '../utils/hatch';
 import { DoubleCross, DoubleCrossBorder, FloodfillShape, HH, ITPLogo, RectangularBorder, TurtleShape } from './shape';
-const snakefill = require('../utils/snakefill.js');
+const snake = require('../utils/snakefill.js');
 
 const settings = {
   suffix: random.getSeed(),
@@ -180,7 +180,7 @@ const sketch = ({ width, height }) => {
           angles: Array.from(Array(nroflines_)).map(i => random.value()*60),
           spreads:  Array.from(Array(nroflines_)).map(i => random.value()*card.width/20),
         }
-        card.grid = snakefill(rows, columns, {iterations: 70 });
+        card.grid = snake.snakefill(rows, columns, {iterations: 70 });
         console.log(' flood fill ok ')
       })
 

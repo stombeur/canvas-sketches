@@ -27,7 +27,7 @@ const sketch = ({ width, height }) => {
   paths = [];
   hatches = [];
   
-  const countX = 10;
+  const countX = 32;
   const countY = Math.floor(countX / width * height);
 
   const skew = (point, skew, skewX, skewY) => {
@@ -55,7 +55,7 @@ const sketch = ({ width, height }) => {
         const u = x / (countX - 1);
         const v = y / (countY - 1);
         const position = [ u, v ];
-        const noise = random.noise2D(u,v) * 0.8;//random.gaussian(0.25, 0.28) //
+        const noise = random.noise2D(u,v) * 0.95;//random.gaussian(0.25, 0.28) //
         const positionSkewed = skew(position, noise,  noise / countX, noise / countY);
         points.push({
           position: positionSkewed,

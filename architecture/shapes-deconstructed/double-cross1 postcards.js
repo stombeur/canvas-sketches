@@ -180,10 +180,10 @@ const sketch = ({ width, height }) => {
         let localOrigin = postcards.reorigin([0, 0], origin);
 
 
-        paths.push(... drawShape(localOrigin, w, h, 18));
+        paths.push(... drawShape(localOrigin, w, h, 30));
     }
 
-    postcards.drawColumnsRowsPortrait(draw, width, height, 1, 1);
+    postcards.drawColumnsRowsPortrait(draw, width, height, 2, 2);
     //postcards.drawSingle(draw, width, height);
 
     return renderPaths(paths, {

@@ -39,7 +39,7 @@ const postcardGrid = { columns: 1, rows: 1};
 const createGrid = (columns, rows, w, h, marginX) => {
   let o = [];
   let side = (w - (marginX*2))/columns;
-  let marginY = (h - (side*rows))/2;
+  let marginY = 0 //(h - (side*rows))/2;
   let start = [marginX, marginY];
 
   let weightedArray = [];
@@ -101,7 +101,7 @@ const sketch = ({ width, height }) => {
   //tile grid
   const countX = settings.countX;
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
-  const margin = cardWidth * 0.013;
+  const margin = 0; //cardWidth * 0.013;
 
   const grids = [];
   for (let i = 0; i < postcardGrid.columns*postcardGrid.rows; i++) {

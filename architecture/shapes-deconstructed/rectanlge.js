@@ -21,8 +21,8 @@ const settings = {
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  postcardrows: 2,
-  postcardcolumns: 2,
+  postcardrows: 1,
+  postcardcolumns: 1,
 };
 
 let paths = [];

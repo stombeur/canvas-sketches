@@ -13,7 +13,7 @@ import { boundingBox } from '@lnjs/core/lib/path';
 import { boundingbox } from '../../utils/boundingbox.js';
 import { clipregion } from '../../utils/clipregion.js';
 import { hatch } from '../../utils/hatch.js';
-import { ChristmasTree } from '../shape.js';
+import { ChristmasTree, DoubleCross, GradientLines, House } from '../shape.js';
 
 const settings = {
   suffix: random.getSeed(),
@@ -76,29 +76,36 @@ const drawShape = (coords, width, height, card, thinLines, thickLines) => {
     let h = height/1.5;
     //let p_center = new point(... card.center);
 
-    let sc = new ChristmasTree(center, w, h);
-    let sc_clip = sc.toClipRegion();
+    let grad = new GradientLines(center, w, h, 20);
+    let sc_grad = grad.toClipRegion();
 
-    let pad = w;
-    let bb = sc.bb(pad);
+    let cross = new DoubleCross(center, w, h, w/10);
+    let sc_cross = cross.toClipRegion();
+
+    let house = new House(center[0], center[1], w, h, w/10);
+    let sc_house = house.toClipRegion();
+
+    // let pad = w;
+    // let bb = sc.bb(pad);
    // let bb_zero = [bb.left, bb.top];
 
-    let lines = card.lines;//Array.from(Array(20)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
-    console.log(lines)
+    // let lines = card.lines;//Array.from(Array(20)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
+    // console.log(lines)
 
-    let sc_clip_split = sc_clip.move([0,0]);
-    lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
-    });
+    //let sc_clip_split = sc_clip.move([0,0]);
+    let sc_clip = sc_grad.intersect(sc_cross);
+    // lines.forEach(l => {
+    //   sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
+    // });
 
 
     
-    let hatchregions = sc_clip.move([3,3]).subtract(sc_clip_split);
+    let hatchregions = sc_grad.move([0,0]).subtract(sc_clip);
 
-    let finalbb = boundingbox.from(sc_clip_split.toPoints()).union(hatchregions.bb());
+    let finalbb = boundingbox.from(sc_clip.toPoints()).union(hatchregions.bb());
     
     let delta = [center[0]-finalbb.center[0], center[1]-finalbb.center[1]];
-    sc_clip_split.move(delta);
+    sc_clip.move(delta);
     hatchregions.move(delta);
 
 
@@ -107,16 +114,16 @@ const drawShape = (coords, width, height, card, thinLines, thickLines) => {
       const otherRegions = hatchregions.regions.slice();
       otherRegions.splice(i,1);
       
-      hatch.inside(region, 30, 1.2, otherRegions)?.forEach(l => {
+      hatch.inside(region, 30, 1, otherRegions)?.forEach(l => {
         thinLines.push(createLinePath(l));
       });
     }
 
    
 
-  console.log(sc, sc_clip);
-
-  sc_clip_split.toLines().map(l => thickLines.push(createLinePath(l)));
+  //console.log(grad, sc_clip);
+  //sc_grad.toLines().map(l => thickLines.push(createLinePath(l)));
+  sc_clip.toLines().map(l => thickLines.push(createLinePath(l)));
 }
 
 const sketch = ({ width, height }) => {

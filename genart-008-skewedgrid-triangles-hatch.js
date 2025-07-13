@@ -14,7 +14,7 @@ console.log(`seed: ${random.getSeed()}`);
 //880711
 //995935
 
-const skewFactor = 0.5;
+const skewFactor = 0.7;
 
 const paths = [];
 const hatches = [];
@@ -29,7 +29,7 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const countX = 10;
+  const countX = 24;
   const countY = Math.floor(countX / width * height);
 
   const skew = (point, skew, skewX, skewY) => {

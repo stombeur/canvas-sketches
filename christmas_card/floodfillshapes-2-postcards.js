@@ -1,5 +1,5 @@
 const canvasSketch = require('canvas-sketch');
-const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderGroups, renderPaths, createPath, renderGroupsWithText } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
 const { arc } = require('../utils/arc.js');
 const { createLinePath } = require('../utils/paths.js');
@@ -13,18 +13,19 @@ import { boundingBox } from '@lnjs/core/lib/path';
 import { boundingbox } from '../utils/boundingbox';
 import { clipregion } from '../utils/clipregion';
 import { hatch } from '../utils/hatch';
-import { DoubleCross, DoubleCrossBorder, FloodfillShape, HH, ITPLogo, RectangularBorder, TurtleShape } from './shape';
+import { DoubleCross, DoubleCrossBorder, FloodfillShape, HH, ITPLogo, RectangularBorder, TurtleShape } from '../architecture/shape';
+import { merge } from 'canvas-sketch-util/lib/optimize-penplot-paths.js';
 const snake = require('../utils/snakefill.js');
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'portrait',
+  dimensions: 'A3',//[ 2048, 2048 ]
+  orientation: 'landscape',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  postcardrows: 1,
-  postcardcolumns: 1,
+  postcardrows: 2,
+  postcardcolumns: 4,
 };
 
 let paths1 = [];
@@ -102,45 +103,45 @@ const drawShape = (coords, width, height, card, thinLines, thickLines, shapegrid
 
     
 
-    let sc = new FloodfillShape(shapegrid, width/40, width/40, center);
+    let sc = new FloodfillShape(shapegrid, card.elementsize, card.elementsize, center);
     let sc_clip = sc.toClipRegion().copy([0,0]);
     let sc_clip_split = sc_clip;
 
-    if (split) {
-      let bulletholecenter = card.center; //[card.center[0]+width/2, card.center[1]];
+  //   if (split) {
+  //     let bulletholecenter = card.center; //[card.center[0]+width/2, card.center[1]];
 
-      let bullethole = randomHoles(bulletholecenter, width/20, card);
-      let bulletholeOutside = bullethole[0];
-      let bulletholeInside = bullethole[1];
-      let linehole = [[-width,bulletholecenter[1]],[width*2, bulletholecenter[1]]];
+  //     let bullethole = randomHoles(bulletholecenter, width/20, card);
+  //     let bulletholeOutside = bullethole[0];
+  //     let bulletholeInside = bullethole[1];
+  //     let linehole = [[-width,bulletholecenter[1]],[width*2, bulletholecenter[1]]];
 
-      for (let i = 1; i < card.hole.nroflines; i++) {
-        let a = i * card.hole.angles[i];
-        let l = linehole.map(p => {
-          return new point(...p).rotate(bulletholecenter, a);
-         });
-         sc_clip_split = sc_clip_split.split(l, card.lines_bb, card.hole.spreads[i]);
-         if (i === 1) {
-          sc_clip_split = sc_clip_split.subtract(new clipregion(bulletholeOutside));
-          //sc_clip_split.addRegion(bulletholeInside);
-         }
-      }
+  //     for (let i = 1; i < card.hole.nroflines; i++) {
+  //       let a = i * card.hole.angles[i];
+  //       let l = linehole.map(p => {
+  //         return new point(...p).rotate(bulletholecenter, a);
+  //        });
+  //        sc_clip_split = sc_clip_split.split(l, card.lines_bb, card.hole.spreads[i]);
+  //        if (i === 1) {
+  //         sc_clip_split = sc_clip_split.subtract(new clipregion(bulletholeOutside));
+  //         //sc_clip_split.addRegion(bulletholeInside);
+  //        }
+  //     }
 
-    let lines = card.lines;
+  //   let lines = card.lines;
 
     
-    lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
-    });
+  //   lines.forEach(l => {
+  //     sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
+  //   });
 
-    sc_clip_split = boundingbox.fromWH(p_center, width*2, height)
-                                .toClipRegion()
-                                .intersect(sc_clip_split)
+  //   sc_clip_split = boundingbox.fromWH(p_center, width*2, height)
+  //                               .toClipRegion()
+  //                               .intersect(sc_clip_split)
 
-    sc_clip_split.toLines().forEach(l => {
-        thickLines.push(createLinePath(l));
-    });
-  }
+  //   sc_clip_split.toLines().forEach(l => {
+  //       thickLines.push(createLinePath(l));
+  //   });
+  // }
 
   sc_clip_split.toLines().forEach(l => {
     thickLines.push(createLinePath(l));
@@ -160,13 +161,14 @@ const drawShape = (coords, width, height, card, thinLines, thickLines, shapegrid
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 10; 
+    let nroflines = 4; 
 
-    let rows = 55;
-    let columns = 38;
-    
+    let rows = 28;
+    let columns = 20;
+    let aliens = [snake.alien1Grid, snake.alien1Grid, snake.alien3Grid, snake.alien3Grid, snake.alien2Grid];
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
+        random.setSeed(card.seed);
         let spreads = [2,2,3,2,4,2,5,2];
         let center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
         card.center = center;
@@ -178,10 +180,13 @@ const sketch = ({ width, height }) => {
           nrofsides,
           nroflines: nroflines_,
           angles: Array.from(Array(nroflines_)).map(i => random.value()*60),
-          spreads:  Array.from(Array(nroflines_)).map(i => random.value()*card.width/20),
+          spreads:  Array.from(Array(nroflines_)).map(i => random.value()*0),
         }
-        card.grid = snake.snakefill(rows, columns, {iterations: 70 });
-        console.log(' flood fill ok ')
+      
+
+        card.grid = snake.snakefill(rows, columns, {iterations: 30, mergetree: true, othergrid: random.pick(aliens) });
+        card.elementsize = width/(settings.postcardcolumns*(columns+4));
+        
       })
 
       
@@ -194,6 +199,7 @@ const sketch = ({ width, height }) => {
 
     const draw = (origin, w, h, opts) => {
       let card = cards.find(c => c.index === opts.index);
+      random.setSeed(card.seed);
 
       let shapegrid = [];
       for (let r = 0; r < rows; r++) {
@@ -211,17 +217,27 @@ const sketch = ({ width, height }) => {
       // let localOrigin = postcards.reorigin([0, 0], origin);
       // drawShape(localOrigin, w/2, h, card, paths1, paths2, shapegrid);
 
-      // // draw split rigth
+      // // // draw split right
       // let localOrigin2 = postcards.reorigin([w/2, 0], origin);
       // drawShape(localOrigin2, w/2, h, card, paths1, paths2, shapegrid, true);     
     }
 
+    
+
     postcards.drawColumnsRowsLandscape(draw, width, height, settings.postcardcolumns, settings.postcardrows);
     let paths3 = postcards.drawCutlines(width, height, settings.postcardrows, settings.postcardcolumns);
+    let text1 = postcards.addSeedText(width, height, settings.postcardcolumns, settings.postcardrows, {seeds: cards.map(c => c.seed)})
 
+    let groups = [paths1, paths2, paths3];
+    console.log(groups);
 
-    return renderGroups([paths1, paths2, paths3], {
-      context, width, height, units, groupnames: ['thin', 'normal', 'cutlines']
+    return renderGroupsWithText(groups, text1, {
+      context, width, height, units, groupnames: ['thin', 'normal', 'cutlines'], optimize : {
+        sort: true,
+        merge: true,
+        removeDuplicates: true,
+        removeCollinear: true
+      }
     });
   };
 };
