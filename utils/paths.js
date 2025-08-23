@@ -1,4 +1,5 @@
 import poly from './poly';
+import { polyline } from './polyline';
 
 const { createPath } = require('canvas-sketch-util/penplot');
 
@@ -84,7 +85,18 @@ export const createArcPath = (center, radius, sAngle, eAngle) => {
     });
   }
   
-  const drawLineOnCanvas = (ctx, line) => {
+  export const createPolylinePath = (pl) => {
+    return createPath(ctx => {
+      if (!(pl instanceof polyline)) {
+        pl = new polyline(pl)
+      }
+      pl.toLines().forEach(l => {
+        drawLineOnCanvas(ctx, l);
+      });
+    });
+  }
+
+  export const drawLineOnCanvas = (ctx, line) => {
     try {
     //if (!line || line.length === 0 || !line[0] || !line[1]) { return; }
     let x1 = line[0].x  || line[0][0],

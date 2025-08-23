@@ -13,6 +13,7 @@ export class polyline {
 
   points = [];
 
+
   add(point) {
     this.points.push(point);
   }
@@ -45,6 +46,12 @@ export class polyline {
 
   get lastPoint() {
     return this.points[this.points.length - 1];
+  }
+
+  close() {
+    let p = [...this.points];
+    p.push(this.lastPoint);
+    return new polyline(p)
   }
 
   copy() {
