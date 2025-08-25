@@ -8,6 +8,7 @@ const postcards = require('../utils/postcards.js');
 const { point } = require('../utils/point.js');
 const { polyline } = require('../utils/polyline.js');
 const { square } = require('./square.js');
+const { chevron } = require('./chevron.js');
 
 const settings = {
   suffix: random.getSeed(),
@@ -97,9 +98,9 @@ const sketch = ({ width, height }) => {
 
           if ((c+r)%2 === 0) { 
             //console.log(row.noise)
-            let scale = 10*row.noise;
+            let scale = Math.abs(10*row.noise);
             if (seeds && inversenoise) { scale = 1/scale; }
-            let s = square.fromCenter([x,y]).rotate(45).scaleMinMax(scale, dist);
+            let s = chevron.fromCenter([x,y]).rotate(45).scaleMinMax(scale, dist);
             paths1.push(s.draw());
           }
         }

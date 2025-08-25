@@ -2,31 +2,35 @@ import { createLinePath, createPolylinePath } from "../utils/paths";
 import { point } from "../utils/point";
 import { polyline } from "../utils/polyline";
 
-export class square {
+export class chevron {
     points = [];
     side = 1;
 
     constructor(points, side) {
         if(!points) return;
-        if (points.length != 4) throw new Error("a square must have 4 points");
+
         this.points = points;
         this.side = side;
     }
 
     static fromPoints(points) {
-        if (points.length != 4) throw new Error("a square must have 4 points");
+
         
-        let result = new square();
+        let result = new chevron();
         result.points = points;
         return result;
     }
 
     static fromCenter(center) {
-        let result = new square();
-        result.points.push([center[0]-result.side/2, center[1]-result.side/2]);
-        result.points.push([center[0]+result.side/2, center[1]-result.side/2]);
-        result.points.push([center[0]+result.side/2, center[1]+result.side/2]);
-        result.points.push([center[0]-result.side/2, center[1]+result.side/2]);
+        let result = new chevron();
+
+
+        result.points.push([center[0]-result.side/2, center[1]-result.side/2]); // topleft
+        result.points.push([center[0]+result.side/2, center[1]-result.side/2]); // topright
+        result.points.push([center[0]+result.side/2-result.side/3, center[1]]); // inham rechts
+        result.points.push([center[0]+result.side/2, center[1]+result.side/2]); //bottom right
+        result.points.push([center[0]-result.side/2, center[1]+result.side/2]); // bottom left
+        result.points.push([center[0]-result.side/2-result.side/3, center[1]]);
         return result;
     }
 
@@ -45,11 +49,11 @@ export class square {
             newPoints.push(pa);
         });
 
-        return new square(newPoints, Math.cos(s));
+        return new chevron(newPoints, Math.cos(s));
     }
 
     scaleMinMax(s, max) {
-        if (s === 0 || max === 0) return this;
+        if (max === 0) return this;
         let min = -1 * max;
 
         if (s > max) { s = max }
@@ -65,10 +69,10 @@ export class square {
         this.points.forEach(p => {
             newPoints.push(new point(...p).rotate(c, angle));
         });
-        return new square(newPoints, this.side);
+        return new chevron(newPoints, this.side);
     }
 
     center() {
-        return polyline.findIntersection([this.points[0], this.points[2]], [this.points[1], this.points[3]])
+        return polyline.findIntersection([this.points[0], this.points[3]], [this.points[1], this.points[4]])
     }
 }

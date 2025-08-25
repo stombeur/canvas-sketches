@@ -31,7 +31,7 @@ let rows = 85;
 let pathsPerCard = [];
 
 let inversenoise = true;
-let seeds = undefined; //{"seedvalues":["926121","337507","793832","222196","869543","186172","172930","422251"]};
+let seeds = {"seedvalues":["795692","879736","513582","19503","977828","204266","21316","842433"]};
 
 const createGrid = (countX, countY, noiseFactor = 1) => {
     const grid = [];
@@ -98,7 +98,7 @@ const sketch = ({ width, height }) => {
 
           if ((c+r)%2 === 0) { 
             //console.log(row.noise)
-            let scale = 8*row.noise;
+            let scale = 10*row.noise;
             if (seeds && inversenoise) { scale = 1/scale; }
             let s = cross.fromCenter([x,y]).scaleMinMax(scale, dist * 1.15);
             paths1.push(s.draw());
