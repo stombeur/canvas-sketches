@@ -1,6 +1,6 @@
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
-const { renderGroups, renderPaths, createPath } = require('canvas-sketch-util/penplot');
+const { renderGroups, renderPaths, createPath, renderGroupsWithText } = require('canvas-sketch-util/penplot');
 const random = require('canvas-sketch-util/random');
 const { arc } = require('../utils/arc.js');
 const { createArcPath, createLinePath } = require('../utils/paths.js');
@@ -17,24 +17,24 @@ const { drawTile:draw4QCTile } = require('../tiles/tiletype-four-quarter-circles
 const { drawTile:drawSideSemiCircle } = require('../tiles/tiletype-side-semicircle-bookmarks.js');
 const { drawTile:drawCorner } = require('../tiles/tiletype-side-corner.js');
   
-let paths = [];
+let pathsPerCard = [];
 
 random.setSeed(random.getRandomSeed());
 console.log(`seed: ${random.getSeed()}`)
 
 const settings = {
   suffix: `.seed-${random.getSeed()}`,
-  dimensions: [ 370, 700 ],
+  dimensions: 'A4',//[ 370, 700 ],
   orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
-  divide: 3,
+  divide: 5,
   countX: 5,
   tiles: [[draw2QCTile, 13],[drawLineTile, 0], [draw4QCTile, 0], [drawQCLTile1, 0], [drawQCLTile2, 0], [drawQCLTile3, 0]],
 };
 
-const postcardGrid = { columns: 1, rows: 1};
+const postcardGrid = { columns: 4, rows: 2};
 
 const createGrid = (columns, rows, w, h, marginX) => {
   let o = [];
@@ -93,7 +93,7 @@ const createGrid = (columns, rows, w, h, marginX) => {
   o[rows-1][0].drawTile = (x, y, side, rnd, divide, padding) => [];
   o[rows-1][columns-1].drawTile = (x, y, side, rnd, divide, padding) => [];
 
-  return {seed: random.getSeed(), grid: o};
+  return o;
 }
 
 const sketch = ({ width, height }) => {
@@ -104,20 +104,29 @@ const sketch = ({ width, height }) => {
   const countY = Math.floor(cardHeight / Math.floor(cardWidth/countX));
   const margin = cardWidth * 0.013;
 
-  const grids = [];
-  for (let i = 0; i < postcardGrid.columns*postcardGrid.rows; i++) {
-      grids.push(createGrid(countX, countY, cardWidth, cardHeight, margin))
-  }
+  let cards = postcards.prepareColumnsRowsPortrait(width, height, postcardGrid.columns, postcardGrid.rows, undefined);
+       
+    //console.log(cards)
+  cards.forEach(card => {
+      random.setSeed(card.seed);
+      card.grid = createGrid(countX, countY, cardWidth, cardHeight, margin)
+      card.margin = margin
+    })
 
   return ({ context, width, height, units }) => {
-    paths = [];
+    let paths = [];
+    pathsPerCard = [];
+
     context.fillStyle = 'white';//background;
     context.fillRect(0, 0, width, height);
 
     const draw = (origin, w, h, opts) => {
-      this.paths = [];
+      let card = cards.find(c => c.index === opts.index);
+      random.setSeed(card.seed);
 
-      let grid = grids[opts.index].grid;
+      paths = [];
+
+      let grid = card.grid;
 
       let side = (w - (margin*2)) / countX;
       
@@ -131,13 +140,29 @@ const sketch = ({ width, height }) => {
           paths.push(...drawTile(x, y, side, rnd, settings.divide));
         }
       }
+
+      pathsPerCard.push(paths)
     }
 
     postcards.drawColumnsRowsPortrait(draw, width, height, postcardGrid.columns, postcardGrid.rows);
-    //postcards.drawSingle(draw, width, height);
+    let cutlinesPerCard = postcards.drawSeparateLayerCutlines(width, height, postcardGrid.rows, postcardGrid.columns);
+    let text1 = postcards.addSeedText(width, height, postcardGrid.columns, postcardGrid.rows, {seeds: cards.map(c => c.seed)})
 
-    return renderPaths(paths, {
-      context, width, height, units
+    let groups = [...cutlinesPerCard, ...pathsPerCard];
+
+    let groupnames = [];
+    cutlinesPerCard.forEach((p, i) => groupnames.push(`${i} cutlines`))
+    let j = groupnames.length;
+    pathsPerCard.forEach((p, i) => groupnames.push(`${i+j} card`))
+    j = groupnames.length;
+
+    return renderGroupsWithText(groups, text1, {
+      context, width, height, units, groupnames, lineWidth: 0.1, optimize : {
+        sort: true,
+        merge: true,
+        removeDuplicates: true,
+        removeCollinear: true
+      }
     });
   };
 };

@@ -22,7 +22,7 @@ const sketch = ({ width, height }) => {
 
     let s = new point(width/4, height/2);
     let e = new point(width*3/4, height/2);
-    let c1 = new point(width/5, height/2.5);
+    let c1 = new point(width/6, height/2.5);
     let c2 = new point(width*4/5, height/4);
 
     paths.push(createCubicBezierPath(s,e, c1, c2));
@@ -33,10 +33,17 @@ const sketch = ({ width, height }) => {
     console.log(p)
     paths.push(createLinePath([c2, p]))
 
-    let e2 = new point(width, height)
-    let c3 = new point(width/2, height)
+    let e2 = new point(width/2, height-height/7)
+    let c3 = new point(10+width/2, height)
 
     paths.push(createCubicBezierPath(e, e2, p, c3))
+
+    
+    let p2 = findTangentialControlPoint(c1, s, 0,8)
+    let p3 = findTangentialControlPoint(c3, e2, 0.8)
+    console.log(p2, p3)
+
+    paths.push(createCubicBezierPath(e2, s, p2, p3))
     
     return renderGroups([paths], {
       context, width, height, units

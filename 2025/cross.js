@@ -5,6 +5,7 @@ import { polyline } from "../utils/polyline";
 export class cross {
     points = [];
     size = 1;
+    index = -1;
 
     constructor(points, size) {
         if(!points) return;
@@ -59,7 +60,7 @@ export class cross {
             newPoints.push(pa);
         });
 
-        return new cross(newPoints, Math.cos(s));
+        return new cross(newPoints, this.size * s);
     }
 
     scaleMinMax(s, max) {

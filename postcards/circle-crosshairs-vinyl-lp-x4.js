@@ -48,14 +48,14 @@ const sketch = ({ width, height }) => {
       for (let j = 1; j < nrOfBands; j++) {
         let rout = rmax / nrOfBands * (j+1);
         let n = Math.abs(random.noise2D(rmax, j))  * 360;
-        let o = random2.getRandomInclusive(1,0.7) * 24;
+        let o = random2.getRandomInclusive(1,0.7) * 47;
 
         drawArc(center, rout, n+o, n)
       }
 
     }
 
-    postcards.drawQuad(draw, width, height);
+    postcards.drawSingle(draw, width, height);
     //drawOct(draw, width, height)
 
     return renderGroups([paths], {

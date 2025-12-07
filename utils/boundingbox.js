@@ -55,8 +55,6 @@ export class boundingbox {
     }
 
     static from(pline, padding = 0) {
-        if (pline instanceof polyline) { pline = pline.points; }
-        
         let bb = new boundingbox();
 
         if (pline instanceof polyline) { pline = pline.points; }

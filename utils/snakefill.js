@@ -66,6 +66,17 @@ const snakefill = (rows, columns,
     return grid;
 }
 
+const invertsnake = (grid) => {
+    for (let i = 0; i < grid.length; i++) {
+        const row = grid[i];
+        for (let j = 0; j < row.length; j++) {
+            const element = row[j];
+            row[j] = element === 1 ? 0 : 1;
+        }
+    }
+    return grid;
+}
+
 const mergegrids = (grid, tree) => {
     let result = [];
 
@@ -199,3 +210,4 @@ module.exports.treeGrid2 = treeGrid2;
 module.exports.alien1Grid = alien1Grid;
 module.exports.alien2Grid = alien2Grid;
 module.exports.alien3Grid = alien3Grid;
+module.exports.invertsnake = invertsnake;

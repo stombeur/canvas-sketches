@@ -12,26 +12,26 @@ const { chevron } = require('./chevron.js');
 
 const settings = {
   suffix: random.getSeed(),
-  dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'portrait',
+  dimensions: [ 180, 140 ], //'A4',//[ 2048, 2048 ]
+  orientation: 'landscape',
   pixelsPerInch: 300,
   //scaleToView: true,
   units: 'mm',
 };
-let postcardrows = 2;
-let postcardcolumns = 4;
-let lineWidth = 0.1;
-let noiseFactor = 0.4;
+let postcardrows = 1;
+let postcardcolumns = 3;
+let lineWidth = 0.5;
+let noiseFactor = 0.12;
 let diamondSpacing = 1.2;
 // grid settings
 let margin = 5;
-let columns = 33;
-let rows = 85;
+let columns = 15;
+let rows = 40;
 
 let pathsPerCard = [];
 
 let inversenoise = true;
-let seeds = {"seedvalues":["926121","337507","793832","222196","869543","186172","172930","422251"]};
+let seeds = {"seedvalues":[  "186172","172930","422251"]};
 
 const createGrid = (countX, countY, noiseFactor = 1) => {
     const grid = [];
@@ -100,7 +100,8 @@ const sketch = ({ width, height }) => {
             //console.log(row.noise)
             let scale = Math.abs(10*row.noise);
             if (seeds && inversenoise) { scale = 1/scale; }
-            let s = chevron.fromCenter([x,y]).rotate(45).scaleMinMax(scale, dist);
+            let s = square.fromCenter([x,y]).rotate(45).scaleMinMax(scale, dist);
+            //let s = chevron.fromCenter([x,y]).rotate(45).scaleMinMax(scale, dist);
             paths1.push(s.draw());
           }
         }
