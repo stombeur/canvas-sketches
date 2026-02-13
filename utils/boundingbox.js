@@ -42,6 +42,15 @@ export class boundingbox {
         return boundingbox.from(pline, padding);
     }
 
+    static fromTopleft(topleft, width, height, padding = 0) {
+        const pline = new polyline([[topleft[0], topleft[1]],
+        [topleft[0]+width, topleft[1]],
+        [topleft[0]+width, topleft[1]+height],
+        [topleft[0], topleft[1]+height],]);
+
+        return boundingbox.from(pline, padding);
+    }
+
     union(otherbb, padding) {
          let left = Math.min(this.left, otherbb.left);
          let top = Math.min(this.top, otherbb.top);

@@ -5,14 +5,16 @@ const { arc } = require('../../utils/arc.js');
 const { createLinePath } = require('../../utils/paths.js');
 //const palettes = require('nice-color-palettes');
 const poly = require('../../utils/poly.js');
-const postcards = require('../../utils/postcards');
-const rnd2 = require('../../utils/random');
-const { point } = require('../../utils/point');
+const postcards = require('../../utils/postcards.js');
+const rnd2 = require('../../utils/random.js');
+const { point } = require('../../utils/point.js');
 const { polyline } = require('../../utils/polyline.js');
 import { boundingBox } from '@lnjs/core/lib/path';
-import { boundingbox } from '../../utils/boundingbox';
-import { hatch } from '../../utils/hatch';
-import { DoubleCross, DoubleCrossBorder, RectangularBorder } from '../shape';
+import { boundingbox } from '../../utils/boundingbox.js';
+import { hatch } from '../../utils/hatch.js';
+import { DoubleCross, DoubleCrossBorder, RectangularBorder } from '../shape.js';
+import { insetPolygon } from '../../utils/polygon.js';
+import { clipregion } from '../../utils/clipregion.js';
 
 const settings = {
   suffix: random.getSeed(),
@@ -26,6 +28,7 @@ const settings = {
 };
 
 let paths = [];
+
 
 const randomLine = (origin, width, height) => {
   let sides = [1,2,3,4];
@@ -72,60 +75,71 @@ const randomLine = (origin, width, height) => {
 
 const drawShape = (coords, width, height, card) => {   
     let result = [];
-    let center = [coords[0]+width/2, coords[1]+ height/2];
-    let w = width/2;
-    let h = height/2;
+    let padleft = 13.5;
+    let padtop = 18.5;
+    let totalwidth = 143;
+    let columngap = 4;
+    let columnheight = 209;
+
+    // total w = 133 gap = 4
+    // h = 175
 
     //let sc = new DoubleCross(center, w, height/1.5, width / 12); 
     //let sc_border = new RectangularBorder(center, width, height, width/10, width/90);
-    let sc = boundingbox.fromWH(center, width*2/5, height*3/5);
+    let sc1 = boundingbox.fromTopleft([padleft,padtop], (totalwidth-columngap)/2, columnheight);
+    let sc2 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop], (totalwidth-columngap)/2, columnheight);
 
-    // sc_border.toLines().forEach(l => {
-    //     result.push(createLinePath(l));
-    //    })
-
-    // hatch.inside(sc_border.points).forEach(l => {
-    //     //result.push(createLinePath(l));
-    // })
+    let sc3 = boundingbox.fromTopleft([padleft,padtop+107], (totalwidth-columngap)/2, 93);
+    let sc4 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop+107], (totalwidth-columngap)/2, 93);
 
 
-    
-    // let borderhatchregions = sc_border.regions;
-    // for (let i = 0; i < borderhatchregions.length; i++) {
-    //     const region = borderhatchregions[i];
-    //     const otherRegions = borderhatchregions.slice();
-    //     otherRegions.splice(i,1);
-        
-    //     hatch.inside(region, 30, 10, otherRegions)?.forEach(l => {
-    //       //result.push(createLinePath(l));
-    //     //   new polyline(l).toDottedLines().forEach(dl => {
-    //     //     result.push(createLinePath(dl));
-    //     //    })
-    //     });
-    //   }
-   
-    
-    // sc.toLines().forEach(l => {
-    //  //result.push(createLinePath(l));
-    // })
+    let sc = new clipregion();
+    sc.addRegion(sc1.points);
+    sc.addRegion(sc2.points);
+
+    let sc_sub = new clipregion();
+    sc_sub.addRegion(sc3.points);
+    sc_sub.addRegion(sc4.points);
+
+    sc = sc.subtract(sc_sub);
 
     let bb =  card.lines_bb; //boundingbox.fromWH(center, width*9.5/10, height*9.5/10);
 
     let lines = card.lines;//Array.from(Array(nroflines)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
     //let spreads = [width/75, width/75, width/75, width/75, width/75, width/50, width/50, width/30];
 
-    let sc_clip = sc.toClipRegion();
-    let sc_clip_split = sc_clip;
+
+    let sc_clip_split = sc;
     lines.forEach(l => {
-      sc_clip_split = sc_clip_split.split(l.line, card.lines_bb, l.spread);
+      sc_clip_split = sc_clip_split.splitNoJoin(l.line, card.lines_bb);
     });
 
-    sc_clip_split.toLines().forEach(l => {
+    let shapes = sc_clip_split.regions;
+    let sc_clip_inset = new clipregion();
+    shapes.forEach(shape => {
+      let insetshape = insetPolygon(shape.map(p => { return {x: p[0], y: p[1]}}), 0.2);
+      insetshape = insetshape.map(p => [p.x, p.y]);
+      //console.log(shape, d, insetshape);
+      new polyline(insetshape).toLines().forEach(l => {
         result.push(createLinePath(l));
+      });
+      sc_clip_inset.addRegion(insetshape);
     });
+    
+
+    // let sc_sub = new clipregion();
+    // sc_sub.addRegion(sc3.points);
+    // sc_sub.addRegion(sc4.points);
+
+    // sc_clip_inset = sc_clip_inset.subtract(sc_sub);
+
+    // sc_clip_inset.toLines().forEach(l => {
+    //     result.push(createLinePath(l));
+    // });
 
     
-    let hatchregions = sc.toClipRegion().move([3,3]).subtract(sc_clip_split);
+    let hatchregions = sc.subtract(sc_clip_inset);
+    //hatchregions = hatchregions.subtract(sc_sub);
 
     //let regionPolylines = hatchregions.regions.map(r => new polyline(r));
     
@@ -141,7 +155,7 @@ const drawShape = (coords, width, height, card) => {
       const otherRegions = hatchregions.regions.slice();
       otherRegions.splice(i,1);
       
-      hatch.inside(region, 30, 1, otherRegions)?.forEach(l => {
+      hatch.inside(region, 30, 0.8, otherRegions)?.forEach(l => {
         result.push(createLinePath(l));
       });
     }
@@ -170,7 +184,7 @@ const drawShape = (coords, width, height, card) => {
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 25;
+    let nroflines = 50;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {

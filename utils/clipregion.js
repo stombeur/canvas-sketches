@@ -1,6 +1,7 @@
 import { boundingbox } from './boundingbox';
 import { polyline } from './polyline';
 import { point } from "./point";
+import { insetPolygon } from './polygon';
 
 
 const polybool = require('polybooljs');
@@ -123,10 +124,66 @@ export class clipregion {
         return clipregion.join(resultLeft, resultRight);
     }
 
-    split(line, bbox, moveMultiplier=1) {
-        
+    splitNoJoin(line, bbox) {
+        let [pline1, pline2] = bbox.bisect(line);
+
+        if (pline1 && pline2) {
+            let region1 = pline1.toClipRegion();
+            let region2 = pline2.toClipRegion();
+
+            let result = new clipregion();
+
+            this.regions.forEach(r => {
+                let c1 = new clipregion(r).diff(region1);
+                let c2 = new clipregion(r).diff(region2);
+                c1.regions.forEach(rg => result.addRegion(rg));
+                c2.regions.forEach(rg => result.addRegion(rg));
+            });
+            return result;
+        }
+        else {
+            return this;
+        }   
+    }
+
+    splitAndCenter(line, bbox, moveMultiplier=0.1) {
+        let center = bbox.center;
+       
+        let [pline1, pline2] = bbox.bisect(line);
+
+        if (pline1 && pline2) {
+            let region1 = pline1.toClipRegion();
+            let centroid1 = pline1.centroid();
+            // vector from centroid to center times moveMultiplier
+            let v1 = [(centroid1.x - center[0])*moveMultiplier , (centroid1.y - center[1])*moveMultiplier];
+            
+            let region2 = pline2.toClipRegion();
+            let centroid2 = pline2.centroid();
+            let v2 = [(centroid2.x - center[0])*moveMultiplier , (centroid2.y - center[1])*moveMultiplier];
+            
+            // let result1 = this.diff(region2).move([-pv[0], -pv[1]]);
+            // let result2 = this.diff(region1).move([pv[0], pv[1]]);
+            let result1 = this.diff(region1).move(v1);
+            let result2 = this.diff(region2).move(v2);
+
+            //console.log(region1, region2, centroid1, centroid2, v1, v2);
+    
+            //return result1.add(result2);
+            return clipregion.join(result1, result2);
+           // return result1.add(result2);
+        }
+        else {
+            return this;
+        }   
+    }
+
+    split(line, bbox, moveMultiplier=1, moveYMultiplier=0) {
+        if (moveYMultiplier === 0) {
+            moveYMultiplier = moveMultiplier;
+        }
+
         let pv = polyline.perpendicularVector(line);
-        pv = [pv[0]*moveMultiplier, pv[1]*moveMultiplier];
+        pv = [pv[0]*moveMultiplier, pv[1]*moveYMultiplier];
        
         let [pline1, pline2] = bbox.bisect(line);
 
@@ -135,13 +192,13 @@ export class clipregion {
             let centroid1 = pline1.centroid();
             let sp1 = polyline.getSpPoint(centroid1, line[0], line[1]);
             let d1 = sp1.distanceTo(centroid1);
-            let v1 = [moveMultiplier*(centroid1.x - sp1.x)/d1 , moveMultiplier*(centroid1.y-sp1.y)/d1];
+            let v1 = [moveMultiplier*(centroid1.x - sp1.x)/d1 , moveYMultiplier*(centroid1.y-sp1.y)/d1];
             
             let region2 = pline2.toClipRegion();
             let centroid2 = pline2.centroid();
             let sp2 = polyline.getSpPoint(centroid2, line[0], line[1]);
             let d2 = sp2.distanceTo(centroid2);
-            let v2 = [moveMultiplier*(centroid2.x-sp2.x)/d2 , moveMultiplier*(centroid2.y-sp2.y)/d2];
+            let v2 = [moveMultiplier*(centroid2.x-sp2.x)/d2 , moveYMultiplier*(centroid2.y-sp2.y)/d2];
 
 
             
