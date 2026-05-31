@@ -107,7 +107,7 @@ const reorigin = (point, origin) => {
       }
     }
 
-    if (!seeds) { seeds = {seedvalues: []}; }
+    if (!seeds || !seeds.seedvalues) { seeds = {seedvalues: []}; }
 
     for (let i = 0; i < result.length; i++) {
       if (seeds.seedvalues.length < result.length || !seeds.seedvalues[i]) { seeds.seedvalues[i] = random.getRandomSeed(); }
@@ -119,6 +119,58 @@ const reorigin = (point, origin) => {
     return result;
   }
 
+const prepareCards = (columns = 2, rows = 2, seeds = undefined) => {
+    let index = 0;
+    let result = [];
+
+    for (let r = 0; r <= (rows-1); r++) {
+      for (let c = 0; c <= (columns-1); c++) {
+
+        result.push(
+          {
+            index
+          }
+        );
+
+        index++;
+      }
+    }
+
+    if (!seeds || !seeds.seedvalues) { seeds = {seedvalues: []}; }
+    for (let i = 0; i < result.length; i++) {
+      if (seeds.seedvalues.length < result.length || !seeds.seedvalues[i]) { seeds.seedvalues[i] = random.getRandomSeed(); }
+      result[i].seed = seeds.seedvalues[i];
+    }
+
+    console.log("seedvalues:", JSON.stringify(seeds.seedvalues));
+
+    return result;
+  }
+
+    const drawCards = (f, width, height, columns = 2, rows = 2, cards) => {
+    let cardIndex = 0;
+
+    for (let r = 0; r <= (rows-1); r++) {
+      for (let c = 0; c <= (columns-1); c++) {
+        let posX = c * (width / columns);
+        let posY = r * (height / rows);
+
+        let card = cards[cardIndex];
+        card.origin = [posX,posY];
+        card.center = [posX+width/columns/2, posY+height/rows/2];
+        card.width = width/columns;
+        card.height = height/rows;
+        card.left = posX;
+        card.right = posX + width/columns;
+        card.top = posY;
+        card.bottom = posY + height/rows;
+
+        f(card);
+        cardIndex++;
+      }
+    }
+  }
+
   const drawColumnsRowsPortrait = (f, width, height, columns = 2, rows = 2, opt = null) => {
     let opt2 = {index:0}
 
@@ -126,6 +178,8 @@ const reorigin = (point, origin) => {
       for (let c = 0; c <= (columns-1); c++) {
         let posX = c * (width / columns);
         let posY = r * (height / rows);
+
+
         
         f([posX,posY], width/columns, height/rows, {...opt, ...opt2});
         opt2.index++;
@@ -148,13 +202,13 @@ const reorigin = (point, origin) => {
   }
 
   const addSeedText = (width, height, columns = 2, rows = 2, opt = null) => {
-    opt = {fontsize: 3,...opt};
+    opt = {fontsize: 3, fontfamily: 'sans-serif', ...opt};
     let i = 0;
     let result = [];
     for (let r = 0; r <= (rows-1); r++) {
       for (let c = 0; c <= (columns-1); c++) {
-        let posX = c * (width / columns);
-        let posY = (r+1) * (height / rows);
+        let posX = (opt.offset || 0) + c * (width / columns);
+        let posY = -(opt.offset || 0) + (r+1) * (height / rows);
 
         let seed = opt.seeds[i];
         
@@ -162,6 +216,7 @@ const reorigin = (point, origin) => {
           pos: [posX,posY],
           text: "" + seed,
           fontsize: opt.fontsize,
+          fontfamily: opt.fontfamily,
         });
         i++;
       }
@@ -169,6 +224,8 @@ const reorigin = (point, origin) => {
 
     return result;
   }
+
+
 
   const drawTwoColumnsFourRowsLandscape = (f, width, height, opt = null) => {
     let opt2 = {index:0}
@@ -243,28 +300,33 @@ const reorigin = (point, origin) => {
     ctx.lineTo(...l2[1]);
   }
 
-  const drawCutlines = (width, height, rows, columns) => {
-    let l = width / 100;
+  const drawCutlines = (input_width, input_height, rows, columns, offset = 0.1) => {
+    let l = input_width / 100;
     let paths = [];
 
+    let width = input_width - offset;
+    let height = input_height - offset;
+
+    let z = offset;
+
     // add corners first
-    paths.push(createLinePath([[0,0],[0, l]]));
-    paths.push(createLinePath([[0,0],[l, 0]]));
+    paths.push(createLinePath([[z,z],[z, l+z]]));
+    paths.push(createLinePath([[z,z],[l+z, z]]));
 
-    paths.push(createLinePath([[width,0],[width, l]]));
-    paths.push(createLinePath([[width,0],[width-l, 0]]));
+    paths.push(createLinePath([[width,z],[width, l+z]]));
+    paths.push(createLinePath([[width,z],[width-l, z]]));
 
-    paths.push(createLinePath([[0,height],[0, height-l]]));
-    paths.push(createLinePath([[0,height],[l, height]]));
+    paths.push(createLinePath([[z,height],[z, height-l]]));
+    paths.push(createLinePath([[z,height],[l, height]]));
 
     paths.push(createLinePath([[width,height],[width, height-l]]));
     paths.push(createLinePath([[width,height],[width-l, height]]));
 
     //left
-    let h = height/rows;
+    let h = input_height/rows;
     for (let i = 1; i < rows; i++) {
-      paths.push(createLinePath([[0,h*i],[l, h*i]]));
-      paths.push(createLinePath([[0,h*i - l],[0, h*i + l]]));
+      paths.push(createLinePath([[z,h*i],[l, h*i]]));
+      paths.push(createLinePath([[z,h*i - l],[z, h*i + l]]));
     }
 
     //right
@@ -274,10 +336,10 @@ const reorigin = (point, origin) => {
     }
 
     //top
-    let w = width/columns;
+    let w = input_width/columns;
     for (let i = 1; i < columns; i++) {
-      paths.push(createLinePath([[w*i, 0],[w*i, l]]));
-      paths.push(createLinePath([[w*i - l,0],[w*i + l, 0]]));
+      paths.push(createLinePath([[w*i, z],[w*i, l]]));
+      paths.push(createLinePath([[w*i - l,z],[w*i + l, z]]));
     }
 
     //bottom
@@ -385,3 +447,5 @@ module.exports.drawColumnsRowsLandscape = drawColumnsRowsLandscape;
 module.exports.drawCutlines = drawCutlines;
 module.exports.addSeedText = addSeedText;
 module.exports.drawSeparateLayerCutlines = drawSeparateLayerCutlines;
+module.exports.drawCards = drawCards;
+module.exports.prepareCards = prepareCards;

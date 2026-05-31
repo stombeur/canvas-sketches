@@ -175,6 +175,12 @@ export class SymmetricCross extends Shape {
         super(...SymmetricCross.calculatePoints(x, y, shortSide, longSide))
     }
 
+    static fromCenter(center, width, shortSide = width/3) {
+        let x = center[0] - width/2;
+        let y = center[1] - width/2;
+        return new SymmetricCross(x, y, width, shortSide);
+    }
+
     static calculatePoints(x, y, shortSide, longSide) {
         let points = [];
         let start = new point(x+longSide, y);
@@ -259,6 +265,7 @@ export class DoubleCross extends Shape {
         let points = [];
         let start = new point(center[0] - thickness/2, center[1]);
         let w = width;
+        let h = height;
 
         /* start (anti-clockwise)
                     + +
@@ -337,6 +344,111 @@ export class DoubleCross extends Shape {
         points.push(next);
 
         next = next.copy(0, thickness);
+        points.push(next);
+
+        return points;
+    }
+
+
+}
+
+export class DoubleCross2 extends Shape {
+    constructor(center, width1, width2, height, thickness) {
+        super(...DoubleCross2.calculatePoints(center, width1, width2, height, thickness))
+    }
+
+    static calculatePoints(center, width1, width2, height, thickness = width1/2) {
+        let points = [];
+        
+        let w1 = width1, w2 = width2, h = height, t = thickness;
+        let hh = h/3;
+        let h1 = hh -t/2;
+        let h2 = hh - t;
+        let h3 = hh + 3*t/2;
+        let ww1 = w1/2 - t/2;
+        let ww2 = w2/2 - t/2;
+        let cyoffset = (height/2 - h1 + h2/2) / 2;
+
+        let start = new point(center[0] - thickness/2, center[1] - cyoffset);
+
+        /* start (anti-clockwise)
+                    + +    h1
+                    + + w1
+                 +  + +  + 
+                 +  + +  +
+              start>+ +    h2
+                + + + + + +
+                + + + + + +
+                    + + w2
+                    + +    h3
+                 
+                 
+            rotate clockwise
+        */
+        let next = start.copy();
+        points.push(next);
+
+        next = next.copy(0, h2/2);
+        points.push(next);
+
+        next = next.copy(-ww2, 0);
+        points.push(next);
+
+        next = next.copy(0, t);
+        points.push(next);
+
+        next = next.copy(ww2, 0);
+        points.push(next);
+
+        next = next.copy(0, h3);
+        points.push(next);
+
+        next = next.copy(t, 0);
+        points.push(next);
+
+        next = next.copy(0, -h3);
+        points.push(next);
+
+        next = next.copy(ww2, 0);
+        points.push(next);
+
+        next = next.copy(0, -t);
+        points.push(next);
+
+        next = next.copy(-ww2, 0);
+        points.push(next);
+        
+        next = next.copy(0, -h2);
+        points.push(next);
+
+        next = next.copy(ww1, 0);
+        points.push(next);
+
+        next = next.copy(0, -t);
+        points.push(next);
+
+        next = next.copy(-ww1, 0);
+        points.push(next);
+
+        next = next.copy(0, -h1);
+        points.push(next);
+
+        next = next.copy(-t, 0);
+        points.push(next);
+
+        next = next.copy(0, h1);
+        points.push(next);
+
+        next = next.copy(-ww1, 0);
+        points.push(next);
+
+        next = next.copy(0, t);
+        points.push(next);
+
+        next = next.copy(ww1, 0);
+        points.push(next);
+
+        next = next.copy(0, h2/2);
         points.push(next);
 
         return points;
@@ -435,6 +547,37 @@ export class RectangularBorder {
         let result = clip1.subtract(clip2);
         return result.regions;
 
+    }
+
+
+}
+
+export class EquilateralTriangle extends Shape {
+    constructor(center, side) {
+        super(...EquilateralTriangle.calculatePoints(center[0], center[1], side))
+    }
+
+    static calculatePoints(x, y, side) {
+        let points = [];
+        let start = new point(x, y - side/2);
+
+
+
+        /* start V
+                 +
+               +   +
+            rotate clockwise
+        */
+        let next = start.copy();
+        points.push(next);
+
+        next = next.copy(side/2, side * Math.sin(Math.PI/3));
+        points.push(next);
+        
+        next = next.copy(-side, 0);
+        points.push(next);
+
+        return points;
     }
 
 

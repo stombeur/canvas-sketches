@@ -1,3 +1,4 @@
+import { random } from 'canvas-sketch-util';
 import poly from './poly';
 import { polyline } from './polyline';
 
@@ -17,15 +18,21 @@ export const createArcPath = (center, radius, sAngle, eAngle) => {
     });
   };
 
-  export const createCirclePath = (center, radius) => {
+  export const createCirclePath = (center, radius, randomizeStart = false) => {
     return createPath(ctx => {
       let c = {}
       if (center.x) { c.x = center.x; c.y = center.y; }
       else { c.x = center[0]; c.y = center[1]; }
-      drawArcOnCanvas(ctx, c.x, c.y, radius, 0, 360);
+      let start = 0;
+      let end = 360;
+      if (randomizeStart) {
+        start = random.value() * 360;
+        end = start + 360;
+      }
+      drawArcOnCanvas(ctx, c.x, c.y, radius, start, end);
     });
   };
-  
+
   const drawArcOnCanvas = (ctx, cx, cy, radius, sAngle, eAngle) => {
     //ctx.beginPath();
     ctx.arc(

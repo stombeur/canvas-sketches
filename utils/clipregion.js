@@ -1,7 +1,7 @@
 import { boundingbox } from './boundingbox';
 import { polyline } from './polyline';
 import { point } from "./point";
-import { insetPolygon } from './polygon';
+import { insetPolygon, insetPolygonAbs } from './polygon';
 
 
 const polybool = require('polybooljs');
@@ -237,6 +237,32 @@ export class clipregion {
 
     toPoints() {
         return this.regions.flat();
+    }
+
+    translate(x, y) {
+        let result = new clipregion();
+        result.inverted = this.inverted;
+        result.regions = this.regions.map(r => r.map(p => [p[0]+x, p[1]+y]));
+        return result;
+    }
+
+    translatePct(pct, width) {
+        let shift = width * pct / 100;
+        return this.translate(shift, shift);
+    }
+
+    grow(amount) {
+        let result = new clipregion();
+        result.inverted = this.inverted;
+        result.regions = this.regions.map(r => insetPolygonAbs(r.map(p => { return {x: p[0], y: p[1]}}), -amount).map(p => [p.x, p.y]));
+        return result;
+    }
+
+    shrink(amount) {
+        let result = new clipregion();
+        result.inverted = this.inverted;
+        result.regions = this.regions.map(r => insetPolygonAbs(r.map(p => { return {x: p[0], y: p[1]}}), amount).map(p => [p.x, p.y]));
+        return result;
     }
 }
 

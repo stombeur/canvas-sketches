@@ -17,7 +17,7 @@ console.log(`seed: ${random.getSeed()}`);
 const settings = {
   suffix: random.getSeed(),
   dimensions: 'A4',//[ 2048, 2048 ]
-  orientation: 'landscape',
+  orientation: 'portrait',
   pixelsPerInch: 300,
   //scaleToView: true, 
   units: 'mm',

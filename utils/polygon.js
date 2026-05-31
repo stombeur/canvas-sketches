@@ -16,11 +16,18 @@ const getInsetDistance = (points, percentage) => {
     return (width * percentage) / 2;
 }
 
+
+
 export const insetPolygon = (points, percentage) => {
+    
+    const distance = getInsetDistance(points, percentage);
+
+    return insetPolygonAbs(points, distance);
+}
+
+export const insetPolygonAbs = (points, distance) => {
     // 1. Get Winding (CW = 1, CCW = -1)
     const winding = getWindingOrder(points);
-
-    const distance = getInsetDistance(points, percentage);
 
     // 2. To SHRINK:
     // If CW (1), we need negative distance to go inward.

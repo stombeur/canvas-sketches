@@ -13,8 +13,11 @@ export class hexagon {
     constructor(center, side) {
        this.side = side;
        this.center = center;
+
+       // top point (not saved)
        let p = new point(center[0], center[1]-side);
 
+       // rotate clockwise and place 6 points 60 degrees apart
        for (let i = 0; i < 6; i++) {
         this.points.push(p.rotate(center, i*60))
        }

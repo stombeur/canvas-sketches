@@ -75,8 +75,8 @@ const randomLine = (origin, width, height) => {
 
 const drawShape = (coords, width, height, card) => {   
     let result = [];
-    let padleft = 13.5;
-    let padtop = 18.5;
+    let padleft = 16;
+    let padtop = 18;
     let totalwidth = 143;
     let columngap = 4;
     let columnheight = 209;
@@ -84,56 +84,28 @@ const drawShape = (coords, width, height, card) => {
     // total w = 133 gap = 4
     // h = 175
 
-    //let sc = new DoubleCross(center, w, height/1.5, width / 12); 
-    //let sc_border = new RectangularBorder(center, width, height, width/10, width/90);
-    let sc1 = boundingbox.fromTopleft([padleft,padtop], (totalwidth-columngap)/2, columnheight);
-    let sc2 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop], (totalwidth-columngap)/2, columnheight);
-
-    let sc3 = boundingbox.fromTopleft([padleft,padtop+51], (totalwidth), 97);
-    //let sc4 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop+63], (totalwidth-columngap)/2, 100);
-
-
-    let sc_left = new clipregion();
-    sc_left.addRegion(sc1.points);
-
-    let sc_right = new clipregion();
-    sc_right.addRegion(sc2.points);
-
     let sc = new clipregion();
-    sc.addRegion(sc1.points);
-    sc.addRegion(sc2.points);
+    let topleft_bb = boundingbox.fromTopleft([padleft, padtop], 139, 27);
+    sc.addRegion(topleft_bb.points);
 
-    let sc_sub = new clipregion();
-    sc_sub.addRegion(sc3.points);
-    //sc_sub.addRegion(sc4.points);
-
-    sc_left = sc_left.subtract(sc_sub);
-    sc_right = sc_right.subtract(sc_sub);
-    sc = sc.subtract(sc_sub);
+    let bottomleft_bb = boundingbox.fromTopleft([padleft, padtop+27+83], 139, 96);
+    sc.addRegion(bottomleft_bb.points);
 
     let bb =  card.lines_bb; //boundingbox.fromWH(center, width*9.5/10, height*9.5/10);
 
-    card.linesx.forEach(l => {
-      sc_left = sc_left.splitNoJoin(l.line, card.lines_bb);
-      sc_right = sc_right.splitNoJoin(l.line, card.lines_bb);
-    });
+    let lines = card.lines;//Array.from(Array(nroflines)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
+    //let spreads = [width/75, width/75, width/75, width/75, width/75, width/50, width/50, width/30];
 
-    card.linesy1.forEach(l => {
-      sc_left = sc_left.splitNoJoin(l.line, card.lines_bb);
-    });
-    
-    card.linesy2.forEach(l => {
-      sc_right = sc_right.splitNoJoin(l.line, card.lines_bb);
-    });
 
-    let sc_clip_split = new clipregion();
-    sc_left.regions.forEach(r => sc_clip_split.addRegion(r));
-    sc_right.regions.forEach(r => sc_clip_split.addRegion(r));
+    let sc_clip_split = sc;
+    lines.forEach(l => {
+      sc_clip_split = sc_clip_split.splitNoJoin(l.line, card.lines_bb);
+    });
 
     let shapes = sc_clip_split.regions;
     let sc_clip_inset = new clipregion();
     shapes.forEach(shape => {
-      let insetshape = insetPolygon(shape.map(p => { return {x: p[0], y: p[1]}}), 0.1);
+      let insetshape = insetPolygon(shape.map(p => { return {x: p[0], y: p[1]}}), 0.2);
       insetshape = insetshape.map(p => [p.x, p.y]);
       //console.log(shape, d, insetshape);
       new polyline(insetshape).toLines().forEach(l => {
@@ -194,76 +166,20 @@ const drawShape = (coords, width, height, card) => {
     //        })
     // })
 
-    // card.lines.forEach(l => {
-    //    result.push(createLinePath(l.line));
-    //   });
    
 
     return result;
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 51;
+    let nroflines = 50;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
         let spreads = [card.width/75, card.width/75, card.width/30, card.width/75, card.width/50, card.width/50, card.width/50, card.width/30];
         let center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
         card.lines_bb = boundingbox.fromWH(center, card.width*9.5/10, card.height*9.5/10);
-        // // divide the lines over height and width proportionally
-        // let nroflines_width = Math.round(nroflines * (card.width / (card.width + card.height)));
-        // let nroflines_height = nroflines - nroflines_width;
-        // card.lines = [];
-        // for (let i = 0; i < nroflines_width - 1; i++) {
-        //   let x = (i+1) * (card.lines_bb.right - card.lines_bb.left) / nroflines_width + card.lines_bb.left;
-        //   card.lines.push({line: [[x, 0], [x, card.height]], spread: random.pick(spreads)});
-        // }        
-        // for (let i = 0; i < nroflines_height - 1; i++) {
-        //   let y = (i+1) * (card.lines_bb.bottom - card.lines_bb.top) / nroflines_height + card.lines_bb.top;
-        //   card.lines.push({line: [[0, y], [card.width, y]], spread: random.pick(spreads)});
-        // }
-        card.linesx = [];
-        
-        card.linesy1 = [];
-        card.linesy2 = [];
-        let nroflines_width = Math.round(nroflines * (card.width / (card.width + card.height)));
-        let nroflines_height = nroflines - nroflines_width;
-        // divide width in nroflines_width segments of random size and same for height
-        let xSegments = [];
-        let ySegments = [];
-        let ySegments2 = [];
-        let currentX = card.origin[0];
-        for (let i = 0; i < nroflines_width - 1; i++) {
-          let segmentSize = (card.width - currentX) / (nroflines_width - i) * random.value() * 2;
-          xSegments.push(currentX + segmentSize);
-          currentX += segmentSize;
-        }
-        let currentY = card.origin[1];
-        for (let i = 0; i < nroflines_height - 1; i++) {
-          let segmentSize = (card.height - currentY) / (nroflines_height - i) * random.value() * 2;
-          ySegments.push(currentY + segmentSize);
-          currentY += segmentSize;
-        }
-        currentY = card.origin[1];
-        for (let i = 0; i < nroflines_height - 1; i++) {
-          let segmentSize = (card.height - currentY) / (nroflines_height - i) * random.value() * 2;
-          ySegments2.push(currentY + segmentSize);
-          currentY += segmentSize;
-        }
-        xSegments.forEach(x => {
-          card.linesx.push({line: [[x, card.origin[1]], [x, card.origin[1] + card.height]], spread: random.pick(spreads)});
-        });
-        ySegments.forEach(y => {
-          card.linesy1.push({line: [[card.origin[0], y], [card.origin[0] + card.width/2, y]], spread: random.pick(spreads)});
-        });
-        ySegments2.forEach(y => {
-          card.linesy2.push({line: [[card.origin[0] + card.width/2, y], [card.origin[0] + card.width, y]], spread: random.pick(spreads)});
-        });
-
-        for (let i = 0; i < 13; i++) {
-          card.linesx.push({line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)});
-        }
-        //card.lines = Array.from(Array(nroflines)).map(x => { return {line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)}});
+        card.lines = Array.from(Array(nroflines)).map(x => { return {line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)}});
     })
 
     

@@ -35,7 +35,7 @@ const sketch = ({ width, height }) => {
   let columns = 1;
   let rows = 1;
 
-  let nrOfBands = 17;
+  let nrOfBands = 21;
   let rmax = (width-margin*2) / 2;
   let center = poly.point(width/2, height/2);
   

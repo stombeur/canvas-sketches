@@ -12,9 +12,14 @@ const { polyline } = require('../../utils/polyline.js');
 import { boundingBox } from '@lnjs/core/lib/path';
 import { boundingbox } from '../../utils/boundingbox.js';
 import { hatch } from '../../utils/hatch.js';
-import { DoubleCross, DoubleCrossBorder, RectangularBorder } from '../shape.js';
+import { DoubleCross, DoubleCross2, DoubleCrossBorder, RectangularBorder } from '../shape.js';
 import { insetPolygon } from '../../utils/polygon.js';
 import { clipregion } from '../../utils/clipregion.js';
+
+const seed = random.getRandomSeed();//set seed here
+
+random.setSeed(seed);
+console.log('seed: ', random.getSeed());
 
 const settings = {
   suffix: random.getSeed(),
@@ -75,47 +80,25 @@ const randomLine = (origin, width, height) => {
 
 const drawShape = (coords, width, height, card) => {   
     let result = [];
-    let padleft = 13.5;
-    let padtop = 18.5;
-    let totalwidth = 143;
-    let columngap = 4;
-    let columnheight = 209;
 
-    // total w = 133 gap = 4
-    // h = 175
+    let center = [coords[0]+width/2, coords[1]+height/2];
+    let sc = new DoubleCross2(center, width * 0.6, width * 0.5, height * 0.55, width / 7).toClipRegion(); 
+    // let ll = sc.toLines();
+    // ll.forEach(l => {
+    //   result.push(createLinePath(l));
+    // })
 
-    //let sc = new DoubleCross(center, w, height/1.5, width / 12); 
-    //let sc_border = new RectangularBorder(center, width, height, width/10, width/90);
-    let sc1 = boundingbox.fromTopleft([padleft,padtop], 130, 50);
-    let sc2 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop], (totalwidth-columngap)/2, 5);
+    let sc_clip_inset = sc;
 
-    let sc3 = boundingbox.fromTopleft([padleft,padtop+51], (totalwidth), 97);
-    let sc4 = boundingbox.fromTopleft([padleft+((totalwidth-columngap)/2+columngap),padtop+107], (totalwidth-columngap)/2, 93);
-
-
-    let sc = new clipregion();
-    sc.addRegion(sc1.points);
-    sc.addRegion(sc2.points);
-
-    let sc_sub = new clipregion();
-    sc_sub.addRegion(sc3.points);
-    sc_sub.addRegion(sc4.points);
-
-    sc = sc.subtract(sc_sub);
-
-    let bb =  card.lines_bb; //boundingbox.fromWH(center, width*9.5/10, height*9.5/10);
-
-    let lines = card.lines;//Array.from(Array(nroflines)).map(x => randomLine(bb_zero, bb.right-bb.left, bb.bottom-bb.top));
-    //let spreads = [width/75, width/75, width/75, width/75, width/75, width/50, width/50, width/30];
-
-
-    let sc_clip_split = sc;
-    lines.forEach(l => {
-      sc_clip_split = sc_clip_split.splitNoJoin(l.line, card.lines_bb);
+    card.lines.forEach(l => {
+      sc_clip_inset = sc_clip_inset.splitNoJoin(l.line, card.lines_bb);
     });
+    // sc_clip_inset.toLines().forEach(l => {
+    //     result.push(createLinePath(l));
+    // });
 
-    let shapes = sc_clip_split.regions;
-    let sc_clip_inset = new clipregion();
+    let shapes = sc_clip_inset.regions;
+    let sc_clip_inset__ = new clipregion();
     shapes.forEach(shape => {
       let insetshape = insetPolygon(shape.map(p => { return {x: p[0], y: p[1]}}), 0.1);
       insetshape = insetshape.map(p => [p.x, p.y]);
@@ -123,32 +106,15 @@ const drawShape = (coords, width, height, card) => {
       new polyline(insetshape).toLines().forEach(l => {
         result.push(createLinePath(l));
       });
-      sc_clip_inset.addRegion(insetshape);
+      sc_clip_inset__.addRegion(insetshape);
     });
     
 
-    // let sc_sub = new clipregion();
-    // sc_sub.addRegion(sc3.points);
-    // sc_sub.addRegion(sc4.points);
+    sc_clip_inset__.toLines().forEach(l => {
+        result.push(createLinePath(l));
+    });
 
-    // sc_clip_inset = sc_clip_inset.subtract(sc_sub);
-
-    // sc_clip_inset.toLines().forEach(l => {
-    //     result.push(createLinePath(l));
-    // });
-
-    
-    let hatchregions = sc.subtract(sc_clip_inset);
-    //hatchregions = hatchregions.subtract(sc_sub);
-
-    //let regionPolylines = hatchregions.regions.map(r => new polyline(r));
-    
-    // regionPolylines.forEach(rp => {
-    //   hatchregions.regions.forEach((r, i) => {
-    //     let {overlaps, isinside} = rp.overlapsWith(r);
-    //     console.log('region is inside other region', i, isinside, overlaps, r);
-    //   });
-    // });
+    let hatchregions = sc.subtract(sc_clip_inset__);
 
     for (let i = 0; i < hatchregions.regions.length; i++) {
       const region = hatchregions.regions[i];
@@ -160,31 +126,11 @@ const drawShape = (coords, width, height, card) => {
       });
     }
 
-    // lines.forEach(l => {
-    //   new polyline(l).toDottedLines().forEach(dl => {
-    //    result.push(createLinePath(dl));
-    //   })
-    // })
-
-    // let otherregions = [];
-    // otherregions.push(...sc_clip_split.regions);
-    // otherregions.push(...hatchregions.regions);
-
-    // let bbdot = boundingbox.fromWH(center, width - width/10, height - height/10);
-    // hatch.inside(bbdot.points, 120, 4, otherregions).forEach(l => {
-    //     // result.push(createLinePath(l));
-    //       new polyline(l).toDottedLines().forEach(dl => {
-    //         result.push(createLinePath(dl));
-    //        })
-    // })
-
-   
-
     return result;
 }
 
 const sketch = ({ width, height }) => {
-    let nroflines = 20;
+    let nroflines = 49;
     
     let cards = postcards.prepareColumnsRowsPortrait(width, height, settings.postcardcolumns, settings.postcardrows);
     cards.forEach(card => {
@@ -192,7 +138,8 @@ const sketch = ({ width, height }) => {
         let center = [card.origin[0]+card.width/2, card.origin[1]+ card.height/2];
         card.lines_bb = boundingbox.fromWH(center, card.width*9.5/10, card.height*9.5/10);
         card.lines = Array.from(Array(nroflines)).map(x => { return {line: randomLine([card.lines_bb.left, card.lines_bb.top], card.lines_bb.right-card.lines_bb.left, card.lines_bb.bottom-card.lines_bb.top), spread: random.pick(spreads)}});
-    })
+        card.spreads = Array.from(Array(nroflines)).map(i => random.value()*card.width/20);
+      })
 
     
   return ({ context, width, height, units }) => {
